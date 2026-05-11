@@ -62,10 +62,12 @@ class DaoTransformer:
     _LINE_RULES: list[tuple[str, str]] = [
         # DbWrap 선언 제거
         (r'\bDbWrap\s+\w+\s*=\s*new\s+DbWrap\(\)\s*;', ''),
-        # setObject/getObject/getObjects: conn 파라미터 제거 (prefix 치환으로 괄호 중첩 문제 회피)
+        # setObject/getObject/getObjects/updateQuery/isExist: conn 파라미터 제거
         (r'\b\w+\.setObject\(conn,\s*', r'commonDao.setObject('),
         (r'\b\w+\.getObjects\(conn,\s*', r'commonDao.getObjects('),
         (r'\b\w+\.getObject\(conn,\s*', r'commonDao.getObject('),
+        (r'\b\w+\.updateQuery\(conn,\s*', r'commonDao.updateQuery('),
+        (r'\b\w+\.isExist\(conn,\s*', r'commonDao.isExist('),
         # Connection conn 파라미터 제거
         (r',\s*Connection\s+conn\b', ''),
         (r'\bConnection\s+conn\s*,\s*', ''),
@@ -78,6 +80,9 @@ class DaoTransformer:
          r'StringUtil.nvl(map.get("\1"), "")'),
         # Formatter.nullTrim 일반 (단순 인자)
         (r'\bFormatter\.nullTrim\((\w+)\)', r'StringUtil.nvl(\1, "")'),
+        # Formatter.nullLong(obj.getXxx()) → StringUtil.nvl 래핑
+        (r'\bFormatter\.nullLong\((\w+)\.get(\w+)\(\)\)',
+         r'Formatter.nullLong(StringUtil.nvl(\1.get\2(), "0"))'),
         # ResultSet 컬럼 읽기 → Map 변환 (래핑 형태 우선 처리)
         (r'new\s+Long\(\s*rs\d*\.getLong\("(\w+)"\)\s*\)',
          r'Formatter.nullLong(StringUtil.nvl(map.get("\1"), "0"))'),
@@ -93,11 +98,11 @@ class DaoTransformer:
          r'StringUtil.toInt((String) map.get("\1"), 0)'),
         (r'\brs\d*\.getTimestamp\("(\w+)"\)',
          r'Formatter.parseToDate(map.get("\1"))'),
-        # finally 블록 내 close() 제거
-        (r'if\s*\(\s*rs\d*\s*!=\s*null\s*\)\s*rs\d*\.close\(\)\s*;', ''),
-        (r'if\s*\(\s*ps\d*\s*!=\s*null\s*\)\s*ps\d*\.close\(\)\s*;', ''),
-        (r'\brs\d*\.close\(\)\s*;', ''),
-        (r'\bps\d*\.close\(\)\s*;', ''),
+        # finally 블록 내 close() 제거 (ps/pstmt/rs 공통)
+        (r'if\s*\(\s*rs\w*\s*!=\s*null\s*\)\s*rs\w*\.close\(\)\s*;', ''),
+        (r'if\s*\(\s*ps\w*\s*!=\s*null\s*\)\s*ps\w*\.close\(\)\s*;', ''),
+        (r'\brs\w*\.close\(\)\s*;', ''),
+        (r'\bps\w*\.close\(\)\s*;', ''),
         # PreparedStatement / ResultSet 선언 제거
         (r'\bPreparedStatement\s+\w+(\s*=\s*null)?\s*;', ''),
         (r'\bResultSet\s+\w+(\s*=\s*null)?\s*;', ''),
@@ -169,7 +174,7 @@ class DaoTransformer:
 
             # SQL 추출 (prepareStatement 이전, 현재 메서드 범위만)
             before = code[:prep_match.start()]
-            sql_parts, param_names = self._extract_sql_and_params(before, sb_var)
+            sql_parts, param_pairs = self._extract_sql_and_params(before, sb_var)
 
             if is_update:
                 ordered_params = self._extract_update_params(code, prep_match.end())
@@ -181,11 +186,18 @@ class DaoTransformer:
                     'params': [k for k, _ in ordered_params], 'type': 'update',
                 }
             else:
-                ordered_params = []
                 sql_xml = ' '.join(sql_parts).strip()
+                if param_pairs:
+                    ordered_params = []
+                else:
+                    # ? 플레이스홀더 방식 SELECT: ps.setXxx 에서 파라미터 추출
+                    ordered_params = self._extract_update_params(code, prep_match.end())
+                    if ordered_params:
+                        sql_xml = self._replace_positional_params(sql_xml, ordered_params)
                 xml_entries[mapper_id] = {
                     'id': mapper_id, 'sql': sql_xml,
-                    'params': param_names, 'type': 'select',
+                    'params': [k for k, _ in ordered_params] if ordered_params else [k for k, _ in param_pairs],
+                    'type': 'select',
                 }
 
             # sb 선언부터 prepareStatement 줄까지를 java_call 로 교체
@@ -204,6 +216,34 @@ class DaoTransformer:
                 base = sb_match.group(1)
                 inner = base + ('\t' if '\t' in base else '    ')
 
+                # 교체 범위 전체에서 sb/log/conn 관련 줄만 제거하고 나머지 보존
+                # (변수 선언, 대입문, if 블록 등 sb와 무관한 코드 유지)
+                range_text = result_code[sb_match.start():adjusted_start]
+                # 블록 주석(/* ... */) 전체 제거 후 라인별 처리
+                range_text = re.sub(r'/\*.*?\*/', '', range_text, flags=re.DOTALL)
+                preamble_parts = []
+                for _line in range_text.splitlines(keepends=True):
+                    _s = _line.strip()
+                    if not _s:
+                        continue
+                    # sb 선언 제거
+                    if re.match(rf'(?:String(?:Buffer|Builder))\s+{re.escape(sb_var)}\b', _s):
+                        continue
+                    # sb. 관련 (sb.append 등) 제거
+                    if re.search(rf'\b{re.escape(sb_var)}\.', _s):
+                        continue
+                    # conn. 관련 제거
+                    if re.search(r'\bconn\.', _s):
+                        continue
+                    # log. 제거
+                    if re.match(r'log\.', _s):
+                        continue
+                    # 주석 라인 제거 (//, /*, *)
+                    if re.match(r'(//|/\*|\*)', _s):
+                        continue
+                    preamble_parts.append(_line)
+                preamble = ''.join(preamble_parts)
+
                 if is_update:
                     lines = [f'{base}Map<String, Object> paramMap = new HashMap<>();']
                     for key, val in ordered_params:
@@ -211,13 +251,14 @@ class DaoTransformer:
                     lines.append(f'{inner}uxbDAO.update("{self.namespace}.{mapper_id}", paramMap);')
                 else:
                     lines = [f'{base}Map<String, Object> paramMap = new HashMap<>();']
-                    for p in param_names:
-                        lines.append(f'{inner}paramMap.put("{p}", {p});')
+                    effective_params = ordered_params if ordered_params else param_pairs
+                    for key, val in effective_params:
+                        lines.append(f'{inner}paramMap.put("{key}", {val});')
                     lines.append(
                         f'{inner}List<Map<String, Object>> listMap = '
                         f'uxbDAO.select("{self.namespace}.{mapper_id}", paramMap);'
                     )
-                java_call = '\n'.join(lines)
+                java_call = preamble + '\n'.join(lines)
 
                 replace_start = sb_match.start()
                 prep_line_end = result_code.index('\n', adjusted_start) + 1
@@ -227,10 +268,20 @@ class DaoTransformer:
                 )
                 offset += len(java_call) + 1 - (prep_line_end - replace_start)
 
-        # if 내부가 replacement 범위에 포함되어 } else { throw ... } 가 고아로 남는 경우 제거
+        # if (cond) ps/pstmt.setXxx(i++, ...) 인라인 형태 통째 제거
         result_code = re.sub(
-            r'\}\s*else\s*\{\s*throw\s+new\s+\w+\s*\(\s*"[^"]*"\s*\)\s*;\s*\}',
-            '',
+            r'[ \t]*if\s*\([^{]+?\)\s*ps\w*\.set(?:Long|String|Int|Double|Timestamp|Object)\b[^\n]*;\n?',
+            '', result_code
+        )
+        # PreparedStatement 인덱스 카운터 (int i = 1;) 제거
+        result_code = re.sub(r'[ \t]*\bint\s+i\s*=\s*\d+\s*;\n?', '', result_code)
+        # sb.append 제거 후 남은 빈 if 블록 정리 (한 줄 조건 한정)
+        result_code = re.sub(r'[ \t]*if\b[^\n{]*\{\s*\}\s*\n?', '', result_code)
+
+        # } else { throw ... } 패턴에서 else-throw 블록만 제거, 닫는 } 는 보존
+        result_code = re.sub(
+            r'(\})\s*else\s*\{\s*throw\s+new\s+\w+\s*\(\s*"[^"]*"\s*\)\s*;\s*\}',
+            r'\1',
             result_code,
             flags=re.DOTALL,
         )
@@ -239,11 +290,16 @@ class DaoTransformer:
         result_code = re.sub(r'[ \t]*\w+\s*=\s*\w+\.executeQuery\(\)\s*;\n?', '', result_code)
         result_code = re.sub(r'[ \t]*\w+\.executeUpdate\(\)\s*;\n?', '', result_code)
         result_code = re.sub(
-            r'[ \t]*\bps\d*\.set(?:Long|String|Int|Double|Timestamp|Object)\b[^\n]*;\n?',
+            r'[ \t]*\bps\w*\.set(?:Long|String|Int|Double|Timestamp|Object)\b[^\n]*;\n?',
             '', result_code
         )
         # 잔여 conn.prepareStatement() 호출 제거 (변환 실패한 케이스 정리)
         result_code = re.sub(r'[ \t]*\w+\s*=\s*conn\.prepareStatement\([^\n]+\)\s*;\n?', '', result_code)
+
+        # ps.setXxx 제거 후 if 블록만 남은 블록 주석 정리 (/* \n if(cond){ \n }*/ 형태)
+        result_code = re.sub(r'/\*\s*\n\s*if[^\n]*\n\s*\}\s*\*/', '', result_code)
+        # 완전히 비거나 공백만 있는 블록 주석 제거
+        result_code = re.sub(r'/\*\s*\*/', '', result_code)
 
         # while (rs.next()) → for (Map<String, Object> map : listMap)
         result_code = re.sub(
@@ -282,14 +338,32 @@ class DaoTransformer:
             name = m.group(1)
         return name
 
-    def _extract_sql_and_params(self, code: str, sb_var: str) -> tuple[list[str], list[str]]:
-        """sb.append() 호출에서 SQL 조각과 파라미터 이름을 추출.
-        현재 메서드 범위로 스코프 제한 (마지막 sb 선언 이후만 검색).
+    def _java_condition_to_mybatis(self, java_cond: str) -> str:
+        """Java if 조건식 → MyBatis <if test="..."> 조건식 변환."""
+        java_cond = java_cond.strip()
+        # obj.getXxx().longValue() != 0
+        m = re.match(r'\w+\.get(\w+)\(\)\.\w+\(\)\s*(!=|==|>|<|>=|<=)\s*(\w+)', java_cond)
+        if m:
+            key = m.group(1)[0].lower() + m.group(1)[1:]
+            return f'{key} {m.group(2)} {m.group(3)}'
+        # obj.getXxx() != null
+        m = re.match(r'\w+\.get(\w+)\(\)\s*(!=|==)\s*(null|\w+)', java_cond)
+        if m:
+            key = m.group(1)[0].lower() + m.group(1)[1:]
+            return f'{key} {m.group(2)} {m.group(3)}'
+        # simpleVar != null/0
+        m = re.match(r'(\w+)\s*(!=|==)\s*(\w+)', java_cond)
+        if m:
+            return java_cond
+        return java_cond
+
+    def _extract_sql_and_params(self, code: str, sb_var: str) -> tuple[list[str], list[tuple[str, str]]]:
+        """sb.append() 호출에서 SQL 조각과 (key, value) 파라미터 쌍 목록을 추출.
+        if (cond) { sb.append(...) } 패턴은 <if test="..."> MyBatis 태그로 변환.
         """
         sql_parts: list[str] = []
-        param_names: list[str] = []
+        param_pairs: list[tuple[str, str]] = []
 
-        # 마지막 sb 선언 위치 이후에서만 검색 (다른 메서드 sb와 혼용 방지)
         sb_decl_re = re.compile(
             rf'(?:StringBuilder|StringBuffer)\s+{re.escape(sb_var)}\b'
         )
@@ -297,7 +371,6 @@ class DaoTransformer:
         for m in sb_decl_re.finditer(code):
             last_decl_pos = m.start()
 
-        # sb = new StringBuilder("initial SQL...") 생성자 초기값 추출
         init_re = re.compile(
             rf'(?:StringBuilder|StringBuffer)\s+{re.escape(sb_var)}\s*=\s*new\s+\w+\("([^"]*)"\)',
             re.DOTALL
@@ -311,53 +384,144 @@ class DaoTransformer:
             re.DOTALL
         )
 
+        # if (cond) { sb.append(...) } → <if test="..."> 변환 위한 위치 맵
+        if_append_re = re.compile(
+            rf'if\s*\(([^{{;]+)\)\s*\{{\s*{re.escape(sb_var)}\.append\((.+?)\)\s*;\s*\}}',
+            re.DOTALL
+        )
+        cond_map: dict[int, str] = {}
+        for im in if_append_re.finditer(code, last_decl_pos):
+            inner = append_re.search(code, im.start(), im.end())
+            if inner:
+                cond_map[inner.start()] = self._java_condition_to_mybatis(im.group(1).strip())
+
         for m in append_re.finditer(code, last_decl_pos):
             arg = m.group(1).strip()
+            mybatis_cond = cond_map.get(m.start())
+
+            frag_sql: list[str] = []
+            frag_pairs: list[tuple[str, str]] = []
 
             # 순수 문자열 리터럴
             if re.match(r'^"[^"]*"$', arg):
-                sql_parts.append(arg[1:-1])
-                continue
+                frag_sql.append(arg[1:-1])
+
+            # "prefix" + Formatter.nullXxx(StringUtil.nvl(obj.getCol(), "...")) + "suffix"
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\(StringUtil\.nvl\((\w+)\.get(\w+)\(\)\s*,\s*"[^"]*"\s*\)\)\s*\+\s*"([^"]*)"',
+                arg
+            )):
+                prefix, obj, col, suffix = m2.group(1).rstrip("'"), m2.group(2), m2.group(3), m2.group(4).lstrip("'")
+                key = col[0].lower() + col[1:]
+                frag_pairs.append((key, f'{obj}.get{col}()'))
+                frag_sql.extend([prefix, f'#{{{key}}}', suffix])
+
+            # "prefix" + Formatter.nullXxx(StringUtil.nvl(obj.getCol(), "..."))  (suffix 없음)
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\(StringUtil\.nvl\((\w+)\.get(\w+)\(\)\s*,\s*"[^"]*"\s*\)\)\s*$',
+                arg
+            )):
+                prefix, obj, col = m2.group(1).rstrip("'"), m2.group(2), m2.group(3)
+                key = col[0].lower() + col[1:]
+                frag_pairs.append((key, f'{obj}.get{col}()'))
+                frag_sql.extend([prefix, f'#{{{key}}}'])
+
+            # "prefix" + Formatter.nullXxx(StringUtil.nvl(simpleVar, "...")) + "suffix"
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\(StringUtil\.nvl\((\w+)\s*,\s*"[^"]*"\s*\)\)\s*\+\s*"([^"]*)"',
+                arg
+            )):
+                prefix, name, suffix = m2.group(1).rstrip("'"), m2.group(2), m2.group(3).lstrip("'")
+                frag_pairs.append((name, name))
+                frag_sql.extend([prefix, f'#{{{name}}}', suffix])
+
+            # "prefix" + Formatter.nullXxx(StringUtil.nvl(simpleVar, "..."))  (suffix 없음)
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\(StringUtil\.nvl\((\w+)\s*,\s*"[^"]*"\s*\)\)\s*$',
+                arg
+            )):
+                prefix, name = m2.group(1).rstrip("'"), m2.group(2)
+                frag_pairs.append((name, name))
+                frag_sql.extend([prefix, f'#{{{name}}}'])
 
             # "prefix" + param[.method()] + "suffix"
-            concat = re.match(
+            elif (m2 := re.match(
                 r'"([^"]*?)"\s*\+\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.\w+\(\))?\s*\+\s*"([^"]*?)"',
                 arg
-            )
-            if concat:
-                sql_parts.append(concat.group(1))
-                raw_param = concat.group(2)
-                param_names.append(raw_param)
-                sql_parts.append(f'#{{{raw_param}}}')
-                sql_parts.append(concat.group(3))
-                continue
+            )):
+                frag_sql.append(m2.group(1))
+                raw_param = m2.group(2)
+                frag_pairs.append((raw_param, raw_param))
+                frag_sql.extend([f'#{{{raw_param}}}', m2.group(3)])
 
             # "prefix" + param[.method()]  (suffix 없음)
-            concat_no_suffix = re.match(
+            elif (m2 := re.match(
                 r'"([^"]*?)"\s*\+\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.\w+\(\))?$',
                 arg
-            )
-            if concat_no_suffix:
-                sql_parts.append(concat_no_suffix.group(1))
-                raw_param = concat_no_suffix.group(2)
-                param_names.append(raw_param)
-                sql_parts.append(f'#{{{raw_param}}}')
-                continue
+            )):
+                frag_sql.append(m2.group(1))
+                raw_param = m2.group(2)
+                frag_pairs.append((raw_param, raw_param))
+                frag_sql.append(f'#{{{raw_param}}}')
 
-            if not arg.startswith('"') and not arg.startswith("'"):
-                sql_parts.append(f'/* {arg} */')
+            # "prefix" + Formatter.nullXxx(obj.getCol()) + "suffix"
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\((\w+)\.get(\w+)\(\)\)\s*\+\s*"([^"]*)"',
+                arg
+            )):
+                prefix, obj, col, suffix = m2.group(1).rstrip("'"), m2.group(2), m2.group(3), m2.group(4).lstrip("'")
+                key = col[0].lower() + col[1:]
+                frag_pairs.append((key, f'{obj}.get{col}()'))
+                frag_sql.extend([prefix, f'#{{{key}}}', suffix])
 
-        return sql_parts, list(dict.fromkeys(param_names))
+            # "prefix" + Formatter.nullXxx(obj.getCol())  (suffix 없음)
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\((\w+)\.get(\w+)\(\)\)\s*$',
+                arg
+            )):
+                prefix, obj, col = m2.group(1).rstrip("'"), m2.group(2), m2.group(3)
+                key = col[0].lower() + col[1:]
+                frag_pairs.append((key, f'{obj}.get{col}()'))
+                frag_sql.extend([prefix, f'#{{{key}}}'])
+
+            # "prefix" + Formatter.nullXxx(simpleVar) + "suffix"
+            elif (m2 := re.match(
+                r'"([^"]*)"\s*\+\s*Formatter\.\w+\((\w+)\)\s*\+\s*"([^"]*)"',
+                arg
+            )):
+                prefix, name, suffix = m2.group(1).rstrip("'"), m2.group(2), m2.group(3).lstrip("'")
+                frag_pairs.append((name, name))
+                frag_sql.extend([prefix, f'#{{{name}}}', suffix])
+
+            elif not arg.startswith('"') and not arg.startswith("'"):
+                frag_sql.append(f'/* {arg} */')
+
+            # 조건부 append → <if> 태그 / 일반 append → 직접 병합
+            if mybatis_cond is not None:
+                sql_content = ' '.join(frag_sql).strip()
+                if sql_content:
+                    sql_content = re.sub(r'<>', '&lt;&gt;', sql_content)
+                    sql_parts.append(f'\n<if test="{mybatis_cond}">\n    {sql_content}\n</if>')
+                param_pairs.extend(frag_pairs)
+            else:
+                sql_parts.extend(frag_sql)
+                param_pairs.extend(frag_pairs)
+
+        seen: dict[str, str] = {}
+        for k, v in param_pairs:
+            if k not in seen:
+                seen[k] = v
+        return sql_parts, list(seen.items())
 
     def _extract_update_params(self, code: str, start: int) -> list[tuple[str, str]]:
-        """ps.setXxx(pos, expr) 에서 순서대로 (key, value_expr) 쌍을 추출.
-        pos는 숫자 또는 i++ 형태 모두 지원.
+        """ps.setXxx / pstmt.setXxx(pos, expr) 에서 순서대로 (key, value_expr) 쌍을 추출.
+        pos는 숫자, i++ 또는 ++i 형태 모두 지원.
         """
-        exec_m = re.search(r'\bexecuteUpdate\(\)', code[start:])
-        end = start + exec_m.start() if exec_m else start + 1000
+        exec_m = re.search(r'\bexecute(?:Update|Query)\(\)', code[start:])
+        end = start + exec_m.start() if exec_m else start + 500
 
         set_line_re = re.compile(
-            r'\bps\d*\.set(?:Long|String|Int|Double|Timestamp|Object)\s*\(\s*(\d+|i\+\+)\s*,\s*([^\n]+)\)',
+            r'\bps\w*\.set(?:Long|String|Int|Double|Timestamp|Object)\s*\(\s*(\+\+i|\d+|i\+\+)\s*,\s*([^\n]+)\)',
         )
         fixed: dict[int, tuple[str, str]] = {}
         ordered: list[tuple[str, str]] = []
@@ -366,7 +530,9 @@ class DaoTransformer:
             pos_str = m.group(1)
             expr = m.group(2).strip()
             kv = self._derive_param_key_value(expr)
-            if pos_str == 'i++':
+            if kv is None:
+                continue
+            if pos_str in ('i++', '++i'):
                 ordered.append(kv)
             else:
                 pos = int(pos_str)
@@ -377,15 +543,20 @@ class DaoTransformer:
             return [fixed[k] for k in sorted(fixed.keys())]
         return ordered
 
-    def _derive_param_key_value(self, expr: str) -> tuple[str, str]:
+    def _derive_param_key_value(self, expr: str) -> tuple[str, str] | None:
         """파라미터 표현식에서 (paramMap key, Java value expression) 쌍 도출.
 
         규칙:
         - 단순 파라미터(processFlag, invoNo 등) → (paramName, paramName)
         - VO/DTO getter(headVo.getCancel_date()) → (cancel_date, headVo.getCancel_date())
         - session userId → (_sessionUserId, userInfo.getUserId())
+        - 시스템 타임스탬프(new Date(System.currentTimeMillis())) → None (스킵)
         """
         expr = expr.strip()
+
+        # 0. 시스템 타임스탬프 → 스킵 (SQL에서 SYSDATE 등으로 처리)
+        if 'currentTimeMillis' in expr or 'System.currentTime' in expr:
+            return None
 
         # 1. session userId
         if 'getUserId' in expr or 'getUser_id' in expr:
@@ -420,6 +591,18 @@ class DaoTransformer:
         if m:
             obj, col = m.group(1), m.group(2)
             return (col[0].lower() + col[1:], f'{obj}.get{col}()')
+
+        # 6.5. Formatter.nullXxx(StringUtil.nvl(obj.getXxx(), "...")) — LINE_RULES 변환 결과
+        m = re.match(r'Formatter\.\w+\(StringUtil\.nvl\((\w+)\.get(\w+)\(\)', expr)
+        if m:
+            obj, col = m.group(1), m.group(2)
+            return (col[0].lower() + col[1:], f'{obj}.get{col}()')
+
+        # 6.6. Formatter.nullXxx(StringUtil.nvl(simpleVar, "...")) — LINE_RULES 변환 결과
+        m = re.match(r'Formatter\.\w+\(StringUtil\.nvl\((\w+)\s*,', expr)
+        if m:
+            name = m.group(1)
+            return (name, name)
 
         # 7. Formatter.nullXxx(simpleVar) — 단순 파라미터 with null wrapper
         m = re.match(r'Formatter\.\w+\((\w+)\)', expr)
@@ -520,15 +703,25 @@ class DaoTransformer:
             if catch_close >= len(code):
                 continue
 
-            # 추가 catch / finally 가 있으면 건너뜀
-            tail = code[catch_close + 1:].lstrip()
-            if re.match(r'(catch|finally)\b', tail):
+            # 추가 catch 가 있으면 건너뜀 (finally 는 제거 범위에 포함)
+            tail_str = code[catch_close + 1:]
+            tail = tail_str.lstrip()
+            if re.match(r'catch\b', tail):
                 continue
 
             # catch 바디가 단순 rethrow 하나뿐인지 확인
             catch_body = code[catch_open_abs + 1:catch_close].strip()
             if not re.match(r'^throw\s+new\s+\w+\s*\(\s*\w+\s*\)\s*;$', catch_body):
                 continue
+
+            # finally 블록이 있으면 제거 범위에 포함
+            removal_end = catch_close + 1
+            finally_m = re.match(r'\s*finally\s*\{', tail_str)
+            if finally_m:
+                finally_brace = catch_close + 1 + tail_str.index('{', finally_m.start())
+                finally_close = self._find_block_end(code, finally_brace)
+                if finally_close < len(code):
+                    removal_end = finally_close + 1
 
             # try 본문 추출 후 들여쓰기 한 단계 제거
             try_body = code[try_open_abs + 1:try_close]
@@ -546,7 +739,7 @@ class DaoTransformer:
                     de_indented.append(indent + line[len(indent) + len(extra_indent):])
                 else:
                     de_indented.append(line)
-            replacements.append((m.start(), catch_close + 1, ''.join(de_indented)))
+            replacements.append((m.start(), removal_end, ''.join(de_indented)))
 
         for start, end, replacement in sorted(replacements, key=lambda x: x[0], reverse=True):
             code = code[:start] + replacement + code[end:]
@@ -572,17 +765,28 @@ class DaoTransformer:
         return code
 
     def _format_sql(self, sql: str) -> str:
-        """SQL 가독성 정리: 리터럴 \\n 제거, 과도한 공백 정규화, 8칸 들여쓰기 적용."""
+        """SQL 가독성 정리: 리터럴 \\n 제거, 과도한 공백 정규화, 8칸 들여쓰기 적용.
+        <if test="..."> MyBatis 태그는 한 단계 추가 들여쓰기.
+        """
         sql = sql.replace('\\n', '\n')
-        lines = []
-        for line in sql.splitlines():
-            line = re.sub(r'\t+', ' ', line)
-            line = re.sub(r' {2,}', ' ', line)
-            line = line.strip()
-            if line:
-                lines.append(line)
         indent = '        '
-        return '\n'.join(indent + line for line in lines)
+        inner_indent = indent + '    '
+        lines = []
+        inside_if = False
+        for line in sql.splitlines():
+            stripped = re.sub(r'\t+', ' ', line)
+            stripped = re.sub(r' {2,}', ' ', stripped).strip()
+            if not stripped:
+                continue
+            if re.match(r'<if\s+test=', stripped):
+                lines.append(f'{indent}{stripped}')
+                inside_if = True
+            elif stripped == '</if>':
+                lines.append(f'{indent}</if>')
+                inside_if = False
+            else:
+                lines.append(f'{inner_indent if inside_if else indent}{stripped}')
+        return '\n'.join(lines)
 
     def _build_mapper_xml(self, entries: list[dict]) -> str:
         if not entries:
