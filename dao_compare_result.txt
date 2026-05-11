@@ -1,33 +1,42 @@
-Business   : C:\Projects\somSecond\SOM_Business_Basic\ejbModule\com\stx\som\business\dao\erp
-Common     : C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\erp
-Git 1차 전환 : C:\Projects\Panocean\src\main\java\com\pan\som\dao\erp
+Business   : C:\Projects\somSecond\SOM_Business_OperSa\ejbModule\com\stx\som\business\dao\da
+Common     : C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\da
+Git 1차 전환 : C:\Projects\Panocean\src\main\java\com\pan\som\dao\da
 
-[Business+Common에 있고 Git 1차 전환에 없는 파일 - 2개]
-  EARCustomerIntVDAO.java                            [SOM_BUSINESS]
-  EARCustomerVendorVDAO.java                         [SOM_COMMON]
+[Business+Common에 있고 Git 1차 전환에 없는 파일 - 6개]
+  ODACpCodeDAO.java                                  [SOM_BUSINESS]
+  OMTMaterialCostDetailDAO.java                      [SOM_BUSINESS]
+  OMTMaterialCostHeadDAO.java                        [SOM_BUSINESS]
+  OMTMaterialDistrDetailDAO.java                     [SOM_BUSINESS]
+  OMTMaterialDistrHeadDAO.java                       [SOM_BUSINESS]
+  OMTMaterialPrcInfoDAO.java                         [SOM_BUSINESS]
 
-[Git 1차 전환에만 있는 파일 - 2개]
-  ErpEARCustomerVendorVDAO.java
-  ErpFunctionDAO.java
+[Git 1차 전환에만 있는 파일 - 1개]
+  CirCulODAInvoHeadDAO.java
 
-[공통 파일 - 20개]
-  EARBankAccountVDAO.java
-  EARCurrencyCodeVDAO.java
-  EARCustomerRecVDAO.java
-  EARExchangeRateTypeVDAO.java
-  EARIfHeadersAllDAO.java
-  EARIfInvoiceBalanceVDAO.java
-  EARIfLinesAllDAO.java
-  EARIfReceiptBalanceVDAO.java
-  EARIfTrxBalanceVDAO.java
-  EARIfTrxTypeDAO.java
-  EARPaymentTermVDAO.java
-  EARVendorBankAccountVDAO.java
-  EGLDepartmentVDAO.java
-  ELTTaxXmlDAO.java
-  GLDailyRatesVDAO.java
-  GLPeriodStatusesDAO.java
-  OFFAccountDAO.java
-  RCMAgentPrtInfoDAO.java
-  RCMHarbourLimitCntrMDAO.java
-  RCMHarbourLimitCntrTariffDAO.java
+[공통 파일 - 26개]
+  ODADirInvoDetailDAO.java
+  ODADirInvoHeadDAO.java
+  ODADomDirInvoDetailDAO.java
+  ODADomDirInvoHeadDAO.java
+  ODAInvoDetailDAO.java
+  ODAInvoHeadDAO.java
+  ODASbgSendDetailDAO.java
+  ODASbgSendHeadDAO.java
+  ODASendDetailDAO.java
+  ODASendHeadDAO.java
+  ODAVouchDetailDAO.java
+  ODAVouchHeadDAO.java
+  ODAVouchImpDetailDAO.java
+  ODAVouchImpHeadDAO.java
+  OPDPostDeliveryFeeDetailDAO.java
+  OPDPostDeliveryFeeHeadDAO.java
+  ORFOceanRouteFeeDetailDAO.java
+  ORFOceanRouteFeeHeadDAO.java
+  ORFOceanRouteReqDetailDAO.java
+  ORFOceanRouteReqHeadDAO.java
+  ORFOceanRouteReqOperatorDAO.java
+  OVSVslStsSmryMDAO.java
+  WebVouchDetailDAO.java
+  WebVouchHeadDAO.java
+  WebVouchImpDetailDAO.java
+  WebVouchImpHeadDAO.java

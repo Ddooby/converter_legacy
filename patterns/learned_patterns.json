@@ -5,13 +5,16 @@
     {"from": "import java.sql.PreparedStatement;\n", "to": ""},
     {"from": "import java.sql.ResultSet;\n", "to": ""},
     {"from": "import java.sql.SQLException;\n", "to": ""},
+    {"from": "import java.sql.Timestamp;\n", "to": ""},
     {"from": "import java.util.ArrayList;\n", "to": ""},
     {"from": "import java.util.Collection;\n", "to": ""},
     {"from": "import java.util.Iterator;\n", "to": ""},
+    {"from": "import java.util.Vector;\n", "to": ""},
     {"from": "import org.apache.log4j.Logger;\n", "to": ""},
     {"from": "import com.stx.som.common.exception.STXException;\n", "to": ""},
     {"from": "import com.stx.som.common.utility.DbWrap;\n", "to": ""},
     {"from": "import com.stx.som.common.utility.DateUtil;\n", "to": ""},
+    {"from": "import com.stx.som.business.utility.ConnectionHelper;\n", "to": ""},
     {"from": "com.stx.som.business.dao.", "to": "com.pan.som.dao."},
     {"from": "com.stx.som.business.", "to": "com.pan.som."},
     {"from": "com.stx.som.", "to": "com.pan.som."}
@@ -46,6 +49,7 @@
     {"from": "STXException", "to": "Exception"},
     {"from": "StringBuffer", "to": "StringBuilder"},
     {"from": "new Timestamp(System.currentTimeMillis())", "to": "new Date(System.currentTimeMillis())"},
-    {"from": "userBean.getUser_id()", "to": "userInfo.getUserId()"}
+    {"from": "userBean.getUser_id()", "to": "userInfo.getUserId()"},
+    {"from": " extends CommonDao", "to": ""}
   ]
 }
