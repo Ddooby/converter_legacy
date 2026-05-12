@@ -62,6 +62,12 @@ class DaoTransformer:
     _LINE_RULES: list[tuple[str, str]] = [
         # DbWrap 선언 제거
         (r'\bDbWrap\s+\w+\s*=\s*new\s+DbWrap\(\)\s*;', ''),
+        # Logger 필드 선언 제거 (@Slf4j 로 대체)
+        (r'private\s+\w*\s*Logger\s+\w+\s*=\s*Logger\.getLogger\([^;]+\)\s*;', ''),
+        # StringBuffer → StringBuilder
+        (r'\bStringBuffer\b', 'StringBuilder'),
+        # PKGenerator 카멜케이스 정규화
+        (r'\bPKGenerator\.', 'pkGenerator.'),
         # setObject/getObject/getObjects/updateQuery/isExist: conn 파라미터 제거
         (r'\b\w+\.setObject\(conn,\s*', r'commonDao.setObject('),
         (r'\b\w+\.getObjects\(conn,\s*', r'commonDao.getObjects('),
@@ -75,9 +81,23 @@ class DaoTransformer:
         # UserBean userBean 파라미터 제거
         (r',\s*UserBean\s+userBean\b', ''),
         (r'\bUserBean\s+userBean\s*,\s*', ''),
-        # Formatter.nullTrim(rs.getString("X")) 조합 우선 처리 (중첩 괄호 문제 방지)
+        # userBean 메서드 호출 → userInfo (특수 케이스 우선)
+        (r'\buserBean\.getUser_id\s*\(', 'userInfo.getUserId('),
+        (r'\buserBean\.getUser_name\s*\(', 'userInfo.getUserName('),
+        # userBean. 잔여 → userInfo. (일반 치환)
+        (r'\buserBean\.', 'userInfo.'),
+        # STXException → UxbBizException (일반 치환)
+        (r'\bSTXException\b', 'UxbBizException'),
+        # RowStatus: getStatus().equals(...) → DataSetRowStatus
+        (r'\.getStatus\(\)\s*\.equals\s*\(\s*"insert"\s*\)', '.getRowStatus() == DataSetRowStatus.INSERT'),
+        (r'\.getStatus\(\)\s*\.equals\s*\(\s*"update"\s*\)', '.getRowStatus() == DataSetRowStatus.UPDATE'),
+        (r'\.getStatus\(\)\s*\.equals\s*\(\s*"delete"\s*\)', '.getRowStatus() == DataSetRowStatus.DELETE'),
+        # Formatter.nullTrim(rs.getString("X")) 조합 우선 처리 → Formatter.nullTrim(String.valueOf(map.get("X")))
         (r'\bFormatter\.nullTrim\(\s*rs\d*\.getString\("(\w+)"\)\s*\)',
-         r'StringUtil.nvl(map.get("\1"), "")'),
+         r'Formatter.nullTrim(String.valueOf(map.get("\1")))'),
+        # VO/DTO setter에서 rs.getString → Formatter.nullTrim(String.valueOf(map.get())) 우선 처리
+        (r'(\.set\w+\(\s*)rs\d*\.getString\s*\(\s*"(\w+)"\s*\)(\s*\))',
+         r'\1Formatter.nullTrim(String.valueOf(map.get("\2")))\3'),
         # Formatter.nullTrim 일반 (단순 인자)
         (r'\bFormatter\.nullTrim\((\w+)\)', r'StringUtil.nvl(\1, "")'),
         # Formatter.nullLong(obj.getXxx()) → StringUtil.nvl 래핑
@@ -109,6 +129,9 @@ class DaoTransformer:
         # throw new Exception("ERR-...") → UxbBizException (문자열 코드 버전)
         (r'throw\s+new\s+Exception\s*\(\s*"([^"]+)"\s*\)',
          r'throw new UxbBizException("\1")'),
+        # new Long / new Double 일반 fallback (위의 specific 패턴 처리 후 잔여분)
+        (r'\bnew\s+Long\(', 'Long.valueOf('),
+        (r'\bnew\s+Double\(', 'Double.valueOf('),
     ]
 
     def __init__(self, class_name: str):
@@ -119,6 +142,7 @@ class DaoTransformer:
         code = self._apply_line_rules(code)
         code = self._add_class_decorations(code)
         code, xml_entries = self._convert_execute_queries(code)
+        code = self._wrap_listmap_for_loops(code)
         code = self._inject_user_delegation(code)
         code = self._fix_throws(code)
         code = self._remove_trivial_try_catch(code)
@@ -135,8 +159,49 @@ class DaoTransformer:
             code = re.sub(pattern, replacement, code)
         return code
 
+    def _wrap_listmap_for_loops(self, code: str) -> str:
+        """for (Map<String, Object> map : listMapXxx) 루프를 null 가드 if 블록으로 감쌈.
+
+        이미 직전 줄에 null 체크가 있으면 건너뜀.
+        """
+        lines = code.splitlines(keepends=True)
+        result: list[str] = []
+        i = 0
+        for_re = re.compile(
+            r'^([ \t]*)for\s*\(\s*Map<String,\s*Object>\s+\w+\s*:\s*(\w+)\s*\)\s*\{'
+        )
+        while i < len(lines):
+            line = lines[i]
+            m = for_re.match(line)
+            if m:
+                indent = m.group(1)
+                list_var = m.group(2)
+                prev = result[-1].rstrip() if result else ''
+                if f'{list_var} != null' in prev or '!= null' in prev:
+                    result.append(line)
+                    i += 1
+                    continue
+                # null 가드 삽입 + for 블록 전체 들여쓰기 한 단계 추가
+                inner = indent + '    '
+                result.append(f'{indent}if ({list_var} != null && !{list_var}.isEmpty()) {{\n')
+                result.append(re.sub(r'^' + re.escape(indent), inner, line, count=1))
+                i += 1
+                depth = 1
+                while i < len(lines) and depth > 0:
+                    body = lines[i]
+                    result.append(re.sub(r'^' + re.escape(indent), inner, body, count=1))
+                    depth += body.count('{') - body.count('}')
+                    i += 1
+                result.append(f'{indent}}}\n')
+                continue
+            result.append(line)
+            i += 1
+        return ''.join(result)
+
     def _add_class_decorations(self, code: str) -> str:
         """@Slf4j / @RequiredArgsConstructor / @Repository 추가 및 필드 삽입."""
+        # extends CommonDao 제거 (필드 주입 방식으로 전환)
+        code = re.sub(r'\s+extends\s+CommonDao\b', '', code)
         anns = '@Slf4j\n@RequiredArgsConstructor\n@Repository\n'
         code = re.sub(r'(public\s+class\s+)', anns + r'\1', code, count=1)
         fields = (
@@ -275,8 +340,8 @@ class DaoTransformer:
         )
         # PreparedStatement 인덱스 카운터 (int i = 1;) 제거
         result_code = re.sub(r'[ \t]*\bint\s+i\s*=\s*\d+\s*;\n?', '', result_code)
-        # sb.append 제거 후 남은 빈 if 블록 정리 (한 줄 조건 한정)
-        result_code = re.sub(r'[ \t]*if\b[^\n{]*\{\s*\}\s*\n?', '', result_code)
+        # sb.append 제거 후 남은 빈 if/else-if 블록 정리 (한 줄 조건 한정)
+        result_code = re.sub(r'[ \t]*(?:else\s+)?if\b[^\n{]*\{\s*\}\s*\n?', '', result_code)
 
         # } else { throw ... } 패턴에서 else-throw 블록만 제거, 닫는 } 는 보존
         result_code = re.sub(
@@ -328,6 +393,11 @@ class DaoTransformer:
             result_code
         )
 
+        # sb 선언이 제거된 후 남는 orphan log 라인 (.toString() 포함) 제거
+        result_code = re.sub(r'[ \t]*log\.\w+\([^\n]*\.toString\(\)[^\n]*\);\n?', '', result_code)
+        # 잔류 String sql = ... 선언 제거
+        result_code = re.sub(r'[ \t]*String\s+sql\w*\s*=\s*[^\n]+;\n?', '', result_code)
+
         return result_code, list(xml_entries.values())
 
     def _enclosing_method(self, code: str, pos: int) -> str:
@@ -340,22 +410,74 @@ class DaoTransformer:
 
     def _java_condition_to_mybatis(self, java_cond: str) -> str:
         """Java if 조건식 → MyBatis <if test="..."> 조건식 변환."""
-        java_cond = java_cond.strip()
-        # obj.getXxx().longValue() != 0
-        m = re.match(r'\w+\.get(\w+)\(\)\.\w+\(\)\s*(!=|==|>|<|>=|<=)\s*(\w+)', java_cond)
-        if m:
-            key = m.group(1)[0].lower() + m.group(1)[1:]
-            return f'{key} {m.group(2)} {m.group(3)}'
-        # obj.getXxx() != null
-        m = re.match(r'\w+\.get(\w+)\(\)\s*(!=|==)\s*(null|\w+)', java_cond)
-        if m:
-            key = m.group(1)[0].lower() + m.group(1)[1:]
-            return f'{key} {m.group(2)} {m.group(3)}'
-        # simpleVar != null/0
-        m = re.match(r'(\w+)\s*(!=|==)\s*(\w+)', java_cond)
-        if m:
-            return java_cond
-        return java_cond
+        cond = java_cond.strip()
+
+        def decap(s: str) -> str:
+            return s[0].lower() + s[1:] if s else s
+
+        # 1. !''.equals(dto.getXxx()) → xxx != ''
+        cond = re.sub(
+            r"!\s*''\s*\.equals\s*\(\s*(?:\w+\.)?get([A-Z]\w*)\s*\(\s*\)\s*\)",
+            lambda m: f"{decap(m.group(1))} != ''",
+            cond,
+        )
+
+        # 2. Formatter.nullTrim(...) 제거 (조건식 내)
+        cond = re.sub(r'Formatter\.nullTrim\s*\(\s*(.+?)\s*\)', r'\1', cond)
+
+        # 3. 'CONST'.equals(dto.getField()) → field == 'CONST'
+        cond = re.sub(
+            r"'([^']*)'\s*\.\s*equals\s*\(\s*(?:\w+\.)?get([A-Z]\w*)\s*\(\s*\)\s*\)",
+            lambda m: f"{decap(m.group(2))} == '{m.group(1)}'",
+            cond,
+        )
+
+        # 4. dto.getField().equals('CONST') → field == 'CONST'
+        cond = re.sub(
+            r"(?:\w+\.)?get([A-Z]\w*)\s*\(\s*\)\s*\.\s*equals\s*\(\s*'([^']*)'\s*\)",
+            lambda m: f"{decap(m.group(1))} == '{m.group(2)}'",
+            cond,
+        )
+
+        # 5. null != dto.getField() → field != null
+        cond = re.sub(
+            r"null\s*!=\s*(?:\w+\.)?get([A-Z]\w*)\s*\(\s*\)",
+            lambda m: f"{decap(m.group(1))} != null",
+            cond,
+        )
+
+        # 6. 숫자 != nullLong(getXxx()) → xxx != 0 and xxx != null
+        cond = re.sub(
+            r"(?:\b\w+\b|\d+)\s*!=\s*(?:Formatter\.)?nullLong\s*\(\s*(?:\w+\.)?get([A-Z]\w*)\s*\(\s*\)\s*\)",
+            lambda m: f"{decap(m.group(1))} != 0 and {decap(m.group(1))} != null",
+            cond,
+        )
+
+        # 7. obj.getXxx().longValue() 등 래퍼메서드 포함 비교
+        cond = re.sub(
+            r'(?:\w+\.)?get(\w+)\(\)\.\w+\(\)\s*(!=|==|>|<|>=|<=)\s*(\w+)',
+            lambda m: f"{decap(m.group(1))} {m.group(2)} {m.group(3)}",
+            cond,
+        )
+
+        # 8. obj.getXxx() 비교 (단순)
+        cond = re.sub(
+            r'(?:\w+\.)?get(\w+)\(\)\s*(!=|==|>|<|>=|<=)\s*(\S+)',
+            lambda m: f"{decap(m.group(1))} {m.group(2)} {m.group(3)}",
+            cond,
+        )
+
+        # 9. 잔여 getXxx() → 프로퍼티명
+        cond = re.sub(
+            r'(?:\w+\.)?get([A-Z]\w*)\s*\(\s*\)',
+            lambda m: decap(m.group(1)),
+            cond,
+        )
+
+        # 10. && → and, || → or
+        cond = cond.replace('&&', 'and').replace('||', 'or')
+
+        return cond.strip()
 
     def _extract_sql_and_params(self, code: str, sb_var: str) -> tuple[list[str], list[tuple[str, str]]]:
         """sb.append() 호출에서 SQL 조각과 (key, value) 파라미터 쌍 목록을 추출.
@@ -586,8 +708,14 @@ class DaoTransformer:
             name = m.group(1)
             return (name, name)
 
-        # 6. Formatter.nullXxx(obj.getXxx()) — VO getter with null wrapper
-        m = re.match(r'Formatter\.\w+\((\w+)\.get(\w+)\(\)', expr)
+        # 5.5. Long/Double/Integer.valueOf(x).longValue() 등 — 래퍼 언박싱 단순화
+        m = re.match(r'(?:Long|Double|Integer|Float)\.valueOf\((\w+)\)\.\w+Value\(\)', expr)
+        if m:
+            name = m.group(1)
+            return (name, name)
+
+        # 6. Formatter.nullXxx((obj.getXxx())) — 추가 괄호 포함 VO getter with null wrapper
+        m = re.match(r'Formatter\.\w+\(\s*\(?\s*(\w+)\.get(\w+)\(\)', expr)
         if m:
             obj, col = m.group(1), m.group(2)
             return (col[0].lower() + col[1:], f'{obj}.get{col}()')
@@ -668,7 +796,7 @@ class DaoTransformer:
             body_start = m.end()
             body_end = self._find_block_end(code, m.start() + m.group().rfind('{'))
             body = code[body_start:body_end]
-            if 'userInfo.getUserId()' in body and 'UserDelegation userInfo' not in body:
+            if re.search(r'\buserInfo\.', body) and 'UserDelegation userInfo' not in body:
                 line_start = code.rfind('\n', 0, body_start) + 1
                 base_indent = re.match(r'[ \t]*', code[line_start:]).group()
                 inner_indent = base_indent + '    '
@@ -709,9 +837,10 @@ class DaoTransformer:
             if re.match(r'catch\b', tail):
                 continue
 
-            # catch 바디가 단순 rethrow 하나뿐인지 확인
+            # catch 바디의 마지막 문장이 rethrow 이면 제거 대상
+            # (앞의 result = "ERR-..." 등은 throw 후 도달 불가 → 제거해도 안전)
             catch_body = code[catch_open_abs + 1:catch_close].strip()
-            if not re.match(r'^throw\s+new\s+\w+\s*\(\s*\w+\s*\)\s*;$', catch_body):
+            if not re.search(r'\bthrow\s+new\s+\w+\b[^;]*;\s*$', catch_body, re.DOTALL):
                 continue
 
             # finally 블록이 있으면 제거 범위에 포함
