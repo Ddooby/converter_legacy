@@ -28,7 +28,7 @@
     "import kr.co.takeit.dao.UxbDAO;",
     "import kr.co.takeit.exception.UxbBizException;",
     "import kr.co.takeit.session.UserInfo;",
-    "import kr.co.takeit.session.user.UserDelegation;",
+    "import kr.co.takeit.user.UserAdditionalDTO;",
     "import kr.co.takeit.util.StringUtil;",
     "import lombok.RequiredArgsConstructor;",
     "import lombok.extern.slf4j.Slf4j;",
