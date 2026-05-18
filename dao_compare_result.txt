@@ -1,174 +1,25 @@
-Business   : C:\Projects\somSecond\SOM_Business_SalesCb\ejbModule\com\stx\som\business\dao\salesOpportunity
-Common     : C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\salesOpportunity
-Git 1차 전환 : C:\Projects\Panocean\src\main\java\com\pan\som\dao\salesOpportunity
+Business   : C:\Projects\somSecond\SOM_Business_OperSt\ejbModule\com\stx\som\business\dao\globalOperationStatus
+Common     : C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\globalOperationStatus
+Git 1차 전환 : C:\Projects\Panocean\src\main\java\com\pan\som\dao\globalOperationStatus
 
-[Business+Common에 있고 Git 1차 전환에 없는 파일 - 56개]
-  BunkerDemandForecastDAO.java                       [SOM_BUSINESS]
-  BunkerRiskDAO.java                                 [SOM_BUSINESS]
-  CBGLDifferenceListDAO.java                         [SOM_BUSINESS]
-  CBSOAMappingListDAO.java                           [SOM_BUSINESS]
-  CBSummaryDataVerifyDAO.java                        [SOM_BUSINESS]
-  CbComparisonDAO.java                               [SOM_BUSINESS]
-  CntrCBMappingListDAO.java                          [SOM_BUSINESS]
-  FFASummaryDAO.java                                 [SOM_BUSINESS]
-  FfSettleDAO.java                                   [SOM_BUSINESS]
-  FuturesHedgeManagementDAO.java                     [SOM_BUSINESS]
-  FuturesLsFoHedgeManagementDAO.java                 [SOM_BUSINESS]
-  FuturesLsmgoHedgeManagementDAO.java                [SOM_BUSINESS]
-  HedgeLsFoManagementDAO.java                        [SOM_BUSINESS]
-  HedgeLsmgoManagementDAO.java                       [SOM_BUSINESS]
-  HedgeManagementDAO.java                            [SOM_BUSINESS]
-  ManagementPlanningInfoDAO.java                     [SOM_BUSINESS]
-  PANInvestBasicPaidCapitalDAO.java                  [SOM_BUSINESS]
-  PANInvestBasicShareRateDAO.java                    [SOM_BUSINESS]
-  PANInvestBasicSubCompanyDAO.java                   [SOM_BUSINESS]
-  PlanBusinessSimulationDAO.java                     [SOM_BUSINESS]
-  SCBFfaInfoDAO.java                                 [SOM_BUSINESS]
-  SCBFfaSmryMDAO.java                                [SOM_BUSINESS]
-  SCBFnDemDesPortCgoDetailDAO.java                   [SOM_BUSINESS]
-  SCBOwnVslProfitDAO.java                            [SOM_BUSINESS]
-  SCBPerfActStlInfoDAO.java                          [SOM_BUSINESS]
-  SCBPerfFfaMDAO.java                                [SOM_BUSINESS]
-  SCBPerfSmryVoySDAO.java                            [SOM_BUSINESS]
-  SCBPerfTkBookingCgoInfoDAO.java                    [SOM_BUSINESS]
-  SCBPerfTkFrtInfoDAO.java                           [SOM_BUSINESS]
-  SCBSummaryListReportDAO.java                       [SOM_BUSINESS]
-  SCBVslFixedCostRateDAO.java                        [SOM_BUSINESS]
-  SCBWrkActStlInfoDAO.java                           [SOM_BUSINESS]
-  SCBWrkFixrInfoDAO.java                             [SOM_BUSINESS]
-  SCBWrkTcoutBnkDifDetailDAO.java                    [SOM_BUSINESS]
-  SCBWrkTcoutBnkDifHeadDAO.java                      [SOM_BUSINESS]
-  SCBWrkTcoutFixrHireInfoDAO.java                    [SOM_BUSINESS]
-  SCBWrkTkBookingCgoInfoDAO.java                     [SOM_BUSINESS]
-  SCBWrkTkFrtInfoDAO.java                            [SOM_BUSINESS]
-  SOPCandidateCgoDetailDAO.java                      [SOM_BUSINESS]
-  SOPCandidateCgoTnkInfoDAO.java                     [SOM_BUSINESS]
-  SOPCandidateMDAO.java                              [SOM_BUSINESS]
-  SOPCandidateTonnBulkerInfoDAO.java                 [SOM_BUSINESS]
-  SOPCandidateTonnCarInfoDAO.java                    [SOM_BUSINESS]
-  SOPCandidateTonnDetailDAO.java                     [SOM_BUSINESS]
-  SOPCandidateTonnTnkInfoDAO.java                    [SOM_BUSINESS]
-  SOPCgoListTnkInfoDAO.java                          [SOM_BUSINESS]
-  SOPCgoTonnCodeMappingDAO.java                      [SOM_BUSINESS]
-  SOPTonnListBulkerInfoDAO.java                      [SOM_BUSINESS]
-  SOPTonnListCarCarrierInfoDAO.java                  [SOM_BUSINESS]
-  SOPTonnListCarSupplyInfoDAO.java                   [SOM_BUSINESS]
-  SOPTonnListTnkInfoDAO.java                         [SOM_BUSINESS]
-  SalesSummaryBoardDAO.java                          [SOM_BUSINESS]
-  TCHedgeManagementDAO.java                          [SOM_BUSINESS]
-  TCLsFoHedgeManagementDAO.java                      [SOM_BUSINESS]
-  TCLsmgoHedgeManagementDAO.java                     [SOM_BUSINESS]
-  TCOutHirstoryDAO.java                              [SOM_BUSINESS]
+[Business+Common에 있고 Git 1차 전환에 없는 파일 - 2개]
+  OVSPortLineUpDAO.java                              [SOM_BUSINESS]
+  VoucherStatusCollectionDAO.java                    [SOM_BUSINESS]
 
 [Git 1차 전환에만 있는 파일 - 0개]
 
-[공통 파일 - 109개]
-  AccountIntegrationInformationDAO.java
-  AccountLimitManagementDAO.java
-  BunkerSplyStatusDAO.java
-  CCDMktIndiDAO.java
-  CCDMktIndiNoteDAO.java
-  CVCCntrFrtDisPortRotationMDAO.java
-  CVCCntrFrtLdgPortRotationDAO.java
-  CVCCntrFrtMDAO.java
-  CVCCntrFrtRateBafMDAO.java
-  CVCDisPortProdChgMDAO.java
-  CVCPortDistanceMDAO.java
-  DemurrageStutsDAO.java
-  EAPPaymentTtnoVDAO.java
-  FDMOAManagementDAO.java
-  HedgeOrderDAO.java
-  InvestmentAdequacyDAO.java
-  OCBPsummstVoyCgoDAO.java
-  OasisDAO.java
-  OverseaAdministrateActualRenewalMngDAO.java
-  OverseaAdministrateActualRenewalMngDAO2.java
-  OverseaAdministrateActualRenewalMngDAO3.java
-  OverseaAdministrateActualRenewalMngDAO4.java
-  OverseaAdministrateActualRenewalMngDAO5.java
-  PANInvestCompanyMDAO.java
-  SCBAnalInfoDAO.java
-  SCBApprovalStatusDAO.java
-  SCBBafInfoDAO.java
-  SCBBookingTmpCgoDetailDAO.java
-  SCBBookingTmpCgoHeadDAO.java
-  SCBCbChangeResonMDAO.java
-  SCBCbCheckListDAO.java
-  SCBCbChgInfoDAO.java
-  SCBCbStsComInfoDAO.java
-  SCBCbSummaryInfoDAO.java
-  SCBCbVaChangeResonMDAO.java
-  SCBDemDesDetailInfoDAO.java
-  SCBDemDesInfoDAO.java
-  SCBDurChkDAO.java
-  SCBEstBnkMDAO.java
-  SCBEstCommonDAO.java
-  SCBEstDetailDAO.java
-  SCBEstHireMDAO.java
-  SCBEstMDAO.java
-  SCBEstVslMDAO.java
-  SCBFnDemDesDetailDAO.java
-  SCBFnDemDesMDAO.java
-  SCBFnDemDesPortCgoInfoDAO.java
-  SCBFnLayTimeSheetInfoDAO.java
-  SCBFnLaytimeSheetDetailDAO.java
-  SCBInitialApprovalMDAO.java
-  SCBLinerPortRotnCalcFuncDAO.java
-  SCBPerfBnkActualMDAO.java
-  SCBPerfBnkInfoDAO.java
-  SCBPerfCoaInfoDAO.java
-  SCBPerfCommExpDAO.java
-  SCBPerfCrFixrInfoDAO.java
-  SCBPerfCrPortCgoInfoDAO.java
-  SCBPerfFixrReletInfoDAO.java
-  SCBPerfLnBookingCgoInfoDAO.java
-  SCBPerfLnFrtInfoDAO.java
-  SCBPerfMDAO.java
-  SCBPerfNbizInfoDAO.java
-  SCBPerfPortActualMDAO.java
-  SCBPerfPortRotnInfoDAO.java
-  SCBPerfSmryCgoSDAO.java
-  SCBPerfSmryNbizSDAO.java
-  SCBPerfSmrySDAO.java
-  SCBPerfTcoutBnkDifDetailDAO.java
-  SCBPerfTcoutBnkDifHeadDAO.java
-  SCBPerfTcoutFixrHireInfoDAO.java
-  SCBPerfTcoutFixrInfoDAO.java
-  SCBPerfTermDvIntrlSDAO.java
-  SCBPerfTermDvSDAO.java
-  SCBPerfTnkBookingCgoInfoDAO.java
-  SCBPerfTnkFrtHDAO.java
-  SCBPerfTnkFrtInfoDAO.java
-  SCBPerfTonnInfoDAO.java
-  SCBPerfTrFixrInfoDAO.java
-  SCBPerfTrPortCgoInfoDAO.java
-  SCBPerfWashMDAO.java
-  SCBRobInfoDAO.java
-  SCBTankerDao.java
-  SCBTbnTonnInfoDAO.java
-  SCBTrdRouteCodeMDAO.java
-  SCBVslVoyMDAO.java
-  SCBWrkBnkInfoDAO.java
-  SCBWrkCoaInfoDAO.java
-  SCBWrkCrFixrInfoDAO.java
-  SCBWrkCrPortCgoInfoDAO.java
-  SCBWrkFfaMDAO.java
-  SCBWrkFixrReletInfoDAO.java
-  SCBWrkLnBookingCgoInfoDAO.java
-  SCBWrkLnFrtInfoDAO.java
-  SCBWrkMDAO.java
-  SCBWrkNbizInfoDAO.java
-  SCBWrkPortRotnInfoDAO.java
-  SCBWrkTcoutFixrInfoDAO.java
-  SCBWrkTnkBookingCgoInfoDAO.java
-  SCBWrkTnkFrtHDAO.java
-  SCBWrkTnkFrtInfoDAO.java
-  SCBWrkTonnInfoDAO.java
-  SCBWrkTrFixrInfoDAO.java
-  SCBWrkTrPortCgoInfoDAO.java
-  SOPCgoListInfoDAO.java
-  SOPTonnListInfoDAO.java
-  SOPTonnListMDAO.java
-  TBLManagementMstDAO.java
-  VoyageAnalysisDAO.java
-  WebPortalDAO.java
+[공통 파일 - 14개]
+  OVSAgentStsInfoDAO.java
+  OVSDailyReportDAO.java
+  OVSOpBoardPortSearchDAO.java
+  OVSOpBoardTropicalSearchDAO.java
+  OVSOpBoardVslSearchDAO.java
+  OVSOpBoardWeatherSearchDAO.java
+  OVSVslStsChkListAutoDAO.java
+  OVSVslStsChkListDetailDAO.java
+  OVSVslStsChkListHeadDAO.java
+  OVSVslStsInfoDAO.java
+  OVSVslStsMDAO.java
+  OperationNoticeDAO.java
+  SCBVslMoveMDAO.java
+  VslAccountBalanceListDAO.java

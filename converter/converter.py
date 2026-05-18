@@ -1,13 +1,54 @@
 import json
 import logging
+import os
 import re
+from datetime import datetime
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-INPUT_DIR = Path("input")
-OUTPUT_DIR = Path("output")
-PATTERNS_FILE = Path("patterns/learned_patterns.json")
+
+def _env_path(key: str, default: str) -> Path:
+    return Path(os.getenv(key, default))
+
+
+def _env_path_optional(key: str) -> Path | None:
+    val = os.getenv(key, "").strip()
+    return Path(val) if val else None
+
+
+INPUT_DIR = _env_path("INPUT_DIR", "input")
+OUTPUT_DIR = _env_path("OUTPUT_DIR", "output")
+PATTERNS_FILE = _env_path("PATTERNS_FILE", "patterns/learned_patterns.json")
+EXTERNAL_DAO_BASE = _env_path_optional("EXTERNAL_DAO_BASE")
+EXTERNAL_MAPPER_BASE = _env_path_optional("EXTERNAL_MAPPER_BASE")
+
+_VALID_MODES = {"overwrite", "skip", "backup"}
+OVERWRITE_MODE = os.getenv("OVERWRITE_MODE", "overwrite").strip().lower()
+if OVERWRITE_MODE not in _VALID_MODES:
+    logger.warning(
+        f"OVERWRITE_MODE='{OVERWRITE_MODE}' 는 유효하지 않음. 'overwrite' 로 폴백."
+    )
+    OVERWRITE_MODE = "overwrite"
+
+
+def _safe_write(path: Path, content: str) -> bool:
+    """OVERWRITE_MODE 에 따라 파일 저장. 저장하면 True, 스킵하면 False."""
+    if path.exists():
+        if OVERWRITE_MODE == "skip":
+            logger.warning(f"이미 존재 → 스킵: {path}")
+            return False
+        if OVERWRITE_MODE == "backup":
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup = path.with_name(f"{path.name}.bak.{ts}")
+            path.rename(backup)
+            logger.info(f"백업: {path.name} → {backup.name}")
+    path.write_text(content, encoding="utf-8")
+    return True
 
 
 class RuleEngine:
@@ -1785,6 +1826,22 @@ class EjbConverter:
             return m.group(1) + (m.group(2) if m.group(2) else '') + 'Mapper.xml'
         return stem + 'Mapper.xml'
 
+    def _sub_path_after_dao(self, code: str) -> str | None:
+        """변환된 package 선언에서 'dao' 세그먼트 이후 sub-path 추출.
+
+        예: 'com.pan.som.dao.standardInfo' → 'standardInfo'
+            'com.pan.som.dao' → ''
+            package 없거나 'dao' 미포함 → None
+        """
+        m = re.search(r'package\s+([\w.]+)\s*;', code)
+        if not m:
+            return None
+        parts = m.group(1).split('.')
+        if 'dao' not in parts:
+            return None
+        sub = parts[parts.index('dao') + 1:]
+        return '/'.join(sub)
+
     def _read_source(self, path: Path) -> str:
         for enc in ('utf-8', 'cp949', 'euc-kr'):
             try:
@@ -1821,20 +1878,47 @@ class EjbConverter:
                 result = self.convert_file(java_file, patterns)
 
                 if isinstance(result, dict):
-                    out_java = OUTPUT_DIR / java_file.name
-                    out_java.write_text(result['java'], encoding='utf-8')
-                    converted.append(out_java)
-                    logger.info(f'완료 (Java): {out_java}')
+                    java_code = result['java']
+                    xml_code = result['xml']
+                    mapper_name = self._mapper_name(java_file.stem)
+                    sub = self._sub_path_after_dao(java_code)
 
-                    out_xml = OUTPUT_DIR / self._mapper_name(java_file.stem)
-                    out_xml.write_text(result['xml'], encoding='utf-8')
-                    converted.append(out_xml)
-                    logger.info(f'완료 (Mapper XML): {out_xml}')
+                    out_java = OUTPUT_DIR / java_file.name
+                    if _safe_write(out_java, java_code):
+                        converted.append(out_java)
+                        logger.info(f'완료 (Java): {out_java}')
+
+                    out_xml = OUTPUT_DIR / mapper_name
+                    if _safe_write(out_xml, xml_code):
+                        converted.append(out_xml)
+                        logger.info(f'완료 (Mapper XML): {out_xml}')
+
+                    if EXTERNAL_DAO_BASE and sub is not None:
+                        ext_java = EXTERNAL_DAO_BASE / sub / java_file.name
+                        ext_java.parent.mkdir(parents=True, exist_ok=True)
+                        if _safe_write(ext_java, java_code):
+                            converted.append(ext_java)
+                            logger.info(f'완료 (외부 Java): {ext_java}')
+
+                    if EXTERNAL_MAPPER_BASE and sub is not None:
+                        ext_xml = EXTERNAL_MAPPER_BASE / sub / mapper_name
+                        ext_xml.parent.mkdir(parents=True, exist_ok=True)
+                        if _safe_write(ext_xml, xml_code):
+                            converted.append(ext_xml)
+                            logger.info(f'완료 (외부 Mapper XML): {ext_xml}')
                 else:
                     out_path = OUTPUT_DIR / java_file.name
-                    out_path.write_text(result, encoding='utf-8')
-                    converted.append(out_path)
-                    logger.info(f'완료: {out_path}')
+                    if _safe_write(out_path, result):
+                        converted.append(out_path)
+                        logger.info(f'완료: {out_path}')
+
+                    sub = self._sub_path_after_dao(result)
+                    if EXTERNAL_DAO_BASE and sub is not None:
+                        ext_java = EXTERNAL_DAO_BASE / sub / java_file.name
+                        ext_java.parent.mkdir(parents=True, exist_ok=True)
+                        if _safe_write(ext_java, result):
+                            converted.append(ext_java)
+                            logger.info(f'완료 (외부 Java): {ext_java}')
 
             except Exception as e:
                 logger.error(f'실패 ({java_file.name}): {e}')
