@@ -104,6 +104,8 @@ class DaoTransformer:
 
     # (정규식 패턴, 치환 문자열) 목록
     _LINE_RULES: list[tuple[str, str]] = [
+        # JavaDoc @param conn / @param userBean 라인 제거 (Spring 변환 시 두 파라미터 모두 사라짐)
+        (r'[ \t]*\*[ \t]*@param[ \t]+(?:conn|connection|userBean)\b[^\n]*\n', ''),
         # RemoteException import 제거
         (r'import\s+java\.rmi\.RemoteException\s*;\n?', ''),
         # DbWrap 선언 제거 (접근제어자/static/final 등 modifier 도 함께 제거)
@@ -136,6 +138,8 @@ class DaoTransformer:
         # Connection <varname> 파라미터/인자 제거 (선언부 먼저, 이후 인자 변수)
         (r',\s*Connection\s+\w+\b', ''),
         (r'\bConnection\s+\w+\s*,\s*', ''),
+        # 로컬 변수 선언 `Connection conn = null;` 통째로 제거 (`= null;` 잔여 방지)
+        (r'[ \t]*\bConnection\s+\w+(\s*=\s*null)?\s*;\n?', ''),
         (r'\bConnection\s+\w+\b', ''),
         (r',\s*\b(?:conn|connection)\b(?=\s*[,)])', ''),
         (r'\b(?:conn|connection)\b\s*,\s*', ''),
@@ -227,15 +231,15 @@ class DaoTransformer:
         (r'\bnew\s+Long\(', 'Long.valueOf('),
         (r'\bnew\s+Double\(', 'Double.valueOf('),
         
-        # -----------------------------------------------------------------------
-        # AMT/AMOUNT 컬럼 → BigDecimal 변환
-        # new Double(rs.getDouble("ENTER_AMOUNT")) → Formatter.nullDouble(StringUtil.nvl(...)) 변환 후
-        # AMT/AMOUNT 컬럼명인 경우 nullBigDecimal로 재변환
-        (r'(?i)Formatter\.null(?:Double|Long)\(\s*StringUtil\.nvl\(\s*map\.get\("(\w*(?:amt|amount))"\)\s*,\s*"[^"]*"\s*\)\s*\)',
-         r'Formatter.nullBigDecimal(StringUtil.nvl(map.get("\1"), "0"))'),
-        # VO/DTO 의 defalutQry (오타 필드) → getDefaultQry() 메서드 호출
-        (r'\b(\w+(?:VO|DTO))\.defalutQry\b', r'\1.getDefaultQry()'),
-        # -----------------------------------------------------------------------
+        # # -----------------------------------------------------------------------
+        # # AMT/AMOUNT 컬럼 → BigDecimal 변환
+        # # new Double(rs.getDouble("ENTER_AMOUNT")) → Formatter.nullDouble(StringUtil.nvl(...)) 변환 후
+        # # AMT/AMOUNT 컬럼명인 경우 nullBigDecimal로 재변환
+        # (r'(?i)Formatter\.null(?:Double|Long)\(\s*StringUtil\.nvl\(\s*map\.get\("(\w*(?:amt|amount))"\)\s*,\s*"[^"]*"\s*\)\s*\)',
+        #  r'Formatter.nullBigDecimal(StringUtil.nvl(map.get("\1"), "0"))'),
+        # # VO/DTO 의 defalutQry (오타 필드) → getDefaultQry() 메서드 호출
+        # (r'\b(\w+(?:VO|DTO))\.defalutQry\b', r'\1.getDefaultQry()'),
+        # # -----------------------------------------------------------------------
     ]
 
     # SQL 키워드 우측 정렬 prefix (6자 필드 기준)
@@ -1783,6 +1787,12 @@ class DaoTransformer:
         if m:
             obj, col = m.group(1), m.group(2)
             return (col[0].lower() + col[1:], f'{obj}.get{col}()')
+
+        # 8.5. simpleVar.longValue()/intValue()/doubleValue() 등 — 래퍼 언박싱 단순화
+        m = re.match(r'(\w+)\.(?:longValue|intValue|doubleValue|floatValue|shortValue|byteValue)\(\)', expr)
+        if m:
+            name = m.group(1)
+            return (name, name)
 
         # 9. 단순 식별자 fallback
         clean = expr.rstrip(')')
