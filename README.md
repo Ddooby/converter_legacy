@@ -1,4 +1,4 @@
-# java_converter_with_claude
+# converter_legacy
 
 EJB(Enterprise Java Beans) 소스를 Spring Framework Java 소스로 자동 변환하는 Python 기반 컨버터.
 
