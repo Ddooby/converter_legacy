@@ -28,27 +28,24 @@ java_converter_with_claude/
 ├── .env.example                # 환경변수 템플릿
 ├── .env                        # 실제 환경변수 (git 제외)
 │
-├── converter/                  # 핵심 변환 로직
-│   ├── __init__.py
-│   ├── main.py                 # CLI 진입점
-│   ├── analyzer.py             # 샘플 패턴 분석기 (Claude API 사용)
-│   ├── converter.py            # 변환 실행기 (API 없음, 코드 규칙 기반)
-│   └── claude_client.py        # Claude API 클라이언트 (analyzer 전용)
-│
-├── samples/                    # 패턴 학습용 샘플 코드
-│   ├── as_is/                  # AS-IS EJB 원본 파일
-│   └── to_be/                  # TO-BE Spring 변환 파일
-│       ├── XxxDAO.java         # Java 변환본 (as_is와 동일한 파일명)
-│       └── XxxMapper.xml       # MyBatis Mapper XML (DAO 파일인 경우)
-│
-├── input/                      # 변환할 EJB 소스 파일 (사용자 입력)
-├── output/                     # 변환된 Spring 소스 파일 (자동 생성)
-│   ├── XxxDAO.java             # 변환된 Java 파일
-│   └── XxxMapper.xml           # 생성된 Mapper XML (DAO 파일인 경우)
-├── patterns/                   # 학습된 변환 패턴 캐시 (JSON)
-└── tests/
-    ├── __init__.py
-    └── test_converter.py
+├── convert/                    # 변환 관련 전체 모듈
+│   ├── convertList.py          # 변환 대상 DAO 파일 추출 (Freezing Source vs Git 비교)
+│   └── converter/              # 핵심 변환 로직 (Python 패키지)
+│       ├── __init__.py
+│       ├── convert.py          # CLI 진입점 (convert / validate / patterns 명령)
+│       ├── converter.py        # 변환 실행기 (API 없음, 코드 규칙 기반)
+│       ├── validate.py         # DAO ↔ Mapper XML 검증 유틸
+│       ├── functionService/    # 변환 함수 서비스
+│       ├── asisConverter/      # AS-IS 변환 참고 소스 (Java)
+│       ├── input/              # 변환할 EJB 소스 파일 (사용자 입력)
+│       ├── output/             # 변환된 Spring 소스 파일 (자동 생성)
+│       │   ├── XxxDAO.java     # 변환된 Java 파일
+│       │   └── XxxMapper.xml   # 생성된 Mapper XML (DAO 파일인 경우)
+│       ├── validate/           # 검증 대상 파일 (사용자가 가공 후 배치)
+│       ├── patterns/           # 학습된 변환 패턴 캐시 (JSON)
+│       └── samples/            # 패턴 학습용 샘플 코드
+│           ├── as_is/          # AS-IS EJB 원본 파일
+│           └── to_be/          # TO-BE Spring 변환 파일
 ```
 
 ---
@@ -57,19 +54,23 @@ java_converter_with_claude/
 
 ```
 1. 샘플 준비
-   samples/as_is/  ← AS-IS EJB 파일 배치
-   samples/to_be/  ← TO-BE Spring 파일 배치 (같은 파일명)
-                      DAO 파일이면 XxxMapper.xml 도 함께 배치
+   convert/converter/samples/as_is/  ← AS-IS EJB 파일 배치
+   convert/converter/samples/to_be/  ← TO-BE Spring 파일 배치 (같은 파일명)
+                                        DAO 파일이면 XxxMapper.xml 도 함께 배치
 
 2. 패턴 학습 (Claude API 호출 — 샘플 추가 시에만 실행)
-   python -m converter.main learn
+   python -m convert.converter.convert learn
 
 3. 변환 실행 (API 호출 없음)
-   input/ ← 변환할 EJB 파일 배치
-   python -m converter.main convert
+   convert/converter/input/ ← 변환할 EJB 파일 배치
+   python -m convert.converter.convert convert
 
 4. 결과 확인
-   output/ ← 변환된 Java + Mapper XML 파일 확인
+   convert/converter/output/ ← 변환된 Java + Mapper XML 파일 확인
+
+5. 변환 파일 검증
+   convert/converter/validate/ ← 가공한 파일 배치
+   python -m convert.converter.convert validate
 ```
 
 ---
@@ -145,7 +146,7 @@ cp .env.example .env
 ### Claude API 사용 원칙
 - `analyzer.py` 전용 — 샘플에서 치환 규칙을 추출할 때만 호출
 - 출력 형식: 코드가 직접 실행 가능한 `import_replacements` / `annotation_replacements` / `text_replacements` JSON
-- 변환 규칙이 바뀌면 샘플을 추가하고 `python -m converter.main learn --relearn` 재실행
+- 변환 규칙이 바뀌면 샘플을 추가하고 `python -m convert.converter.convert learn --relearn` 재실행
 - `converter.py` 는 API를 **호출하지 않음** — 저장된 패턴 JSON + 내장 규칙만 사용
 
 ### 코드 스타일
@@ -162,7 +163,7 @@ cp .env.example .env
 DAO 파일인 경우 `to_be/` 에 Mapper XML도 함께 배치한다.
 
 ```
-samples/
+convert/converter/samples/
   as_is/
     UserService.java          # EJB 원본
     OTCSADetailDAO.java       # EJB DAO 원본

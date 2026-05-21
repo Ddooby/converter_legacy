@@ -21,9 +21,9 @@ def _env_path_optional(key: str) -> Path | None:
     return Path(val) if val else None
 
 
-INPUT_DIR = _env_path("INPUT_DIR", "input")
-OUTPUT_DIR = _env_path("OUTPUT_DIR", "output")
-PATTERNS_FILE = _env_path("PATTERNS_FILE", "patterns/learned_patterns.json")
+INPUT_DIR = _env_path("INPUT_DIR", "convert/converter/input")
+OUTPUT_DIR = _env_path("OUTPUT_DIR", "convert/converter/output")
+PATTERNS_FILE = _env_path("PATTERNS_FILE", "convert/converter/patterns/learned_patterns.json")
 
 # Panocean Git 프로젝트 경로 (output 파일 생성 시 프로젝트 폴더에도 같이 생성)
 EXTERNAL_GEN_YN = True  # output 파일을 외부 프로젝트에도 생성할지 여부;
@@ -264,9 +264,10 @@ class DaoTransformer:
 
     def __init__(self, class_name: str):
         self.class_name = class_name
-        m = re.match(r'(.+?)DAO(\d*)$', class_name, re.IGNORECASE)
+        # DAO 뒤 숫자/언더스코어 suffix(_BACKUP, _1 등) 허용 — namespace 에는 suffix 보존
+        m = re.match(r'(.+?)DAO(\d*)(_\w*)?$', class_name, re.IGNORECASE)
         if m:
-            self.namespace = m.group(1) + (m.group(2) if m.group(2) else '')
+            self.namespace = m.group(1) + (m.group(2) or '') + (m.group(3) or '')
         else:
             self.namespace = class_name
 
@@ -1312,6 +1313,64 @@ class DaoTransformer:
                 i += 1
         return in_comment
 
+    def _parse_general_concat(self, arg: str) -> tuple[list[str], list[tuple[str, str]]] | None:
+        """N-ary `"str" + var(.method())? + "str" + var + ...` 일반 파서.
+
+        문자열 리터럴과 식별자(+ optional no-arg `.method()`)가 `+` 로 교차 연결된 형태만 처리.
+        `Formatter.nullXxx(...)` 같이 인자가 있는 함수 호출이 포함되면 None 반환 → 호출자가 특수 패턴으로 폴백.
+        다중 변수 연결을 무손실로 보존하기 위한 가드.
+        """
+        if not arg:
+            return None
+        frag_sql: list[str] = []
+        frag_pairs: list[tuple[str, str]] = []
+        pos = 0
+        n = len(arg)
+        expect_term = True
+
+        while pos < n:
+            while pos < n and arg[pos].isspace():
+                pos += 1
+            if pos >= n:
+                break
+            if expect_term:
+                ch = arg[pos]
+                if ch == '"':
+                    end = arg.find('"', pos + 1)
+                    if end == -1:
+                        return None
+                    frag_sql.append(arg[pos + 1:end])
+                    pos = end + 1
+                elif ch.isalpha() or ch == '_':
+                    tok = re.match(r'[A-Za-z_]\w*(?:\.\w+\(\s*\))?', arg[pos:])
+                    if not tok:
+                        return None
+                    token = tok.group(0)
+                    bare = re.match(r'[A-Za-z_]\w*', token).group(0)
+                    frag_sql.append(f'#{{{bare}}}')
+                    frag_pairs.append((bare, token))
+                    pos += len(token)
+                else:
+                    return None
+                expect_term = False
+            else:
+                if arg[pos] != '+':
+                    return None
+                pos += 1
+                expect_term = True
+
+        if expect_term:
+            return None
+
+        # `'#{var}'` 형태의 양쪽 단일따옴표 제거 (MyBatis 바인딩은 quote 불필요)
+        for i, frag in enumerate(frag_sql):
+            if frag.startswith('#{') and frag.endswith('}'):
+                if i > 0 and frag_sql[i - 1].endswith("'"):
+                    frag_sql[i - 1] = frag_sql[i - 1][:-1]
+                if i + 1 < len(frag_sql) and frag_sql[i + 1].startswith("'"):
+                    frag_sql[i + 1] = frag_sql[i + 1][1:]
+        return frag_sql, frag_pairs
+
     def _parse_append_arg(self, arg: str) -> tuple[list[str], list[tuple[str, str]]]:
         """sb.append() / StringBuffer 생성자 인자에서 (SQL fragments, param pairs) 추출."""
         frag_sql: list[str] = []
@@ -1324,14 +1383,22 @@ class DaoTransformer:
             frag_sql.append(arg[1:-1])
             return frag_sql, frag_pairs
 
-        m = re.match(r'"([^"]*)"\s*\+\s*([A-Za-z_]\w*)(?:\.\w+\(\))?\s*\+\s*"([^"]*)"', arg)
+        # N-ary "str"+var+"str"+var+... 다중 변수 손실 방지 (단일 변수 케이스도 포함)
+        parsed = self._parse_general_concat(arg)
+        if parsed is not None:
+            g_sql, g_pairs = parsed
+            frag_sql.extend(g_sql)
+            frag_pairs.extend(g_pairs)
+            return frag_sql, frag_pairs
+
+        m = re.match(r'"([^"]*)"\s*\+\s*([A-Za-z_]\w*)(?:\.\w+\(\))?\s*\+\s*"([^"]*)"\s*$', arg)
         if m:
             prefix, var, suffix = m.group(1), m.group(2), m.group(3)
             frag_pairs.append((var, var))
             frag_sql.extend([prefix, f'#{{{var}}}', suffix])
             return frag_sql, frag_pairs
 
-        m = re.match(r'"([^"]*)"\s*\+\s*([A-Za-z_]\w*)(?:\.\w+\(\))?$', arg)
+        m = re.match(r'"([^"]*)"\s*\+\s*([A-Za-z_]\w*)(?:\.\w+\(\))?\s*$', arg)
         if m:
             prefix, var = m.group(1), m.group(2)
             frag_pairs.append((var, var))
@@ -1367,11 +1434,8 @@ class DaoTransformer:
             frag_sql.append(prefix_clean + f'#{{{var}}}' + suffix_clean)
             return frag_sql, frag_pairs
 
-        parts = re.findall(r'"([^"]*)"', arg)
-        if parts:
-            frag_sql.extend(parts)
-        elif not arg.startswith('"') and not arg.startswith("'"):
-            frag_sql.append(f'/* {arg} */')
+        # 어떤 패턴도 매치 실패 → 원본 그대로 주석으로 보존 (조용한 손실 방지)
+        frag_sql.append(f'/* UNPARSED_APPEND: {arg} */')
         return frag_sql, frag_pairs
 
     @staticmethod
@@ -1511,11 +1575,9 @@ class DaoTransformer:
                     multi_choose_inserted = True
                 continue
 
-            # choose/when/otherwise 처리
+            # choose/when/otherwise 처리 — XML 이스케이프는 _format_sql 에서 일괄 처리
             if pos in choose_when_pos:
                 cond, when_sql, oth_sql = choose_when_pos[pos]
-                when_sql = re.sub(r'<>', '&lt;&gt;', when_sql)
-                oth_sql = re.sub(r'<>', '&lt;&gt;', oth_sql)
                 sql_parts.append(
                     f'\n<choose>\n'
                     f'<when test="{cond}">\n'
@@ -1538,6 +1600,13 @@ class DaoTransformer:
             # 순수 문자열 리터럴
             if re.match(r'^"[^"]*"$', arg):
                 frag_sql.append(arg[1:-1])
+
+            # N-ary "str"+var+"str"+var+... 다중 변수 연결 무손실 처리.
+            # Formatter.nullXxx(...) 등 함수 호출 패턴은 None 반환 → 아래 특수 패턴들이 처리.
+            elif (parsed := self._parse_general_concat(arg)) is not None:
+                g_sql, g_pairs = parsed
+                frag_sql.extend(g_sql)
+                frag_pairs.extend(g_pairs)
 
             # "prefix" + Formatter.nullXxx(StringUtil.nvl(obj.getCol(), "...")) + "suffix"
             elif (m2 := re.match(
@@ -1638,14 +1707,15 @@ class DaoTransformer:
                 frag_pairs.append((name, name))
                 frag_sql.extend([prefix, f'#{{{name}}}', suffix])
 
-            elif not arg.startswith('"') and not arg.startswith("'"):
-                frag_sql.append(f'/* {arg} */')
+            else:
+                # 어떤 패턴도 매치 실패 → 원본 그대로 주석으로 보존 (조용한 손실 방지)
+                frag_sql.append(f'/* UNPARSED_APPEND: {arg} */')
 
             # 조건부 append → <if> 태그 / 일반 append → 직접 병합
+            # (XML 이스케이프는 _format_sql 에서 일괄 처리)
             if mybatis_cond is not None:
                 sql_content = ' '.join(frag_sql).strip()
                 if sql_content:
-                    sql_content = re.sub(r'<>', '&lt;&gt;', sql_content)
                     sql_parts.append(f'\n<if test="{mybatis_cond}">\n    {sql_content}\n</if>\n')
                 param_pairs.extend(frag_pairs)
             else:
@@ -2048,6 +2118,18 @@ class DaoTransformer:
                 return prefix + stripped
         return stripped
 
+    @staticmethod
+    def _escape_sql_xml(s: str) -> str:
+        """SQL 본문의 비교 연산자(>=, <=, >, <, <>)를 XML 엔티티로 이스케이프.
+
+        MyBatis XML 파싱 오류 방지용. `&` 는 기존 엔티티(`&lt;`/`&gt;`/`&amp;`)를 보존하면서 처리.
+        """
+        # 기존 엔티티 보호 → `<`/`>` 이스케이프 → 보호 해제
+        s = s.replace('&lt;', '\x00LT\x00').replace('&gt;', '\x00GT\x00').replace('&amp;', '\x00AMP\x00')
+        s = s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        s = s.replace('\x00LT\x00', '&lt;').replace('\x00GT\x00', '&gt;').replace('\x00AMP\x00', '&amp;')
+        return s
+
     def _format_sql(self, sql: str) -> str:
         """SQL 가독성 정리: 키워드 우측 정렬(6자 필드), \\n 제거, 공백 정규화.
         MyBatis <if>/<choose>/<when>/<otherwise> 태그는 base 들여쓰기,
@@ -2073,7 +2155,7 @@ class DaoTransformer:
                 lines.append(f'{base}{tag_m.group(1)}')
                 rest = tag_m.group(3).strip()
                 if rest:
-                    lines.append(f'{base}{self._align_sql_keyword(rest)}')
+                    lines.append(f'{base}{self._escape_sql_xml(self._align_sql_keyword(rest))}')
                 continue
 
             # <choose> 닫는 태그: depth 변경 없음 (뒤에 내용이 붙은 경우 분리)
@@ -2081,7 +2163,7 @@ class DaoTransformer:
                 lines.append(f'{base}</choose>')
                 rest = stripped[len('</choose>'):].strip()
                 if rest:
-                    lines.append(f'{base}{self._align_sql_keyword(rest)}')
+                    lines.append(f'{base}{self._escape_sql_xml(self._align_sql_keyword(rest))}')
                 continue
 
             # <choose> 여는 태그: depth 변경 없음 (내부는 <when>/<otherwise>)
@@ -2096,9 +2178,9 @@ class DaoTransformer:
                     depth += 1
                 continue
 
-            # SQL 내용: 키워드 정렬 적용
+            # SQL 내용: 키워드 정렬 후 XML 비교연산자 이스케이프
             cur = inner if depth > 0 else base
-            lines.append(f'{cur}{self._align_sql_keyword(stripped)}')
+            lines.append(f'{cur}{self._escape_sql_xml(self._align_sql_keyword(stripped))}')
 
         return '\n'.join(lines)
 
@@ -2155,12 +2237,13 @@ class EjbConverter:
         return patterns
 
     def _is_dao_file(self, path: Path) -> bool:
-        return bool(re.search(r'(?i)DAO\d*$', path.stem))
+        # DAO 뒤 숫자/언더스코어 suffix(_BACKUP, _1, _OLD 등) 변형도 DAO 파일로 인식
+        return bool(re.search(r'(?i)DAO\d*(_\w*)?$', path.stem))
 
     def _mapper_name(self, stem: str) -> str:
-        m = re.match(r'(.+?)DAO(\d*)$', stem, re.IGNORECASE)
+        m = re.match(r'(.+?)DAO(\d*)(_\w*)?$', stem, re.IGNORECASE)
         if m:
-            return m.group(1) + (m.group(2) if m.group(2) else '') + 'Mapper.xml'
+            return m.group(1) + (m.group(2) or '') + (m.group(3) or '') + 'Mapper.xml'
         return stem + 'Mapper.xml'
 
     def _sub_path_after_dao(self, code: str) -> str | None:

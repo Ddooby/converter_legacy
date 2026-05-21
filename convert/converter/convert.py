@@ -43,5 +43,25 @@ def convert():
         console.print(f"  [green]✓[/] {path}")
 
 
+@cli.command()
+@click.option(
+    "--dir",
+    "directory",
+    default=None,
+    help="검증 대상 폴더 (기본: env VALIDATE_DIR 또는 output/)",
+)
+@click.option(
+    "--report",
+    "report",
+    default=None,
+    help="결과 보고서 저장 경로 (예: validate_report.txt)",
+)
+def validate(directory, report):
+    """DAO + Mapper XML 을 교차 검증합니다 (파라미터/네임스페이스/문법)."""
+    from .validate import Validator
+
+    Validator(directory=directory).run(report_path=report)
+
+
 if __name__ == "__main__":
     cli()

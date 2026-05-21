@@ -82,14 +82,14 @@ Claude Code 도 처음 사용해보면서 익숙해지는 것도 목표다.
 pip install -r requirements.txt
 
 # 변환 실행
-# input/ 폴더에 변환할 .java 파일을 넣은 후 실행
-python -m converter.main convert
+# convert/converter/input/ 폴더에 변환할 .java 파일을 넣은 후 실행
+python -m convert.converter.convert convert
 
 # 패턴 파일 확인
-python -m converter.main patterns
+python -m convert.converter.convert patterns
 ```
 
-> 결과 파일은 `output/` 폴더에 생성됩니다.
+> 결과 파일은 `convert/converter/output/` 폴더에 생성됩니다.
 > DAO 파일은 `XxxDAO.java` + `XxxMapper.xml` 두 파일이 함께 생성됩니다.
 
 ---
@@ -158,11 +158,10 @@ python -m converter.main patterns
 - **1차 전환에만 있는 파일**, **공통 파일** 도 참고용으로 함께 출력
 
 ### 실행 방법
-스크립트는 확장자 없는 Python 파일이므로, IDE(VS Code 등)에서 열어 **`Ctrl + F5`** 로 실행합니다.
-또는 명령어로 직접 실행:
+IDE(VS Code 등)에서 열어 **`Ctrl + F5`** 로 실행하거나, 명령어로 직접 실행:
 
 ```bash
-python targetExtract/daoFile
+python convert/convertList.py
 ```
 
 > 실행 전 스크립트 상단의 `PATH_SOM`, `PATH_COMMON`, `PATH_GIT` 경로를 환경에 맞게 수정해야 합니다.
@@ -173,5 +172,55 @@ python targetExtract/daoFile
   - `[Business+Common에 있고 Git 1차 전환에 없는 파일]` ← 실제 변환 대상 목록
   - `[Git 1차 전환에만 있는 파일]` ← 참고용 (Freezing Source에 없는 이상 파일)
   - `[공통 파일]` ← 양쪽 모두 존재하는 파일
+
+---
+
+## 03. 변환 파일 검증 (`converter/validator.py`)
+
+자동 변환된 **DAO + Mapper XML 쌍을 사용자가 가공한 뒤**, 코드 상 오류나 DAO ↔ XML 불일치를 잡아내는 검증 유틸입니다.
+Claude API 호출 없이 정적 분석만으로 동작합니다.
+
+### 검증 항목
+
+| 분류 | 검증 내용 | 레벨 |
+|------|-----------|------|
+| 파일 쌍 | `XxxDAO.java` ↔ `XxxMapper.xml` 매칭 여부 | ERROR / WARN |
+| XML 문법 | well-formed, 루트 `<mapper>`, `namespace` 속성, `id` 중복 | ERROR |
+| Java 문법 | 중괄호 `{}` / 괄호 `()` 균형 (문자열·주석 제외) | ERROR |
+| 네임스페이스 | XML `namespace` ↔ 클래스명에서 `DAO` 제거한 값 | WARN |
+| **호출 ID** | DAO 의 `uxbDAO.select("NS.id", paramMap)` 가 XML 에 실존하는지 | ERROR |
+| **호출 종류** | DAO 호출 `select`/`insert`/`update`/`delete` ↔ XML 태그 일치 | WARN |
+| **파라미터 누락** | XML `#{key}` 인데 DAO `paramMap.put("key", ...)` 없음 | ERROR |
+| **파라미터 미사용** | DAO 에서 put 했는데 XML 에서 사용 안 함 | WARN |
+| 고립 ID | XML 에만 있고 DAO 에서 호출되지 않는 id | INFO |
+
+> XML 파싱이 실패하면 교차검증은 자동 스킵되어 호출 ID 누락 알람으로 도배되지 않습니다 (XML 먼저 수정).
+
+### 실행 방법
+
+```bash
+# 기본 (convert/converter/validate/ 폴더 검증)
+python -m convert.converter.convert validate
+
+# 검증 폴더 지정
+python -m convert.converter.convert validate --dir convert/converter/output
+
+# 결과 보고서 파일로 저장
+python -m convert.converter.convert validate --dir convert/converter/output --report convert/converter/output/_validate_report.txt
+```
+
+`.env` 에 `VALIDATE_DIR=...` 를 두면 `--dir` 생략 가능.
+
+### 결과물
+
+- 콘솔에 Rich 테이블로 ERROR / WARN / INFO 목록 출력
+- `--report` 지정 시 동일 내용을 텍스트 보고서로 저장
+- 종료 시 매칭 페어 수와 레벨별 건수 요약
+
+### 매칭 규칙
+
+- DAO: 파일명이 `DAO.java` 로 끝나는 파일만 매핑 대상
+- Mapper: `XxxDAO.java` ↔ `XxxMapper.xml` (`DAO` 제거 후 `Mapper.xml`)
+- 매칭되지 않는 `*_BACKUP*.java` 등 백업 파일은 INFO 로 표시 후 제외
 
 ---
