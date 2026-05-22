@@ -206,7 +206,7 @@ python -m converter.dao.convert validate
 python -m converter.dao.convert validate --dir converter/dao/output
 
 # 결과 보고서 파일로 저장
-python -m converter.dao.convert validate --dir converter/dao/output --report converter/dao/output/_validate_report.txt
+python -m converter.dao.convert validate --dir converter/dao/validate --report converter/dao/validate/_validate_report.txt
 ```
 
 `.env` 에 `VALIDATE_DIR=...` 를 두면 `--dir` 생략 가능.
