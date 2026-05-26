@@ -231,15 +231,15 @@ class DaoTransformer:
         (r'\bnew\s+Long\(', 'Long.valueOf('),
         (r'\bnew\s+Double\(', 'Double.valueOf('),
         
-        # # -----------------------------------------------------------------------
-        # # AMT/AMOUNT 컬럼 → BigDecimal 변환
-        # # new Double(rs.getDouble("ENTER_AMOUNT")) → Formatter.nullDouble(StringUtil.nvl(...)) 변환 후
-        # # AMT/AMOUNT 컬럼명인 경우 nullBigDecimal로 재변환
-        # (r'(?i)Formatter\.null(?:Double|Long)\(\s*StringUtil\.nvl\(\s*map\.get\("(\w*(?:amt|amount))"\)\s*,\s*"[^"]*"\s*\)\s*\)',
-        #  r'Formatter.nullBigDecimal(StringUtil.nvl(map.get("\1"), "0"))'),
-        # # VO/DTO 의 defalutQry (오타 필드) → getDefaultQry() 메서드 호출
-        # (r'\b(\w+(?:VO|DTO))\.defalutQry\b', r'\1.getDefaultQry()'),
-        # # -----------------------------------------------------------------------
+        # -----------------------------------------------------------------------
+        # AMT/AMOUNT 컬럼 → BigDecimal 변환
+        # new Double(rs.getDouble("ENTER_AMOUNT")) → Formatter.nullDouble(StringUtil.nvl(...)) 변환 후
+        # AMT/AMOUNT 컬럼명인 경우 nullBigDecimal로 재변환
+        (r'(?i)Formatter\.null(?:Double|Long)\(\s*StringUtil\.nvl\(\s*map\.get\("(\w*(?:amt|amount))"\)\s*,\s*"[^"]*"\s*\)\s*\)',
+         r'Formatter.nullBigDecimal(StringUtil.nvl(map.get("\1"), "0"))'),
+        # VO/DTO 의 defalutQry (오타 필드) → getDefaultQry() 메서드 호출
+        (r'\b(\w+(?:VO|DTO))\.defalutQry\b', r'\1.getDefaultQry()'),
+        # -----------------------------------------------------------------------
     ]
 
     # SQL 키워드 우측 정렬 prefix (6자 필드 기준)

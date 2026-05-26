@@ -224,3 +224,54 @@ python -m converter.dao.convert validate --dir converter/dao/validate --report c
 - 매칭되지 않는 `*_BACKUP*.java` 등 백업 파일은 INFO 로 표시 후 제외
 
 ---
+
+## 04. BigDecimal 후처리 패치 (`converter/dao/patch.py`)
+
+자동 변환 또는 수동 커스텀이 완료된 Java 파일에 **AMT/AMOUNT 컬럼 타입을 BigDecimal로 후처리** 적용하는 스크립트입니다.
+Claude API 호출 없이 정규식 치환만으로 동작합니다.
+
+### 적용 패턴
+
+| AS-IS | TO-BE |
+|-------|-------|
+| `Formatter.nullDouble(StringUtil.nvl(map.get("*AMT"), ...))` | `Formatter.nullBigDecimal(StringUtil.nvl(map.get("*AMT"), "0"))` |
+| `Formatter.nullLong(StringUtil.nvl(map.get("*AMOUNT"), ...))` | `Formatter.nullBigDecimal(StringUtil.nvl(map.get("*AMOUNT"), "0"))` |
+
+- 컬럼명이 `AMT` 또는 `AMOUNT` 로 끝나는 경우에만 적용 (대소문자 무관)
+- `nullDouble` / `nullLong` 모두 `nullBigDecimal` 로 변환
+
+### 실행 방법
+
+```bash
+# 변경 대상 미리 확인 (파일 수정 없음)
+python -m converter.dao.patch --dry-run
+
+# 기본 실행 (validate/ → output/ 순으로 존재하는 폴더 자동 탐지)
+python -m converter.dao.patch
+
+# 폴더 직접 지정 (상대경로)
+python -m converter.dao.patch --dir converter/dao/validate
+
+# 다른 프로젝트 경로 직접 지정 (절대경로)
+python -m converter.dao.patch --dir C:\Projects\MyApp\src\main\java\com\example\dao
+```
+
+`.env` 에 `PATCH_DIR` 을 지정하면 `--dir` 생략 가능합니다. 절대경로를 쓰면 이 컨버터 프로젝트 외부 경로도 대상으로 삼을 수 있습니다.
+
+```dotenv
+# .env
+PATCH_DIR=C:\Projects\MyApp\src\main\java\com\example\dao
+```
+
+우선순위: `--dir` 인수 > `.env` 의 `PATCH_DIR` > 기본 폴더 자동 탐색
+
+### 결과물
+
+- 콘솔에 변경된 파일 목록과 건수 출력
+- `--dry-run` 옵션 사용 시 실제 파일 수정 없이 대상 목록만 확인 가능
+- 대상 폴더 내 `.java` 파일 전체를 재귀 탐색
+
+> **참고:** `convert` 명령 실행 시에는 이 패턴이 자동 적용됩니다.
+> `patch.py` 는 이미 변환·커스텀 완료된 파일에 소급 적용하는 용도입니다.
+
+---
