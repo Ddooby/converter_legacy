@@ -98,20 +98,80 @@ def mask_strings_and_comments(text: str) -> str:
     """문자열·주석을 공백 마스크로 치환한 코드를 반환한다.
 
     원본과 동일한 길이·라인 번호를 유지하므로 brace 카운팅·메서드 추출에 안전하다.
+
+    문자 단위 스캔으로 처리 순서를 Java 렉서 규칙과 동일하게 유지한다.
+    (regex 방식은 문자열 안의 /* 가 다른 문자열 안의 */ 와 매칭되는 오탐을 유발함)
     """
-    text = re.sub(r"/\*.*?\*/", lambda m: _mask_to_spaces(m.group(0)), text, flags=re.DOTALL)
-    text = re.sub(r"//[^\n]*", lambda m: _mask_to_spaces(m.group(0)), text)
-    text = re.sub(
-        r'"(?:\\.|[^"\\\n])*"',
-        lambda m: _mask_to_spaces(m.group(0), keep_quotes=True),
-        text,
-    )
-    text = re.sub(
-        r"'(?:\\.|[^'\\\n])*'",
-        lambda m: _mask_to_spaces(m.group(0), keep_quotes=True),
-        text,
-    )
-    return text
+    result: list[str] = []
+    i = 0
+    n = len(text)
+
+    while i < n:
+        ch = text[i]
+
+        # 줄 주석 //
+        if ch == "/" and i + 1 < n and text[i + 1] == "/":
+            j = i
+            while j < n and text[j] != "\n":
+                j += 1
+            result.append("".join("\n" if c == "\n" else " " for c in text[i:j]))
+            i = j
+            continue
+
+        # 블록 주석 /* ... */
+        if ch == "/" and i + 1 < n and text[i + 1] == "*":
+            j = i + 2
+            while j < n - 1 and not (text[j] == "*" and text[j + 1] == "/"):
+                j += 1
+            j += 2  # */ 포함
+            result.append("".join("\n" if c == "\n" else " " for c in text[i:j]))
+            i = j
+            continue
+
+        # 문자열 리터럴 "..."  (Java 8 — 개행 포함 불가)
+        if ch == '"':
+            j = i + 1
+            while j < n and text[j] != "\n":
+                if text[j] == "\\" and j + 1 < n:
+                    j += 2
+                elif text[j] == '"':
+                    j += 1
+                    break
+                else:
+                    j += 1
+            segment = text[i:j]
+            if len(segment) >= 2:
+                masked = segment[0] + "".join("\n" if c == "\n" else " " for c in segment[1:-1]) + segment[-1]
+            else:
+                masked = segment
+            result.append(masked)
+            i = j
+            continue
+
+        # 문자 리터럴 '.'
+        if ch == "'":
+            j = i + 1
+            while j < n and text[j] != "\n":
+                if text[j] == "\\" and j + 1 < n:
+                    j += 2
+                elif text[j] == "'":
+                    j += 1
+                    break
+                else:
+                    j += 1
+            segment = text[i:j]
+            if len(segment) >= 2:
+                masked = segment[0] + "".join("\n" if c == "\n" else " " for c in segment[1:-1]) + segment[-1]
+            else:
+                masked = segment
+            result.append(masked)
+            i = j
+            continue
+
+        result.append(ch)
+        i += 1
+
+    return "".join(result)
 
 
 def _line_of(text: str, idx: int) -> int:
@@ -368,7 +428,10 @@ class Validator:
         xml_files = sorted(self.xml_dir.glob("*.xml"))
 
         if not java_files and not xml_files:
-            console.print(f"[yellow]대상 파일 없음:[/] {self.directory}")
+            if self.java_dir == self.xml_dir:
+                console.print(f"[yellow]대상 파일 없음:[/] {self.java_dir}")
+            else:
+                console.print(f"[yellow]대상 파일 없음:[/] {self.java_dir} / {self.xml_dir}")
             return []
 
         # 파일 쌍 매칭: XxxDAO.java ↔ XxxMapper.xml
@@ -412,6 +475,7 @@ class Validator:
 
         for dao in dao_files:
             m = self._DAO_RE.match(dao.stem)
+            assert m is not None
             prefix = m.group(1)   # "SCBPosition"
             suffix = m.group(2)   # "" | "_BACKUP" | "_BACKUP_1"
             mapper_stem = prefix + suffix + "Mapper"

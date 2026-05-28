@@ -1,60 +1,367 @@
 ────────────────────────────────────────────────────────────────────────────────
   DAO <-> Mapper 검증 보고서
-  2026-05-28 14:32:53
+  2026-05-28 15:43:26
 ────────────────────────────────────────────────────────────────────────────────
-  DAO  폴더        C:\Projects\Panocean\src\main\java\com\pan\som\dao\systemMgnt
-  XML  폴더        C:\Projects\Panocean\src\main\resources\mappers\som\systemMgnt
-  매칭 페어          15쌍
-  문제 건수          ERROR 24  /  WARN 0  /  INFO 0
+  DAO  폴더        C:\Projects\Panocean\src\main\java\com\pan\som\dao\salesOpportunity
+  XML  폴더        C:\Projects\Panocean\src\main\resources\mappers\som\salesOpportunity
+  매칭 페어          150쌍
+  문제 건수          ERROR 140  /  WARN 48  /  INFO 6
 ────────────────────────────────────────────────────────────────────────────────
 
   [ 매칭된 페어 ]
 
-    COURTBondReceiptTransferMDAO.java             <->  COURTBondReceiptTransferMMapper.xml
-    COURTComCodeMDAO.java                         <->  COURTComCodeMMapper.xml
-    COURTOverallStatusDtlVDAO.java                <->  COURTOverallStatusDtlVMapper.xml
-    SCBDivReportSegMDAO.java                      <->  SCBDivReportSegMMapper.xml
-    SCBSalesAnalysisTab1DAO.java                  <->  SCBSalesAnalysisTab1Mapper.xml
-    SCBSalesAnalysisTab2DAO.java                  <->  SCBSalesAnalysisTab2Mapper.xml
-    SCBSalesAnalysisTab3DAO.java                  <->  SCBSalesAnalysisTab3Mapper.xml
-    SCBSalesAnalysisTab4DAO.java                  <->  SCBSalesAnalysisTab4Mapper.xml
-    SCBSalesAnalysisTab5DAO.java                  <->  SCBSalesAnalysisTab5Mapper.xml
-    SCLCbFrtRevSDAO.java                          <->  SCLCbFrtRevSMapper.xml
-    SCLCbHireSDAO.java                            <->  SCLCbHireSMapper.xml
-    SCLCbIndexMDAO.java                           <->  SCLCbIndexMMapper.xml
-    SCLCbProdSmrySDAO.java                        <->  SCLCbProdSmrySMapper.xml
-    SYSManagementMDAO.java                        <->  SYSManagementMMapper.xml
-    SystemMoniterDAO.java                         <->  SystemMoniterMapper.xml
+    AccountIntegrationInformationDAO.java         <->  AccountIntegrationInformationMapper.xml
+    AccountLimitManagementDAO.java                <->  AccountLimitManagementMapper.xml
+    BunkerDemandForecastDAO.java                  <->  BunkerDemandForecastMapper.xml
+    BunkerRiskDAO.java                            <->  BunkerRiskMapper.xml
+    BunkerSplyStatusDAO.java                      <->  BunkerSplyStatusMapper.xml
+    CbComparisonDAO.java                          <->  CbComparisonMapper.xml
+    CBGLDifferenceListDAO.java                    <->  CBGLDifferenceListMapper.xml
+    CBSOAMappingListDAO.java                      <->  CBSOAMappingListMapper.xml
+    CBSummaryDataVerifyDAO.java                   <->  CBSummaryDataVerifyMapper.xml
+    CCDMktIndiDAO.java                            <->  CCDMktIndiMapper.xml
+    CCDMktIndiNoteDAO.java                        <->  CCDMktIndiNoteMapper.xml
+    CntrCBMappingListDAO.java                     <->  CntrCBMappingListMapper.xml
+    CVCCntrFrtDisPortRotationMDAO.java            <->  CVCCntrFrtDisPortRotationMMapper.xml
+    CVCCntrFrtLdgPortRotationDAO.java             <->  CVCCntrFrtLdgPortRotationMapper.xml
+    CVCCntrFrtMDAO.java                           <->  CVCCntrFrtMMapper.xml
+    CVCCntrFrtRateBafMDAO.java                    <->  CVCCntrFrtRateBafMMapper.xml
+    CVCDisPortProdChgMDAO.java                    <->  CVCDisPortProdChgMMapper.xml
+    CVCPortDistanceMDAO.java                      <->  CVCPortDistanceMMapper.xml
+    DemurrageStutsDAO.java                        <->  DemurrageStutsMapper.xml
+    EAPPaymentTtnoVDAO.java                       <->  EAPPaymentTtnoVMapper.xml
+    FFASummaryDAO.java                            <->  FFASummaryMapper.xml
+    FfSettleDAO.java                              <->  FfSettleMapper.xml
+    FuturesHedgeManagementDAO.java                <->  FuturesHedgeManagementMapper.xml
+    FuturesLsFoHedgeManagementDAO.java            <->  FuturesLsFoHedgeManagementMapper.xml
+    FuturesLsmgoHedgeManagementDAO.java           <->  FuturesLsmgoHedgeManagementMapper.xml
+    HedgeLsFoManagementDAO.java                   <->  HedgeLsFoManagementMapper.xml
+    HedgeLsmgoManagementDAO.java                  <->  HedgeLsmgoManagementMapper.xml
+    HedgeManagementDAO.java                       <->  HedgeManagementMapper.xml
+    HedgeOrderDAO.java                            <->  HedgeOrderMapper.xml
+    InvestmentAdequacyDAO.java                    <->  InvestmentAdequacyMapper.xml
+    ManagementPlanningInfoDAO.java                <->  ManagementPlanningInfoMapper.xml
+    OasisDAO.java                                 <->  OasisMapper.xml
+    OverseaAdministrateActualRenewalMngDAO.java   <->  OverseaAdministrateActualRenewalMngMapper.xml
+    OverseaAdministrateActualRenewalMngDAO2.java  <->  OverseaAdministrateActualRenewalMng2Mapper.xml
+    OverseaAdministrateActualRenewalMngDAO3.java  <->  OverseaAdministrateActualRenewalMng3Mapper.xml
+    OverseaAdministrateActualRenewalMngDAO4.java  <->  OverseaAdministrateActualRenewalMng4Mapper.xml
+    OverseaAdministrateActualRenewalMngDAO5.java  <->  OverseaAdministrateActualRenewalMng5Mapper.xml
+    PANInvestBasicPaidCapitalDAO.java             <->  PANInvestBasicPaidCapitalMapper.xml
+    PANInvestBasicShareRateDAO.java               <->  PANInvestBasicShareRateMapper.xml
+    PANInvestBasicSubCompanyDAO.java              <->  PANInvestBasicSubCompanyMapper.xml
+    PANInvestCompanyMDAO.java                     <->  PANInvestCompanyMMapper.xml
+    PlanBusinessSimulationDAO.java                <->  PlanBusinessSimulationMapper.xml
+    SalesSummaryBoardDAO.java                     <->  SalesSummaryBoardMapper.xml
+    SCBAnalInfoDAO.java                           <->  SCBAnalInfoMapper.xml
+    SCBApprovalStatusDAO.java                     <->  SCBApprovalStatusMapper.xml
+    SCBBafInfoDAO.java                            <->  SCBBafInfoMapper.xml
+    SCBBookingTmpCgoDetailDAO.java                <->  SCBBookingTmpCgoDetailMapper.xml
+    SCBBookingTmpCgoHeadDAO.java                  <->  SCBBookingTmpCgoHeadMapper.xml
+    SCBCbCheckListDAO.java                        <->  SCBCbCheckListMapper.xml
+    SCBCbChgInfoDAO.java                          <->  SCBCbChgInfoMapper.xml
+    SCBCbStsComInfoDAO.java                       <->  SCBCbStsComInfoMapper.xml
+    SCBCbVaChangeResonMDAO.java                   <->  SCBCbVaChangeResonMMapper.xml
+    SCBDemDesDetailInfoDAO.java                   <->  SCBDemDesDetailInfoMapper.xml
+    SCBDemDesInfoDAO.java                         <->  SCBDemDesInfoMapper.xml
+    SCBDurChkDAO.java                             <->  SCBDurChkMapper.xml
+    SCBEstBnkMDAO.java                            <->  SCBEstBnkMMapper.xml
+    SCBEstCommonDAO.java                          <->  SCBEstCommonMapper.xml
+    SCBEstDetailDAO.java                          <->  SCBEstDetailMapper.xml
+    SCBEstHireMDAO.java                           <->  SCBEstHireMMapper.xml
+    SCBEstMDAO.java                               <->  SCBEstMMapper.xml
+    SCBEstVslMDAO.java                            <->  SCBEstVslMMapper.xml
+    SCBFfaInfoDAO.java                            <->  SCBFfaInfoMapper.xml
+    SCBFfaSmryMDAO.java                           <->  SCBFfaSmryMMapper.xml
+    SCBFnDemDesDetailDAO.java                     <->  SCBFnDemDesDetailMapper.xml
+    SCBFnDemDesPortCgoDetailDAO.java              <->  SCBFnDemDesPortCgoDetailMapper.xml
+    SCBFnDemDesPortCgoInfoDAO.java                <->  SCBFnDemDesPortCgoInfoMapper.xml
+    SCBFnLaytimeSheetDetailDAO.java               <->  SCBFnLaytimeSheetDetailMapper.xml
+    SCBFnLayTimeSheetInfoDAO.java                 <->  SCBFnLayTimeSheetInfoMapper.xml
+    SCBInitialApprovalMDAO.java                   <->  SCBInitialApprovalMMapper.xml
+    SCBLinerPortRotnCalcFuncDAO.java              <->  SCBLinerPortRotnCalcFuncMapper.xml
+    SCBOwnVslProfitDAO.java                       <->  SCBOwnVslProfitMapper.xml
+    SCBPerfActStlInfoDAO.java                     <->  SCBPerfActStlInfoMapper.xml
+    SCBPerfCoaInfoDAO.java                        <->  SCBPerfCoaInfoMapper.xml
+    SCBPerfCommExpDAO.java                        <->  SCBPerfCommExpMapper.xml
+    SCBPerfCrFixrInfoDAO.java                     <->  SCBPerfCrFixrInfoMapper.xml
+    SCBPerfCrPortCgoInfoDAO.java                  <->  SCBPerfCrPortCgoInfoMapper.xml
+    SCBPerfFfaMDAO.java                           <->  SCBPerfFfaMMapper.xml
+    SCBPerfFixrReletInfoDAO.java                  <->  SCBPerfFixrReletInfoMapper.xml
+    SCBPerfLnBookingCgoInfoDAO.java               <->  SCBPerfLnBookingCgoInfoMapper.xml
+    SCBPerfLnFrtInfoDAO.java                      <->  SCBPerfLnFrtInfoMapper.xml
+    SCBPerfMDAO.java                              <->  SCBPerfMMapper.xml
+    SCBPerfNbizInfoDAO.java                       <->  SCBPerfNbizInfoMapper.xml
+    SCBPerfSmryCgoSDAO.java                       <->  SCBPerfSmryCgoSMapper.xml
+    SCBPerfSmryNbizSDAO.java                      <->  SCBPerfSmryNbizSMapper.xml
+    SCBPerfSmrySDAO.java                          <->  SCBPerfSmrySMapper.xml
+    SCBPerfSmryVoySDAO.java                       <->  SCBPerfSmryVoySMapper.xml
+    SCBPerfTcoutBnkDifDetailDAO.java              <->  SCBPerfTcoutBnkDifDetailMapper.xml
+    SCBPerfTcoutBnkDifHeadDAO.java                <->  SCBPerfTcoutBnkDifHeadMapper.xml
+    SCBPerfTcoutFixrHireInfoDAO.java              <->  SCBPerfTcoutFixrHireInfoMapper.xml
+    SCBPerfTcoutFixrInfoDAO.java                  <->  SCBPerfTcoutFixrInfoMapper.xml
+    SCBPerfTermDvIntrlSDAO.java                   <->  SCBPerfTermDvIntrlSMapper.xml
+    SCBPerfTermDvSDAO.java                        <->  SCBPerfTermDvSMapper.xml
+    SCBPerfTkBookingCgoInfoDAO.java               <->  SCBPerfTkBookingCgoInfoMapper.xml
+    SCBPerfTkFrtInfoDAO.java                      <->  SCBPerfTkFrtInfoMapper.xml
+    SCBPerfTnkBookingCgoInfoDAO.java              <->  SCBPerfTnkBookingCgoInfoMapper.xml
+    SCBPerfTnkFrtHDAO.java                        <->  SCBPerfTnkFrtHMapper.xml
+    SCBPerfTnkFrtInfoDAO.java                     <->  SCBPerfTnkFrtInfoMapper.xml
+    SCBPerfTonnInfoDAO.java                       <->  SCBPerfTonnInfoMapper.xml
+    SCBPerfTrFixrInfoDAO.java                     <->  SCBPerfTrFixrInfoMapper.xml
+    SCBPerfTrPortCgoInfoDAO.java                  <->  SCBPerfTrPortCgoInfoMapper.xml
+    SCBPerfWashMDAO.java                          <->  SCBPerfWashMMapper.xml
+    SCBRobInfoDAO.java                            <->  SCBRobInfoMapper.xml
+    SCBSummaryListReportDAO.java                  <->  SCBSummaryListReportMapper.xml
+    SCBTrdRouteCodeMDAO.java                      <->  SCBTrdRouteCodeMMapper.xml
+    SCBVslFixedCostRateDAO.java                   <->  SCBVslFixedCostRateMapper.xml
+    SCBVslVoyMDAO.java                            <->  SCBVslVoyMMapper.xml
+    SCBWrkActStlInfoDAO.java                      <->  SCBWrkActStlInfoMapper.xml
+    SCBWrkCoaInfoDAO.java                         <->  SCBWrkCoaInfoMapper.xml
+    SCBWrkCrFixrInfoDAO.java                      <->  SCBWrkCrFixrInfoMapper.xml
+    SCBWrkCrPortCgoInfoDAO.java                   <->  SCBWrkCrPortCgoInfoMapper.xml
+    SCBWrkFfaMDAO.java                            <->  SCBWrkFfaMMapper.xml
+    SCBWrkFixrReletInfoDAO.java                   <->  SCBWrkFixrReletInfoMapper.xml
+    SCBWrkLnBookingCgoInfoDAO.java                <->  SCBWrkLnBookingCgoInfoMapper.xml
+    SCBWrkLnFrtInfoDAO.java                       <->  SCBWrkLnFrtInfoMapper.xml
+    SCBWrkMDAO.java                               <->  SCBWrkMMapper.xml
+    SCBWrkNbizInfoDAO.java                        <->  SCBWrkNbizInfoMapper.xml
+    SCBWrkPortRotnInfoDAO.java                    <->  SCBWrkPortRotnInfoMapper.xml
+    SCBWrkTcoutBnkDifDetailDAO.java               <->  SCBWrkTcoutBnkDifDetailMapper.xml
+    SCBWrkTcoutBnkDifHeadDAO.java                 <->  SCBWrkTcoutBnkDifHeadMapper.xml
+    SCBWrkTcoutFixrHireInfoDAO.java               <->  SCBWrkTcoutFixrHireInfoMapper.xml
+    SCBWrkTcoutFixrInfoDAO.java                   <->  SCBWrkTcoutFixrInfoMapper.xml
+    SCBWrkTkBookingCgoInfoDAO.java                <->  SCBWrkTkBookingCgoInfoMapper.xml
+    SCBWrkTkFrtInfoDAO.java                       <->  SCBWrkTkFrtInfoMapper.xml
+    SCBWrkTnkBookingCgoInfoDAO.java               <->  SCBWrkTnkBookingCgoInfoMapper.xml
+    SCBWrkTnkFrtHDAO.java                         <->  SCBWrkTnkFrtHMapper.xml
+    SCBWrkTnkFrtInfoDAO.java                      <->  SCBWrkTnkFrtInfoMapper.xml
+    SCBWrkTonnInfoDAO.java                        <->  SCBWrkTonnInfoMapper.xml
+    SCBWrkTrFixrInfoDAO.java                      <->  SCBWrkTrFixrInfoMapper.xml
+    SCBWrkTrPortCgoInfoDAO.java                   <->  SCBWrkTrPortCgoInfoMapper.xml
+    SOPCandidateCgoDetailDAO.java                 <->  SOPCandidateCgoDetailMapper.xml
+    SOPCandidateCgoTnkInfoDAO.java                <->  SOPCandidateCgoTnkInfoMapper.xml
+    SOPCandidateMDAO.java                         <->  SOPCandidateMMapper.xml
+    SOPCandidateTonnBulkerInfoDAO.java            <->  SOPCandidateTonnBulkerInfoMapper.xml
+    SOPCandidateTonnCarInfoDAO.java               <->  SOPCandidateTonnCarInfoMapper.xml
+    SOPCandidateTonnDetailDAO.java                <->  SOPCandidateTonnDetailMapper.xml
+    SOPCandidateTonnTnkInfoDAO.java               <->  SOPCandidateTonnTnkInfoMapper.xml
+    SOPCgoListTnkInfoDAO.java                     <->  SOPCgoListTnkInfoMapper.xml
+    SOPCgoTonnCodeMappingDAO.java                 <->  SOPCgoTonnCodeMappingMapper.xml
+    SOPTonnListBulkerInfoDAO.java                 <->  SOPTonnListBulkerInfoMapper.xml
+    SOPTonnListCarCarrierInfoDAO.java             <->  SOPTonnListCarCarrierInfoMapper.xml
+    SOPTonnListCarSupplyInfoDAO.java              <->  SOPTonnListCarSupplyInfoMapper.xml
+    SOPTonnListInfoDAO.java                       <->  SOPTonnListInfoMapper.xml
+    SOPTonnListMDAO.java                          <->  SOPTonnListMMapper.xml
+    SOPTonnListTnkInfoDAO.java                    <->  SOPTonnListTnkInfoMapper.xml
+    TBLManagementMstDAO.java                      <->  TBLManagementMstMapper.xml
+    TCHedgeManagementDAO.java                     <->  TCHedgeManagementMapper.xml
+    TCLsFoHedgeManagementDAO.java                 <->  TCLsFoHedgeManagementMapper.xml
+    TCLsmgoHedgeManagementDAO.java                <->  TCLsmgoHedgeManagementMapper.xml
+    VoyageAnalysisDAO.java                        <->  VoyageAnalysisMapper.xml
+    WebPortalDAO.java                             <->  WebPortalMapper.xml
 
 ────────────────────────────────────────────────────────────────────────────────
 
   [ 이슈 목록 ]
 
-  LV     파일                                 위치                              카테고리           메시지
+  LV     파일                                              위치                                        카테고리           메시지
   ──────────────────────────────────────────────────────────────────────────────
-  ERROR  COURTBondReceiptTransferMDAO.java  ReceiptTransferAdmitDenyInsert  PARAM_MISSING  DAO 에서 put 누락: ['userInfo'] (id=ReceiptTransferAdmitDenyInsert)
-  ERROR  COURTBondReceiptTransferMDAO.java  ReceiptTransferAdmitDenyUpdate  PARAM_MISSING  DAO 에서 put 누락: ['userInfo'] (id=ReceiptTransferAdmitDenyUpdate)
-  ERROR  SCLAccountSDAO.java                -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLAccountSMapper.xml)
-  ERROR  SCLCbBnkSDAO.java                  -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbBnkSMapper.xml)
-  ERROR  SCLCbFrtRevSDAO.java               VoyageAnalAccInquiry            PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'team_code', 'util'] (id=voyageAnalAccInquiry)
-  ERROR  SCLCbFrtRevSDAO.java               VoyageAnalVslvoyInquiry         PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=voyageAnalVslvoyInquiry)
-  ERROR  SCLCbHireSDAO.java                 cbUpdate                        PARAM_MISSING  DAO 에서 put 누락: ['cb_sa_voy_no', 'cht_in_out_code', 'voy_no', 'vsl_code'] (id=cbUpdate)
-  ERROR  SCLCbHireSDAO.java                 closingSupportSoaVoyInquiry     PARAM_MISSING  DAO 에서 put 누락: ['cb_sa_voy_no', 'cht_in_out_code', 'vsl_code'] (id=closingSupportSoaVoyInquiry)
-  ERROR  SCLCbHireSDAO.java                 closingSupportVoyInquiry        PARAM_MISSING  DAO 에서 put 누락: ['cht_in_out_code', 'voy_no', 'vsl_code'] (id=closingSupportVoyInquiry)
-  ERROR  SCLCbHireSDAO.java                 hireSave                        PARAM_MISSING  DAO 에서 put 누락: ['acc_code', 'cb_sa_voy_no', 'cht_in_out_code', 'cl_year_month', 'sa_seq', 'sa_seq1', 'sa_voy_no', 'sa_voys', 'sys_upd_date', 'sys_upd_user_id', 'voy_no', 'vsl_code'] (id=hireSave)
-  ERROR  SCLCbHireSDAO.java                 hireVoySearch                   PARAM_MISSING  DAO 에서 put 누락: ['cht_in_out_code', 'cl_year_month', 'voy_no', 'vsl_code'] (id=hireVoySearch)
-  ERROR  SCLCbHireSDAO.java                 saVoySearch                     PARAM_MISSING  DAO 에서 put 누락: ['cht_in_out_code', 'hire_from_date', 'hire_to_date', 'vsl_code'] (id=saVoySearch)
-  ERROR  SCLCbIndexMDAO.java                AccidentalInquiry               PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=accidentalInquiry)
-  ERROR  SCLCbIndexMDAO.java                NonTonnageTaxInquiry            PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=nonTonnageTaxInquiry)
-  ERROR  SCLCbNonPortCgoExpSDAO.java        -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbNonPortCgoExpSMapper.xml)
-  ERROR  SCLCbNonPortChgSDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbNonPortChgSMapper.xml)
-  ERROR  SCLCbPortCgoExpSDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbPortCgoExpSMapper.xml)
-  ERROR  SCLCbPortChgCgoExpSDAO.java        -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbPortChgCgoExpSMapper.xml)
-  ERROR  SCLCbPortChgSDAO.java              -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbPortChgSMapper.xml)
-  ERROR  SCLCbVrSDAO.java                   -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbVrSMapper.xml)
-  ERROR  SCLCbbackupPerfMDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbbackupPerfMMapper.xml)
-  ERROR  SCLCloseMaterialSDAO.java          -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCloseMaterialSMapper.xml)
-  ERROR  SCLTcInWthTaxChkDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLTcInWthTaxChkMapper.xml)
-  ERROR  SystemMoniterDAO.java              getProcessList                  PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getProcessList1)
+  ERROR  AccountIntegrationInformationDAO.java           getAccCB                                  PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccCB)
+  ERROR  AccountIntegrationInformationDAO.java           getAccCr                                  PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccCr)
+  ERROR  AccountIntegrationInformationDAO.java           getAccInfospec                            PARAM_MISSING  DAO 에서 put 누락: ['accCode', 'topAcc'] (id=getAccInfospec)
+  ERROR  AccountIntegrationInformationDAO.java           getAccKeyman                              PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccKeyman)
+  ERROR  AccountIntegrationInformationDAO.java           getAccProfile                             PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccProfile)
+  ERROR  AccountIntegrationInformationDAO.java           getAccProfileNew                          PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccProfileNew)
+  ERROR  AccountIntegrationInformationDAO.java           getAccRef                                 PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccRef)
+  ERROR  AccountIntegrationInformationDAO.java           getAccRemark                              PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getAccRemark)
+  ERROR  AccountIntegrationInformationDAO.java           getArApManage                             MISSING_ID     XML 에 없는 id 호출: "AccountIntegrationInformation.getArApManage"
+  ERROR  AccountIntegrationInformationDAO.java           getClaimManage                            PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getClaimManage)
+  ERROR  AccountIntegrationInformationDAO.java           getCntrData                               PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getCntrData)
+  ERROR  AccountIntegrationInformationDAO.java           getCntrData                               MISSING_ID     XML 에 없는 id 호출: "AccountIntegrationInformation.getCntrData4"
+  ERROR  AccountIntegrationInformationDAO.java           getInfospectrum                           PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getInfospectrum)
+  ERROR  AccountIntegrationInformationDAO.java           getSlip                                   PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'team_code', 'util'] (id=getSlip)
+  ERROR  AccountIntegrationInformationDAO.java           getSmryGroupAccCode                       PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getSmryGroupAccCode)
+  ERROR  AccountIntegrationInformationDAO.java           getSoa                                    PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getSoa)
+  ERROR  AccountLimitManagementDAO.java                  BdiRatioDelete                            MISSING_ID     XML 에 없는 id 호출: "AccountLimitManagement.BdiRatioDelete"
+  ERROR  AccountLimitManagementDAO.java                  BdiRatioInsert                            MISSING_ID     XML 에 없는 id 호출: "AccountLimitManagement.BdiRatioInsert"
+  ERROR  AccountLimitManagementDAO.java                  BdiRatioReconfirm                         MISSING_ID     XML 에 없는 id 호출: "AccountLimitManagement.BdiRatioReconfirm"
+  ERROR  AccountLimitManagementDAO.java                  BdiRatioReconfirm                         MISSING_ID     XML 에 없는 id 호출: "AccountLimitManagement.BdiRatioReconfirm1"
+  ERROR  AccountLimitManagementDAO.java                  BdiRatioUpdate                            MISSING_ID     XML 에 없는 id 호출: "AccountLimitManagement.BdiRatioUpdate"
+  ERROR  CBGLDifferenceListDAO.java                      update                                    PARAM_MISSING  DAO 에서 put 누락: ['tot_ld_cnt'] (id=update2)
+  ERROR  CBSOAMappingListDAO.java                        cbSoaMappingList                          PARAM_MISSING  DAO 에서 put 누락: ['cpFromDate', 'cpToDate', 'tcInOutType', 'teamCode', 'voyNo', 'vslCode'] (id=cbSoaTcInMappingList)
+  ERROR  CBSOAMappingListDAO.java                        cbSoaMappingList                          PARAM_MISSING  DAO 에서 put 누락: ['cpFromDate', 'cpToDate', 'tcInOutType', 'teamCode', 'voyNo', 'vslCode'] (id=cbSoaTcOutMappingList)
+  ERROR  CCDMktIndiNoteDAO.java                          mkartIndiNoteUdate                        PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'item_group_seq', 'kr', 'note_seq', 'remark', 'sea_area_name', 'sys_upd_user_id', 'takeit', 'util', 'vsl_type_name'] (id=mkartIndiNoteUdate)
+  ERROR  CVCCntrFrtLdgPortRotationDAO.java               cvcLdgPortCodePopupInquiry                PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cvcLdgPortCodePopupInquiry)
+  ERROR  CVCCntrFrtLdgPortRotationDAO.java               cvcreturnPortCodeInquiry                  PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cvcreturnPortCodeInquiry)
+  ERROR  CVCCntrFrtMDAO.java                             CVCCntrListSearch                         PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cVCCntrListSearch)
+  ERROR  CVCCntrFrtMDAO.java                             NewCVCCntrListSearch                      PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=newCVCCntrListSearch)
+  ERROR  CVCPortDistanceMDAO.java                        CvcFrtCntrPortDisCalcuate                 PARAM_MISSING  DAO 에서 put 누락: ['from_port_code', 'to_port_code'] (id=cvcFrtCntrPortDisCalcuate1)
+  ERROR  CVCPortDistanceMDAO.java                        NewCvcFrtCntrPortDisCalcuate              PARAM_MISSING  DAO 에서 put 누락: ['from_port_code', 'to_port_code'] (id=newCvcFrtCntrPortDisCalcuate1)
+  ERROR  CVCPortDistanceMDAO.java                        NewCvcFrtCntrPortDisCalcuate              PARAM_MISSING  DAO 에서 put 누락: ['from_port_code', 'to_port_code'] (id=newCvcFrtCntrPortDisCalcuate2)
+  ERROR  EAPPaymentTtnoVDAO.java                         bankslipDetailExport                      PARAM_MISSING  DAO 에서 put 누락: ['frReceipt_date', 'tt_no', 'vendor_num'] (id=bankslipDetailExport)
+  ERROR  EAPPaymentTtnoVDAO.java                         payBankCodePopupInquiry                   PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=payBankCodePopupInquiry)
+  ERROR  EAPPaymentTtnoVDAO.java                         payGroupPopupInquiry                      PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=payGroupPopupInquiry)
+  ERROR  EAPPaymentTtnoVDAO.java                         payInquiry                                PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=payInquiry)
+  ERROR  EAPPaymentTtnoVDAO.java                         workSiteInquiry                           PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=workSiteInquiry)
+  ERROR  FDMOAManagementDAO.java                         -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: FDMOAManagementMapper.xml)
+  ERROR  FfSettleDAO.java                                SettleListCreate                          PARAM_MISSING  DAO 에서 put 누락: ['work_date'] (id=SettleListCreate)
+  ERROR  HedgeManagementDAO.java                         -                                         BRACE          괄호 불균형: '('=5552 ')'=5553
+  ERROR  HedgeOrderDAO.java                              InquiryBnkPriceList                       MISSING_ID     XML 에 없는 id 호출: "HedgeOrder.InquiryBnkPriceList"
+  ERROR  HedgeOrderDAO.java                              InquiryBnkPriceList                       MISSING_ID     XML 에 없는 id 호출: "HedgeOrder.InquiryBnkPriceList1"
+  ERROR  HedgeOrderDAO.java                              InquiryLsBnkPriceList                     MISSING_ID     XML 에 없는 id 호출: "HedgeOrder.InquiryLsBnkPriceList"
+  ERROR  HedgeOrderDAO.java                              InquiryLsBnkPriceList                     MISSING_ID     XML 에 없는 id 호출: "HedgeOrder.InquiryLsBnkPriceList1"
+  ERROR  HedgeOrderDAO.java                              InquiryLsFoBnkPriceList                   MISSING_ID     XML 에 없는 id 호출: "HedgeOrder.InquiryLsFoBnkPriceList"
+  ERROR  HedgeOrderDAO.java                              InquiryLsFoBnkPriceList                   MISSING_ID     XML 에 없는 id 호출: "HedgeOrder.InquiryLsFoBnkPriceList1"
+  ERROR  HedgeOrderDAO.java                              mailTest                                  PARAM_MISSING  DAO 에서 put 누락: ['cntrNo'] (id=mailTest1)
+  ERROR  OCBPsummstVoyCgoDAO.java                        -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: OCBPsummstVoyCgoMapper.xml)
+  ERROR  OasisDAO.java                                   getMenuListByPortCode                     PARAM_MISSING  DAO 에서 put 누락: ['port_code'] (id=getMenuListByPortCode)
+  ERROR  OasisDAO.java                                   inquiryWebDaData                          PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=inquiryWebDaData)
+  ERROR  SCBAnalInfoDAO.java                             cbComparisonSearch                        PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cbComparisonSearch1)
+  ERROR  SCBAnalInfoDAO.java                             cbDifferenceNewSearch                     PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cbDifferenceNewSearch)
+  ERROR  SCBAnalInfoDAO.java                             cbDifferenceSearch                        PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cbDifferenceSearch)
+  ERROR  SCBApprovalStatusDAO.java                       AccntCntrSave                             PARAM_MISSING  DAO 에서 put 누락: ['acc_code', 'new_team_code', 'team_code'] (id=accntCntrSave)
+  ERROR  SCBApprovalStatusDAO.java                       AccntDetailSave                           PARAM_MISSING  DAO 에서 put 누락: ['acc_code', 'new_div_code', 'new_team_code', 'team_code'] (id=accntDetailSave)
+  ERROR  SCBApprovalStatusDAO.java                       AccntSmrySave                             PARAM_MISSING  DAO 에서 put 누락: ['acc_code', 'new_team_code', 'team_code'] (id=accntSmrySave)
+  ERROR  SCBApprovalStatusDAO.java                       approvalSave                              PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'es_flag', 'fi_flag', 'in_flag', 'se_flag', 'sf_flag', 'sm_flag', 'sys_upd_user_id'] (id=approvalSave)
+  ERROR  SCBApprovalStatusDAO.java                       cbApprovalStatusSearch                    PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=cbApprovalStatusSearch)
+  ERROR  SCBApprovalStatusDAO.java                       contractSave                              PARAM_MISSING  DAO 에서 put 누락: ['cntr_no', 'new_team_code', 'team_code'] (id=contractSave)
+  ERROR  SCBBafInfoDAO.java                              mergeBaf                                  PARAM_MISSING  DAO 에서 put 누락: ['acc_code', 'adtnl_frt_rate', 'avg_prc', 'baf_rate', 'bnk_srchg_amt', 'cb_no', 'cgo_qty', 'fixed_bnk_prc', 'from_bnk_prc', 'prc_spread', 'to_bnk_prc'] (id=mergeBaf)
+  ERROR  SCBCbChangeResonMDAO.java                       -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBCbChangeResonMMapper.xml)
+  ERROR  SCBCbSummaryInfoDAO.java                        -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBCbSummaryInfoMapper.xml)
+  ERROR  SCBEstCommonDAO.java                            amountSql                                 PARAM_MISSING  DAO 에서 put 누락: ['cb_no'] (id=amountSql)
+  ERROR  SCBEstCommonDAO.java                            bunkerSql                                 PARAM_MISSING  DAO 에서 put 누락: ['est_flag', 'est_year', 'voy_strt_date'] (id=bunkerSql)
+  ERROR  SCBEstCommonDAO.java                            dateSql                                   PARAM_MISSING  DAO 에서 put 누락: ['est_flag', 'est_year', 'voy_no', 'voy_strt_date', 'vsl_code'] (id=dateSql)
+  ERROR  SCBEstCommonDAO.java                            detailSql                                 PARAM_MISSING  DAO 에서 put 누락: ['cbNo', 'cb_no'] (id=detailSql)
+  ERROR  SCBEstCommonDAO.java                            estCBCopyPrcCall                          PARAM_MISSING  DAO 에서 put 누락: ['est_flag', 'est_year'] (id=estCBCopyPrcCall)
+  ERROR  SCBEstCommonDAO.java                            estCBCopyPrcCall                          PARAM_MISSING  DAO 에서 put 누락: ['_sessionTeamCode', 'est_flag', 'est_year', 'team_code', 'vsl_code'] (id=estCBCopyPrcCall1)
+  ERROR  SCBEstCommonDAO.java                            estCBCopyPrcCall                          PARAM_MISSING  DAO 에서 put 누락: ['est_flag', 'est_year', 'model_voy_no', 'voy_no', 'vsl_code'] (id=estCBCopyPrcCall2)
+  ERROR  SCBEstCommonDAO.java                            hireCntrSql                               PARAM_MISSING  DAO 에서 put 누락: ['voy_end_date', 'voy_strt_date', 'vsl_code'] (id=hireCntrSql)
+  ERROR  SCBEstCommonDAO.java                            hireCommSql                               PARAM_MISSING  DAO 에서 put 누락: ['cb_no'] (id=hireCommSql)
+  ERROR  SCBEstCommonDAO.java                            hireEstSql                                PARAM_MISSING  DAO 에서 put 누락: ['est_flag', 'est_year', 'shup_type'] (id=hireEstSql)
+  ERROR  SCBEstCommonDAO.java                            masterDateBunkerSql                       PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'day_hire', 'fo_unit_price', 'voy_end_date', 'voy_strt_date'] (id=masterDateBunkerSql)
+  ERROR  SCBEstCommonDAO.java                            masterSql                                 PARAM_MISSING  DAO 에서 put 누락: ['_sessionUserId', 'cbNo', 'cb_no', 'est_flag', 'est_year', 'voy_no', 'vsl_code'] (id=masterSql)
+  ERROR  SCBEstCommonDAO.java                            smryMstListInquiry                        PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'cb_team_code', 'co', 'est_flag', 'est_year', 'kr', 'mig_flag', 'sales_type', 'takeit', 'util', 'voy_end_date', 'voy_strt_date', 'voy_tc_type_code', 'vsl_code'] (id=smryMstListInquiry)
+  ERROR  SCBEstCommonDAO.java                            smryTermDvListInquiry                     PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'cb_team_code', 'co', 'est_flag', 'est_year', 'kr', 'mig_flag', 'sales_type', 'takeit', 'util', 'voy_end_date', 'voy_strt_date', 'voy_tc_type_code', 'vsl_code'] (id=smryTermDvListInquiry)
+  ERROR  SCBFnDemDesMDAO.java                            -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBFnDemDesMMapper.xml)
+  ERROR  SCBPerfBnkActualMDAO.java                       -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBPerfBnkActualMMapper.xml)
+  ERROR  SCBPerfBnkInfoDAO.java                          -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBPerfBnkInfoMapper.xml)
+  ERROR  SCBPerfMDAO.java                                getCBActualCommExpData                    MISSING_ID     XML 에 없는 id 호출: "SCBPerfM.getCBActualCommExpData"
+  ERROR  SCBPerfMDAO.java                                getCBActualCommExpDataNew                 MISSING_ID     XML 에 없는 id 호출: "SCBPerfM.getCBActualCommExpDataNew"
+  ERROR  SCBPerfMDAO.java                                perfCommExpSelect                         PARAM_MISSING  DAO 에서 put 누락: ['cb_no'] (id=perfCommExpSelect)
+  ERROR  SCBPerfMDAO.java                                perfMSearchByDuration                     PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=perfMSearchByDuration)
+  ERROR  SCBPerfMDAO.java                                perfMSearchByDurationRenew                PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=perfMSearchByDurationRenew)
+  ERROR  SCBPerfMDAO.java                                perfMSelect                               PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfMSelect)
+  ERROR  SCBPerfMDAO.java                                perfMSelect                               PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'cb_type', 'sts_code'] (id=perfMSelect1)
+  ERROR  SCBPerfMDAO.java                                perfMSelectForDelete                      PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'voy_no', 'vsl_code'] (id=perfMSelectForDelete)
+  ERROR  SCBPerfMDAO.java                                voyagePerformAllSearch                    PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=voyagePerformAllSearch)
+  ERROR  SCBPerfMDAO.java                                voyagePerformComExpSelect                 PARAM_MISSING  DAO 에서 put 누락: ['voy_no', 'vsl_code'] (id=voyagePerformComExpSelect)
+  ERROR  SCBPerfMDAO.java                                voyagePerformCompSearch                   PARAM_MISSING  DAO 에서 put 누락: ['voy_no', 'vsl_code'] (id=voyagePerformCompSearch)
+  ERROR  SCBPerfMDAO.java                                voyagePerformPortSelect                   PARAM_MISSING  DAO 에서 put 누락: ['voy_no', 'vsl_code'] (id=voyagePerformPortSelect)
+  ERROR  SCBPerfPortActualMDAO.java                      -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBPerfPortActualMMapper.xml)
+  ERROR  SCBPerfPortRotnInfoDAO.java                     -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBPerfPortRotnInfoMapper.xml)
+  ERROR  SCBPerfSmrySDAO.java                            getDivTargets                             PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getDivTargets)
+  ERROR  SCBPerfTonnInfoDAO.java                         perfTonnInfoSelect                        PARAM_MISSING  DAO 에서 put 누락: ['cb_no'] (id=perfTonnInfoSelect)
+  ERROR  SCBPerfWashMDAO.java                            getCcdReasonReqStatus                     PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getCcdReasonReqStatus)
+  ERROR  SCBRobInfoDAO.java                              perfEsRobInsert                           PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfEsRobInsert)
+  ERROR  SCBRobInfoDAO.java                              perfEsRobInsert                           PARAM_MISSING  DAO 에서 put 누락: ['sts_code', 'sts_codecb_no'] (id=perfEsRobInsert1)
+  ERROR  SCBRobInfoDAO.java                              perfEsRobInsert                           PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfEsRobInsert2)
+  ERROR  SCBRobInfoDAO.java                              perfRobInsert                             PARAM_MISSING  DAO 에서 put 누락: ['cb_no'] (id=perfRobInsert)
+  ERROR  SCBRobInfoDAO.java                              perfRobInsert                             PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfRobInsert1)
+  ERROR  SCBRobInfoDAO.java                              perfRobInsert                             PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfRobInsert2)
+  ERROR  SCBRobInfoDAO.java                              perfSeRobInsert                           PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfSeRobInsert)
+  ERROR  SCBRobInfoDAO.java                              perfSeRobInsert                           PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfSeRobInsert1)
+  ERROR  SCBRobInfoDAO.java                              perfSeRobInsert                           PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfSeRobInsert2)
+  ERROR  SCBRobInfoDAO.java                              perfTCOutRobInsert                        PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfTCOutRobInsert)
+  ERROR  SCBRobInfoDAO.java                              perfTCOutRobInsert                        PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=perfTCOutRobInsert1)
+  ERROR  SCBSummaryListReportDAO.java                    getSCbSmryListRtBizActual                 PARAM_MISSING  DAO 에서 put 누락: ['smryFromDate', 'smryToDate'] (id=getSCbSmryListRtBizActual)
+  ERROR  SCBSummaryListReportDAO.java                    getSCbSmryListRtBizTotal                  PARAM_MISSING  DAO 에서 put 누락: ['smryFromDate', 'smryToDate'] (id=getSCbSmryListRtBizTotal)
+  ERROR  SCBTbnTonnInfoDAO.java                          -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBTbnTonnInfoMapper.xml)
+  ERROR  SCBVslFixedCostRateDAO.java                     fixedRateUpdate                           PARAM_MISSING  DAO 에서 put 누락: ['_seesionUserId', 'bbcFlag'] (id=fixedRateUpdate)
+  ERROR  SCBVslFixedCostRateDAO.java                     genRateInsert                             PARAM_MISSING  DAO 에서 put 누락: ['bbcFlag', 'ownFlag'] (id=genRateInsert)
+  ERROR  SCBVslFixedCostRateDAO.java                     genRateUpdate                             PARAM_MISSING  DAO 에서 put 누락: ['bbcFlag'] (id=genRateUpdate)
+  ERROR  SCBVslVoyMDAO.java                              getInvoVoyNoListByVslCode                 PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getInvoVoyNoListByVslCode)
+  ERROR  SCBVslVoyMDAO.java                              getInvoVoyNoListByVslCode                 PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getInvoVoyNoListByVslCode1)
+  ERROR  SCBVslVoyMDAO.java                              getVoyNoListByVslCode                     PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getVoyNoListByVslCode)
+  ERROR  SCBVslVoyMDAO.java                              getVoyNoListByVslCode                     PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getVoyNoListByVslCode2)
+  ERROR  SCBVslVoyMDAO.java                              getVoyNoListByVslCode1                    PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getVoyNoListByVslCode1)
+  ERROR  SCBVslVoyMDAO.java                              searchKSAReport                           PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=searchKSAReport)
+  ERROR  SCBWrkBnkInfoDAO.java                           -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SCBWrkBnkInfoMapper.xml)
+  ERROR  SCBWrkFfaMDAO.java                              ffaCntrNo                                 PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=ffaCntrNo)
+  ERROR  SCBWrkFfaMDAO.java                              ffaSmryTitle                              PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=ffaSmryTitle)
+  ERROR  SCBWrkFfaMDAO.java                              maxVoyNoSearch                            PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=maxVoyNoSearch)
+  ERROR  SCBWrkMDAO.java                                 wrkCommExpSelect                          PARAM_MISSING  DAO 에서 put 누락: ['cb_no'] (id=wrkCommExpSelect)
+  ERROR  SCBWrkMDAO.java                                 wrkMSearch                                PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=wrkMSearch)
+  ERROR  SCBWrkMDAO.java                                 wrkMSelect                                PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=wrkMSelect)
+  ERROR  SCBWrkTonnInfoDAO.java                          wrkTonnInfoSelect                         PARAM_MISSING  DAO 에서 put 누락: ['cb_no', 'sts_code'] (id=wrkTonnInfoSelect)
+  ERROR  SOPCgoListInfoDAO.java                          -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: SOPCgoListInfoMapper.xml)
+  ERROR  SOPTonnListInfoDAO.java                         searchPortCode                            PARAM_MISSING  DAO 에서 put 누락: ['port_name'] (id=searchPortCode)
+  ERROR  SOPTonnListInfoDAO.java                         searchVslCode                             PARAM_MISSING  DAO 에서 put 누락: ['vsl_name'] (id=searchVslCode)
+  ERROR  SOPTonnListInfoDAO.java                         searchVslCode                             PARAM_MISSING  DAO 에서 put 누락: ['vsl_name'] (id=searchVslCode1)
+  ERROR  SOPTonnListMDAO.java                            saveTonnageList                           PARAM_MISSING  DAO 에서 put 누락: ['built_year', 'cgo_crane', 'cre_date', 'dwt', 'ldn_consumption_ifo', 'ldn_consumption_mdo', 'ldn_spd_knots', 'mic', 'open_date_from', 'open_date_to', 'port_code', 'port_name', 'remark', 'sts_flag', 'sys_cre_date', 'sys_cre_user_id', 'sys_upd_date', 'sys_upd_user_id', 'team_code', 'tonn_list_no', 'tonn_list_type', 'tonn_seq', 'vsl_code', 'vsl_name'] (id=saveTonnageList)
+  ERROR  SOPTonnListMDAO.java                            searchPortCode                            PARAM_MISSING  DAO 에서 put 누락: ['port_name'] (id=searchPortCode)
+  ERROR  SOPTonnListMDAO.java                            searchVslCode                             PARAM_MISSING  DAO 에서 put 누락: ['vsl_name'] (id=searchVslCode)
+  ERROR  TBLManagementMstDAO.java                        tblBackupDetailDrop                       PARAM_MISSING  DAO 에서 put 누락: ['bak_table_name', 'sys_cre_date', 'version'] (id=tblBackupDetailDrop1)
+  ERROR  TBLManagementMstDAO.java                        tblBackupSaveCheckScript                  PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'script', 'script1', 'takeit', 'util'] (id=tblBackupSaveCheckScript)
+  ERROR  TBLManagementMstDAO.java                        tblBackupSaveCreate                       PARAM_MISSING  DAO 에서 put 누락: ['bak_table_name', 'new_flag', 'script', 'script1'] (id=tblBackupSaveCreate)
+  ERROR  TBLManagementMstDAO.java                        tblBackupSaveCreate                       PARAM_MISSING  DAO 에서 put 누락: ['_sessionUserId', 'bak_table_name', 'ori_table_name', 'remark', 'script', 'script1', 'version'] (id=tblBackupSaveCreate1)
+  ERROR  TCOutHistoryDAO.java                            -                                         PAIR           짝이 되는 Mapper XML 없음 (기대: TCOutHistoryMapper.xml)
+  ERROR  WebPortalDAO.java                               inquiryWebDaData                          PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=inquiryWebDaData)
+
+  WARN   AccountIntegrationInformationDAO.java           getAccCB                                  PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getAccCB)
+  WARN   AccountIntegrationInformationDAO.java           getAccCr                                  PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getAccCr)
+  WARN   AccountIntegrationInformationDAO.java           getAccInfospec                            PARAM_UNUSED   XML 에서 미사용 키: ['acc_code', 'top_acc'] (id=getAccInfospec)
+  WARN   AccountIntegrationInformationDAO.java           getAccKeyman                              PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getAccKeyman)
+  WARN   AccountIntegrationInformationDAO.java           getAccRef                                 PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getAccRef)
+  WARN   AccountIntegrationInformationDAO.java           getClaimManage                            PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getClaimManage)
+  WARN   AccountIntegrationInformationDAO.java           getCntrData                               PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getCntrData)
+  WARN   AccountIntegrationInformationDAO.java           getInfospectrum                           PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getInfospectrum)
+  WARN   AccountIntegrationInformationDAO.java           getSlip                                   PARAM_UNUSED   XML 에서 미사용 키: ['accCode', 'gubun'] (id=getSlip)
+  WARN   AccountIntegrationInformationDAO.java           getSoa                                    PARAM_UNUSED   XML 에서 미사용 키: ['size'] (id=getSoa)
+  WARN   AccountLimitManagementDAO.java                  insertFirstAccLimit                       OP_MISMATCH    호출종류 DAO=select ↔ XML=<insert> (insertFirstAccLimit1)
+  WARN   AccountLimitManagementDAO.java                  insertFirstAccLimit                       PARAM_UNUSED   XML 에서 미사용 키: ['user_id'] (id=insertFirstAccLimit3)
+  WARN   CVCCntrFrtMDAO.java                             NewCVCCntrListSearch                      PARAM_UNUSED   XML 에서 미사용 키: ['file_type'] (id=newCVCCntrListSearch)
+  WARN   EstimateCharterBaseMapper.xml                   -                                         PAIR           짝이 되는 DAO 없음 (기대: EstimateCharterBaseDAO.java)
+  WARN   HedgeOrderDAO.java                              mailTest                                  PARAM_UNUSED   XML 에서 미사용 키: ['order_no'] (id=mailTest1)
+  WARN   OverseaAdministrateActualRenewalMng2Mapper.xml  -                                         NS_MISMATCH    XML namespace='OverseaAdministrateActualRenewalMng2' ↔ 예상 'OverseaAdministrateActualRenewalMngDAO2'
+  WARN   OverseaAdministrateActualRenewalMng3Mapper.xml  -                                         NS_MISMATCH    XML namespace='OverseaAdministrateActualRenewalMng3' ↔ 예상 'OverseaAdministrateActualRenewalMngDAO3'
+  WARN   OverseaAdministrateActualRenewalMng4Mapper.xml  -                                         NS_MISMATCH    XML namespace='OverseaAdministrateActualRenewalMng4' ↔ 예상 'OverseaAdministrateActualRenewalMngDAO4'
+  WARN   OverseaAdministrateActualRenewalMng5Mapper.xml  -                                         NS_MISMATCH    XML namespace='OverseaAdministrateActualRenewalMng5' ↔ 예상 'OverseaAdministrateActualRenewalMngDAO5'
+  WARN   OverseaAdministrateActualRenewalMngDAO4.java    AccountRetrieve_Tot_Corp                  PARAM_UNUSED   XML 에서 미사용 키: ['v_corp_code'] (id=accountRetrieve_Tot_Corp)
+  WARN   SCBAnalInfoDAO.java                             cbDifferenceNewSearch                     PARAM_UNUSED   XML 에서 미사용 키: ['cnt'] (id=cbDifferenceNewSearch)
+  WARN   SCBApprovalStatusDAO.java                       approvalRequest                           PARAM_UNUSED   XML 에서 미사용 키: ['cb_type', 'title', 'voy_no', 'vsl_code'] (id=approvalRequest)
+  WARN   SCBApprovalStatusDAO.java                       approvalStatusUpdate                      PARAM_UNUSED   XML 에서 미사용 키: ['sts_code', 'user_id'] (id=approvalStatusUpdate)
+  WARN   SCBApprovalStatusDAO.java                       approvalStatusUpdate                      PARAM_UNUSED   XML 에서 미사용 키: ['user_id'] (id=approvalStatusUpdate2)
+  WARN   SCBBafInfoDAO.java                              mergeBaf                                  OP_MISMATCH    호출종류 DAO=insert ↔ XML=<update> (mergeBaf)
+  WARN   SCBCbStsComInfoDAO.java                         getActualScbCbStsComInfo                  PARAM_UNUSED   XML 에서 미사용 키: ['voy_no'] (id=getActualScbCbStsComInfo1)
+  WARN   SCBDurChkDAO.java                               VoyAnalClosingSave                        OP_MISMATCH    호출종류 DAO=insert ↔ XML=<select> (voyAnalClosingSave)
+  WARN   SCBDurChkDAO.java                               VoyAnalClosingSave                        PARAM_UNUSED   XML 에서 미사용 키: ['clsType', 'fixFromMonth', 'fixStatus', 'fixToMonth', 'rstCnt', 'updateUser'] (id=voyAnalClosingSave)
+  WARN   SCBEstCommonDAO.java                            estimateContainerDelete                   OP_MISMATCH    호출종류 DAO=delete ↔ XML=<select> (estimateContainerDelete1)
+  WARN   SCBEstCommonDAO.java                            estimateContainerDelete                   OP_MISMATCH    호출종류 DAO=delete ↔ XML=<select> (estimateContainerDelete2)
+  WARN   SCBEstCommonDAO.java                            estimateContainerDelete                   OP_MISMATCH    호출종류 DAO=delete ↔ XML=<select> (estimateContainerDelete3)
+  WARN   SCBPerfMDAO.java                                getCBActualPortCargo                      PARAM_UNUSED   XML 에서 미사용 키: ['cb_type'] (id=getCBActualPortCargo3)
+  WARN   SCBPerfMDAO.java                                voyagePerformAllSearch                    PARAM_UNUSED   XML 에서 미사용 키: ['totOpt'] (id=voyagePerformAllSearch)
+  WARN   SCBPerfMDAO.java                                vslVoySearch                              PARAM_UNUSED   XML 에서 미사용 키: ['cargoCode', 'size'] (id=vslVoySearch)
+  WARN   SCBPerfMDAO.java                                vslVoyWoSearch                            PARAM_UNUSED   XML 에서 미사용 키: ['cargoCode', 'includeTbn', 'size'] (id=vslVoyWoSearch)
+  WARN   SCBTankerMapper.xml                             -                                         PAIR           짝이 되는 DAO 없음 (기대: SCBTankerDAO.java)
+  WARN   SCBVslFixedCostRateDAO.java                     fixedRateUpdate                           PARAM_UNUSED   XML 에서 미사용 키: ['_sessionUserId', 'bbc_flag'] (id=fixedRateUpdate)
+  WARN   SCBVslFixedCostRateDAO.java                     genRateInsert                             PARAM_UNUSED   XML 에서 미사용 키: ['bbc_flag', 'vsl_own'] (id=genRateInsert)
+  WARN   SCBVslFixedCostRateDAO.java                     genRateUpdate                             PARAM_UNUSED   XML 에서 미사용 키: ['bbc_flag'] (id=genRateUpdate)
+  WARN   SCBVslVoyMDAO.java                              getCbCnt                                  PARAM_UNUSED   XML 에서 미사용 키: ['port_code'] (id=getCbCnt)
+  WARN   SCBVslVoyMDAO.java                              getCbCnt                                  PARAM_UNUSED   XML 에서 미사용 키: ['port_code'] (id=getCbCnt1)
+  WARN   SCBVslVoyMDAO.java                              getCbCnt                                  PARAM_UNUSED   XML 에서 미사용 키: ['work_flag'] (id=getCbCnt2)
+  WARN   SCBVslVoyMDAO.java                              getInvoVoyNoListByVslCode                 PARAM_UNUSED   XML 에서 미사용 키: ['ext'] (id=getInvoVoyNoListByVslCode1)
+  WARN   SCBVslVoyMDAO.java                              getVslVoyDurationCheckInfo                PARAM_UNUSED   XML 에서 미사용 키: ['longStepNo'] (id=getVslVoyDurationCheckInfo)
+  WARN   SCBVslVoyMDAO.java                              isExistVslVoy                             PARAM_UNUSED   XML 에서 미사용 키: ['voy_no'] (id=isExistVslVoy)
+  WARN   SCBWrkTonnInfoDAO.java                          tonnageContractBasicDataSelectForFixture  PARAM_UNUSED   XML 에서 미사용 키: ['cb_type'] (id=tonnageContractBasicDataSelectForFixture)
+  WARN   TCOutHirstoryMapper.xml                         -                                         PAIR           짝이 되는 DAO 없음 (기대: TCOutHirstoryDAO.java)
+  WARN   VoyageAnalysisDAO.java                          getCvcReviwCoaList                        PARAM_UNUSED   XML 에서 미사용 키: ['seq'] (id=getCvcReviwCoaList)
+
+  INFO   AccountIntegrationInformationMapper.xml         -                                         ORPHAN_XML     DAO 에서 호출되지 않는 XML id: ['customerManagementDupCheck']
+  INFO   AccountLimitManagementMapper.xml                -                                         ORPHAN_XML     DAO 에서 호출되지 않는 XML id: ['bdiRatioDelete', 'bdiRatioInsert', 'bdiRatioReconfirm', 'bdiRatioReconfirm1', 'bdiRatioUpdate']
+  INFO   HedgeOrderMapper.xml                            -                                         ORPHAN_XML     DAO 에서 호출되지 않는 XML id: ['inquiryBnkPriceList', 'inquiryBnkPriceList1', 'inquiryLsBnkPriceList', 'inquiryLsBnkPriceList1', 'inquiryLsFoBnkPriceList', 'inquiryLsFoBnkPriceList1']
+  INFO   SCBDurChkMapper.xml                             -                                         ORPHAN_XML     DAO 에서 호출되지 않는 XML id: ['voyAnalClosingSave1']
+  INFO   SCBTankerDao.java                               -                                         PAIR           파일명에 'DAO' 가 없어 매핑 대상에서 제외
+  INFO   VoyageAnalysisMapper.xml                        -                                         ORPHAN_XML     DAO 에서 호출되지 않는 XML id: ['perfCommExpSelect', 'perfMSelect', 'perfMSelect1', 'wrkCommExpSelect', 'wrkMSelect']
 
 ────────────────────────────────────────────────────────────────────────────────
