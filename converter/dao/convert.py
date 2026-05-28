@@ -48,7 +48,7 @@ def convert():
     "--dir",
     "directory",
     default=None,
-    help="검증 대상 폴더 (기본: env VALIDATE_DIR 또는 output/)",
+    help="검증 대상 폴더 (지정 시 VALIDATE_JAVA_DIR/VALIDATE_XML_DIR 무시)",
 )
 @click.option(
     "--report",

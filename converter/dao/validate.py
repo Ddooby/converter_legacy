@@ -36,7 +36,12 @@ logger = logging.getLogger(__name__)
 console = Console()
 
 
-DEFAULT_VALIDATE_DIR = Path(os.getenv("VALIDATE_DIR", "converter/dao/output"))
+_VALIDATE_DIR = os.getenv("VALIDATE_DIR", "converter/dao/output")
+DEFAULT_JAVA_DIR = Path(os.getenv("VALIDATE_JAVA_DIR", _VALIDATE_DIR))
+DEFAULT_XML_DIR = Path(os.getenv("VALIDATE_XML_DIR", _VALIDATE_DIR))
+DEFAULT_REPORT_PATH: Path | None = (
+    Path(os.getenv("VALIDATE_REPORT")) if os.getenv("VALIDATE_REPORT") else None
+)
 
 LEVEL_ERROR = "ERROR"
 LEVEL_WARN = "WARN"
@@ -120,6 +125,16 @@ class XmlAnalyzer:
     _PARAM_RE = re.compile(r"#\{\s*(\w+)(?:\s*,[^}]*)?\s*\}")
     _DOLLAR_RE = re.compile(r"\$\{\s*(\w+)(?:\s*,[^}]*)?\s*\}")
     _QUERY_TAGS = {"select", "insert", "update", "delete"}
+    # <if test="...">, <when test="..."> 속성에서 OGNL 식별자 추출
+    # ET.tostring 은 항상 double-quote 로 출력하므로 내부 single-quote 를 허용
+    _TEST_ATTR_RE = re.compile(r'\btest\s*=\s*"([^"]+)"')
+    _STR_LITERAL_RE = re.compile(r"'[^']*'")  # OGNL 문자열 리터럴 제거용
+    _OGNL_IDENT_RE = re.compile(r'\b([a-zA-Z_]\w*)\b(?!\s*\()')
+    _OGNL_KEYWORDS = frozenset({
+        "null", "true", "false", "and", "or", "not", "in", "instanceof",
+        "new", "eq", "neq", "lt", "lte", "gt", "gte",
+        "String", "list", "array", "isEmpty", "size",
+    })
 
     def analyze(
         self, xml_path: Path
@@ -187,6 +202,14 @@ class XmlAnalyzer:
             inner = ET.tostring(child, encoding="unicode", method="xml")
             params = set(self._PARAM_RE.findall(inner))
             dollars = set(self._DOLLAR_RE.findall(inner))
+
+            # <if test="...">, <when test="..."> 속성의 OGNL 변수도 수집
+            for test_expr in self._TEST_ATTR_RE.findall(inner):
+                # 'T', 'SOD' 같은 문자열 리터럴을 먼저 제거
+                clean_expr = self._STR_LITERAL_RE.sub(" ", test_expr)
+                for ident in self._OGNL_IDENT_RE.findall(clean_expr):
+                    if ident not in self._OGNL_KEYWORDS:
+                        params.add(ident)
 
             queries[qid] = MapperQuery(id=qid, tag=tag, params=params, dollar_params=dollars)
 
@@ -324,17 +347,25 @@ class JavaAnalyzer:
 # ─────────────────────────────────────────────────────────────────────
 class Validator:
     def __init__(self, directory: Path | str | None = None) -> None:
-        self.directory = Path(directory) if directory else DEFAULT_VALIDATE_DIR
+        if directory:
+            self.java_dir = Path(directory)
+            self.xml_dir = Path(directory)
+        else:
+            self.java_dir = DEFAULT_JAVA_DIR
+            self.xml_dir = DEFAULT_XML_DIR
         self.java_analyzer = JavaAnalyzer()
         self.xml_analyzer = XmlAnalyzer()
 
     def run(self, report_path: Path | str | None = None) -> list[Issue]:
-        if not self.directory.exists():
-            console.print(f"[bold red]대상 폴더 없음:[/] {self.directory}")
-            return []
+        if report_path is None:
+            report_path = DEFAULT_REPORT_PATH
+        for d in {self.java_dir, self.xml_dir}:
+            if not d.exists():
+                console.print(f"[bold red]대상 폴더 없음:[/] {d}")
+                return []
 
-        java_files = sorted(self.directory.glob("*.java"))
-        xml_files = sorted(self.directory.glob("*.xml"))
+        java_files = sorted(self.java_dir.glob("*.java"))
+        xml_files = sorted(self.xml_dir.glob("*.xml"))
 
         if not java_files and not xml_files:
             console.print(f"[yellow]대상 파일 없음:[/] {self.directory}")
@@ -361,15 +392,18 @@ class Validator:
         return all_issues
 
     # ── 페어 매칭 ────────────────────────────────────────────────
+    _DAO_RE = re.compile(r"^(.+?)DAO(.*)")
+
     def _match_pairs(
         self, java_files: list[Path], xml_files: list[Path]
     ) -> tuple[list[tuple[Path, Path]], list[tuple[str, Issue]]]:
         """DAO.java <-> Mapper.xml 쌍을 만든다.
 
-        매칭 규칙: XxxDAO.java ↔ XxxMapper.xml
+        매칭 규칙: XxxDAO*.java ↔ XxxMapper.xml
+        XxxDAO_BACKUP.java, XxxDAO_BACKUP_1.java 등 접미사가 붙은 파일도 포함.
         쌍을 찾지 못한 파일은 orphan 으로 기록한다.
         """
-        dao_files = [f for f in java_files if f.stem.endswith("DAO")]
+        dao_files = [f for f in java_files if self._DAO_RE.match(f.stem)]
         mapper_files = {f.stem: f for f in xml_files if f.stem.endswith("Mapper")}
 
         pairs: list[tuple[Path, Path]] = []
@@ -377,8 +411,10 @@ class Validator:
         orphans: list[tuple[str, Issue]] = []
 
         for dao in dao_files:
-            base = dao.stem[:-3]  # remove "DAO"
-            mapper_stem = base + "Mapper"
+            m = self._DAO_RE.match(dao.stem)
+            prefix = m.group(1)   # "SCBPosition"
+            suffix = m.group(2)   # "" | "_BACKUP" | "_BACKUP_1"
+            mapper_stem = prefix + suffix + "Mapper"
             if mapper_stem in mapper_files:
                 pairs.append((dao, mapper_files[mapper_stem]))
                 used_mappers.add(mapper_stem)
@@ -413,9 +449,9 @@ class Validator:
                     )
                 )
 
-        # DAO 가 아닌 .java 는 단순 정보로 표시
+        # DAO 가 포함되지 않은 .java 는 단순 정보로 표시
         for f in java_files:
-            if not f.stem.endswith("DAO"):
+            if not self._DAO_RE.match(f.stem):
                 orphans.append(
                     (
                         f.name,
@@ -424,7 +460,7 @@ class Validator:
                             f.name,
                             "",
                             "PAIR",
-                            "파일명이 'DAO' 로 끝나지 않아 매핑 대상에서 제외",
+                            "파일명에 'DAO' 가 없어 매핑 대상에서 제외",
                         ),
                     )
                 )
@@ -564,7 +600,11 @@ class Validator:
             counts[it.level] = counts.get(it.level, 0) + 1
 
         console.rule("[bold cyan]검증 요약")
-        console.print(f"대상 폴더 : {self.directory}")
+        if self.java_dir == self.xml_dir:
+            console.print(f"대상 폴더 : {self.java_dir}")
+        else:
+            console.print(f"DAO  폴더 : {self.java_dir}")
+            console.print(f"XML  폴더 : {self.xml_dir}")
         console.print(f"매칭 페어 : {len(pairs)}쌍")
         console.print(
             f"문제 건수 : "
@@ -605,36 +645,94 @@ class Validator:
         orphans: list[tuple[str, Issue]],
         issues: list[Issue],
     ) -> None:
+        import datetime
+
         path.parent.mkdir(parents=True, exist_ok=True)
         counts = {LEVEL_ERROR: 0, LEVEL_WARN: 0, LEVEL_INFO: 0}
         for it in issues:
             counts[it.level] = counts.get(it.level, 0) + 1
 
+        W = 80
+        rule = "─" * W
+
+        def section(title: str) -> str:
+            pad = W - len(title) - 2
+            return f"┌─ {title} " + "─" * pad + "┐" if pad > 0 else f"┌─ {title} ┐"
+
+        def row(label: str, value: str) -> str:
+            return f"  {label:<14} {value}"
+
         lines: list[str] = []
-        lines.append("# DAO ↔ Mapper 검증 보고서")
-        lines.append(f"대상 폴더 : {self.directory}")
-        lines.append(f"매칭 페어 : {len(pairs)}쌍")
+
+        # ── 헤더 ──
+        lines.append(rule)
+        lines.append(f"  DAO <-> Mapper 검증 보고서")
+        lines.append(f"  {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(rule)
+
+        if self.java_dir == self.xml_dir:
+            lines.append(row("대상 폴더", str(self.java_dir)))
+        else:
+            lines.append(row("DAO  폴더", str(self.java_dir)))
+            lines.append(row("XML  폴더", str(self.xml_dir)))
+        lines.append(row("매칭 페어", f"{len(pairs)}쌍"))
         lines.append(
-            f"문제 건수 : ERROR {counts[LEVEL_ERROR]} / "
-            f"WARN {counts[LEVEL_WARN]} / INFO {counts[LEVEL_INFO]}"
+            row("문제 건수",
+                f"ERROR {counts[LEVEL_ERROR]}  /  WARN {counts[LEVEL_WARN]}  /  INFO {counts[LEVEL_INFO]}")
         )
+        lines.append(rule)
+
+        # ── 매칭 페어 ──
         lines.append("")
-        lines.append("## 매칭된 페어")
-        for dao, xml in pairs:
-            lines.append(f"  - {dao.name}  ↔  {xml.name}")
-        if not pairs:
-            lines.append("  (없음)")
+        lines.append("  [ 매칭된 페어 ]")
         lines.append("")
-        lines.append("## 이슈 목록")
+        if pairs:
+            for dao, xml in pairs:
+                lines.append(f"    {dao.name:<45} <->  {xml.name}")
+        else:
+            lines.append("    (없음)")
+        lines.append("")
+
+        # ── 이슈 목록 ──
+        lines.append(rule)
+        lines.append("")
+        lines.append("  [ 이슈 목록 ]")
+        lines.append("")
+
         if not issues:
-            lines.append("  문제 없음")
+            lines.append("    문제 없음. 검증 통과 ✓")
         else:
             order = {LEVEL_ERROR: 0, LEVEL_WARN: 1, LEVEL_INFO: 2}
-            for it in sorted(
+            sorted_issues = sorted(
                 issues, key=lambda x: (order.get(x.level, 9), x.file, x.location)
-            ):
-                loc = f" [{it.location}]" if it.location else ""
-                lines.append(
-                    f"  [{it.level}] {it.file}{loc} ({it.category}) - {it.message}"
+            )
+
+            # 컬럼 너비 계산
+            w_file = max((len(it.file) for it in sorted_issues), default=10)
+            w_loc  = max((len(it.location or "-") for it in sorted_issues), default=6)
+            w_cat  = max((len(it.category) for it in sorted_issues), default=8)
+
+            header = (
+                f"  {'LV':<5}  {'파일':<{w_file}}  {'위치':<{w_loc}}  {'카테고리':<{w_cat}}  메시지"
+            )
+            lines.append(header)
+            lines.append("  " + "─" * (W - 2))
+
+            prev_level = None
+            for it in sorted_issues:
+                if it.level != prev_level:
+                    if prev_level is not None:
+                        lines.append("")
+                    prev_level = it.level
+
+                loc = it.location or "-"
+                line = (
+                    f"  {it.level:<5}  {it.file:<{w_file}}  {loc:<{w_loc}}  "
+                    f"{it.category:<{w_cat}}  {it.message}"
                 )
+                lines.append(line)
+
+        lines.append("")
+        lines.append(rule)
+
         path.write_text("\n".join(lines), encoding="utf-8")

@@ -1,10 +1,60 @@
-# DAO ↔ Mapper 검증 보고서
-대상 폴더 : converter\dao\validate
-매칭 페어 : 0쌍
-문제 건수 : ERROR 0 / WARN 0 / INFO 1
+────────────────────────────────────────────────────────────────────────────────
+  DAO <-> Mapper 검증 보고서
+  2026-05-28 14:32:53
+────────────────────────────────────────────────────────────────────────────────
+  DAO  폴더        C:\Projects\Panocean\src\main\java\com\pan\som\dao\systemMgnt
+  XML  폴더        C:\Projects\Panocean\src\main\resources\mappers\som\systemMgnt
+  매칭 페어          15쌍
+  문제 건수          ERROR 24  /  WARN 0  /  INFO 0
+────────────────────────────────────────────────────────────────────────────────
 
-## 매칭된 페어
-  (없음)
+  [ 매칭된 페어 ]
 
-## 이슈 목록
-  [INFO] SCBPositionDAO_BACKUP.java (PAIR) - 파일명이 'DAO' 로 끝나지 않아 매핑 대상에서 제외
+    COURTBondReceiptTransferMDAO.java             <->  COURTBondReceiptTransferMMapper.xml
+    COURTComCodeMDAO.java                         <->  COURTComCodeMMapper.xml
+    COURTOverallStatusDtlVDAO.java                <->  COURTOverallStatusDtlVMapper.xml
+    SCBDivReportSegMDAO.java                      <->  SCBDivReportSegMMapper.xml
+    SCBSalesAnalysisTab1DAO.java                  <->  SCBSalesAnalysisTab1Mapper.xml
+    SCBSalesAnalysisTab2DAO.java                  <->  SCBSalesAnalysisTab2Mapper.xml
+    SCBSalesAnalysisTab3DAO.java                  <->  SCBSalesAnalysisTab3Mapper.xml
+    SCBSalesAnalysisTab4DAO.java                  <->  SCBSalesAnalysisTab4Mapper.xml
+    SCBSalesAnalysisTab5DAO.java                  <->  SCBSalesAnalysisTab5Mapper.xml
+    SCLCbFrtRevSDAO.java                          <->  SCLCbFrtRevSMapper.xml
+    SCLCbHireSDAO.java                            <->  SCLCbHireSMapper.xml
+    SCLCbIndexMDAO.java                           <->  SCLCbIndexMMapper.xml
+    SCLCbProdSmrySDAO.java                        <->  SCLCbProdSmrySMapper.xml
+    SYSManagementMDAO.java                        <->  SYSManagementMMapper.xml
+    SystemMoniterDAO.java                         <->  SystemMoniterMapper.xml
+
+────────────────────────────────────────────────────────────────────────────────
+
+  [ 이슈 목록 ]
+
+  LV     파일                                 위치                              카테고리           메시지
+  ──────────────────────────────────────────────────────────────────────────────
+  ERROR  COURTBondReceiptTransferMDAO.java  ReceiptTransferAdmitDenyInsert  PARAM_MISSING  DAO 에서 put 누락: ['userInfo'] (id=ReceiptTransferAdmitDenyInsert)
+  ERROR  COURTBondReceiptTransferMDAO.java  ReceiptTransferAdmitDenyUpdate  PARAM_MISSING  DAO 에서 put 누락: ['userInfo'] (id=ReceiptTransferAdmitDenyUpdate)
+  ERROR  SCLAccountSDAO.java                -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLAccountSMapper.xml)
+  ERROR  SCLCbBnkSDAO.java                  -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbBnkSMapper.xml)
+  ERROR  SCLCbFrtRevSDAO.java               VoyageAnalAccInquiry            PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'team_code', 'util'] (id=voyageAnalAccInquiry)
+  ERROR  SCLCbFrtRevSDAO.java               VoyageAnalVslvoyInquiry         PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=voyageAnalVslvoyInquiry)
+  ERROR  SCLCbHireSDAO.java                 cbUpdate                        PARAM_MISSING  DAO 에서 put 누락: ['cb_sa_voy_no', 'cht_in_out_code', 'voy_no', 'vsl_code'] (id=cbUpdate)
+  ERROR  SCLCbHireSDAO.java                 closingSupportSoaVoyInquiry     PARAM_MISSING  DAO 에서 put 누락: ['cb_sa_voy_no', 'cht_in_out_code', 'vsl_code'] (id=closingSupportSoaVoyInquiry)
+  ERROR  SCLCbHireSDAO.java                 closingSupportVoyInquiry        PARAM_MISSING  DAO 에서 put 누락: ['cht_in_out_code', 'voy_no', 'vsl_code'] (id=closingSupportVoyInquiry)
+  ERROR  SCLCbHireSDAO.java                 hireSave                        PARAM_MISSING  DAO 에서 put 누락: ['acc_code', 'cb_sa_voy_no', 'cht_in_out_code', 'cl_year_month', 'sa_seq', 'sa_seq1', 'sa_voy_no', 'sa_voys', 'sys_upd_date', 'sys_upd_user_id', 'voy_no', 'vsl_code'] (id=hireSave)
+  ERROR  SCLCbHireSDAO.java                 hireVoySearch                   PARAM_MISSING  DAO 에서 put 누락: ['cht_in_out_code', 'cl_year_month', 'voy_no', 'vsl_code'] (id=hireVoySearch)
+  ERROR  SCLCbHireSDAO.java                 saVoySearch                     PARAM_MISSING  DAO 에서 put 누락: ['cht_in_out_code', 'hire_from_date', 'hire_to_date', 'vsl_code'] (id=saVoySearch)
+  ERROR  SCLCbIndexMDAO.java                AccidentalInquiry               PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=accidentalInquiry)
+  ERROR  SCLCbIndexMDAO.java                NonTonnageTaxInquiry            PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=nonTonnageTaxInquiry)
+  ERROR  SCLCbNonPortCgoExpSDAO.java        -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbNonPortCgoExpSMapper.xml)
+  ERROR  SCLCbNonPortChgSDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbNonPortChgSMapper.xml)
+  ERROR  SCLCbPortCgoExpSDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbPortCgoExpSMapper.xml)
+  ERROR  SCLCbPortChgCgoExpSDAO.java        -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbPortChgCgoExpSMapper.xml)
+  ERROR  SCLCbPortChgSDAO.java              -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbPortChgSMapper.xml)
+  ERROR  SCLCbVrSDAO.java                   -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbVrSMapper.xml)
+  ERROR  SCLCbbackupPerfMDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCbbackupPerfMMapper.xml)
+  ERROR  SCLCloseMaterialSDAO.java          -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLCloseMaterialSMapper.xml)
+  ERROR  SCLTcInWthTaxChkDAO.java           -                               PAIR           짝이 되는 Mapper XML 없음 (기대: SCLTcInWthTaxChkMapper.xml)
+  ERROR  SystemMoniterDAO.java              getProcessList                  PARAM_MISSING  DAO 에서 put 누락: ['MybatisUtil', 'co', 'kr', 'takeit', 'util'] (id=getProcessList1)
+
+────────────────────────────────────────────────────────────────────────────────
