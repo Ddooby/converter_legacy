@@ -1,0 +1,277 @@
+{
+  "import_replacements": [
+    {"from": "import javax.ejb.*;\n", "to": ""},
+    {"from": "import javax.naming.*;\n", "to": ""},
+    {"from": "import com.miplatform.DataSet;\n", "to": ""},
+    {"from": "import com.miplatform.DataSetManager;\n", "to": ""},
+    {"from": "import com.tobesoft.platform.PlatformRequest;\n", "to": ""},
+    {"from": "import com.tobesoft.platform.PlatformResponse;\n", "to": ""},
+    {"from": "import com.tobesoft.platform.data.Dataset;\n", "to": ""},
+    {"from": "import com.tobesoft.platform.data.DatasetList;\n", "to": ""},
+    {"from": "import com.tobesoft.platform.data.VariableList;\n", "to": ""},
+    {"from": "import com.stx.som.miplatform.dataset.DataSetManager;\n", "to": "import com.pan.som.common.utility.DataSetManager;\n"},
+    {"from": "import com.stx.som.common.exception.STXException;\n", "to": ""},
+    {"from": "import com.stx.som.common.servicefactory.ServiceObjFactory;\n", "to": ""},
+    {"from": "import com.stx.som.common.servlet.GeneralServlet;\n", "to": ""},
+    {"from": "import com.stx.som.common.utility.UserBean;\n", "to": ""},
+    {"from": "import com.stx.som.common.utility.Formatter;\n", "to": "import com.pan.som.common.utility.Formatter;\n"},
+    {"from": "import java.util.ArrayList;\n", "to": ""},
+    {"from": "import java.util.Collection;\n", "to": ""},
+    {"from": "import java.util.Vector;\n", "to": ""},
+    {"from": "com.stx.som.business.", "to": "com.pan.som."},
+    {"from": "com.stx.som.channel.", "to": "com.pan.som.controller."},
+    {"from": "com.stx.som.", "to": "com.pan.som."}
+  ],
+  "import_additions": [
+    "import org.springframework.stereotype.Controller;",
+    "import org.springframework.web.bind.annotation.RequestMapping;",
+    "import com.pan.som.common.resourceBundle.MessageResources;",
+    "import kr.co.takeit.mvc.context.UxbDataRequest;",
+    "import kr.co.takeit.mvc.context.UxbDataResponse;",
+    "import kr.co.takeit.dataset.DataSetRowStatus;",
+    "import lombok.RequiredArgsConstructor;",
+    "import lombok.extern.slf4j.Slf4j;",
+    "import java.util.Map;",
+    "import java.util.List;",
+    "import java.util.*;"
+  ],
+  "annotation_replacements": [
+    {"from": "@Stateless", "to": "@Controller"},
+    {"from": "@Stateful", "to": "@Controller"},
+    {"from": "@EJB", "to": "@Autowired"},
+    {"from": "@Remote", "to": ""},
+    {"from": "@Local", "to": ""}
+  ],
+  "text_replacements": [
+    {"from": "STXException", "to": "Exception"},
+    {"from": "addErrorMessage(out_vl,", "to": "addErrorMessage(dataResponse,"},
+    {"from": " extends GeneralServlet", "to": ""},
+    {"from": "new Long(Long.parseLong(", "to": "Long.parseLong(", "close_paren_count": 1},
+    {"from": "new Integer(Integer.parseInt(", "to": "Integer.parseInt(", "close_paren_count": 1},
+    {"from": "new Long(", "to": "Long.valueOf("},
+    {"from": "new Integer(", "to": "Integer.valueOf("}
+  ],
+  "package_convention": {
+    "description": "channel 패키지는 controller로 변환 시 서브모듈 1단계만 유지 (2단계 이상 서브패키지 제거)",
+    "example_from": "com.stx.som.channel.bunkerSupply.lubeOilContractPrice",
+    "example_to":   "com.pan.som.controller.bunkerSupply",
+    "rule": "com.stx.som.channel.{module}.{...} → com.pan.som.controller.{module}"
+  },
+  "class_naming": {
+    "controller": {"from_suffix": "Servlet", "to_suffix": "Controller"},
+    "service":    {"from_suffix": "Servlet", "to_suffix": "Service"},
+    "extends":    "없음 — BaseController 상속 제거. Spring GlobalExceptionHandler로 예외 처리."
+  },
+  "controller_method_structure": {
+    "description": "Controller @RequestMapping 메서드에 try/catch 불필요 — GlobalExceptionHandler가 처리",
+    "wrap_try_catch": false,
+    "success_call": "dataResponse.success(); — try/catch 없이 메서드 마지막에 호출"
+  },
+  "row_status_pattern": {
+    "description": "Dataset row의 status 컬럼 → DataSetRowStatus enum으로 변환",
+    "from": "setStatus((String) row.get(\"status\"))",
+    "to":   "setRowStatus(DataSetRowStatus.valueOf((String) row.get(\"status\")))",
+    "copy_from": "getStatus()",
+    "copy_to":   "getRowStatus()",
+    "required_import": "import kr.co.takeit.dataset.DataSetRowStatus;"
+  },
+  "params_to_remove": [
+    "UserBean userBean",
+    "Connection conn"
+  ],
+  "ejb_home_remote_patterns": {
+    "description": "ServletConverter01/02 기반 — EJB Home/Remote 선언·생성 제거 후 service.method() 호출로 대체",
+    "home_pattern":   "\\w+Home\\s+\\w+\\s*=\\s*\\([^)]+\\)\\s*ServiceObjFactory\\.getInstance\\(\\)\\.lookUpHome\\([^)]+\\);",
+    "remote_create":  "\\w+\\s+\\w+\\s*=\\s*\\([^)]+\\)\\s*\\w+\\.create\\(\\);",
+    "call_with_result":  "$resultVar = service.$method($args);",
+    "call_without_result": "service.$method($args);"
+  },
+  "output_replacements": {
+    "description": "out_vl / addDataset / addStr / addVariable 등 → dataResponse 계열로 치환 (ServletConverter01 기반)",
+    "rules": [
+      {"regex": "(?<!dataResponse\\.)\\b\\w+\\.addDataset\\s*\\(", "to": "dataResponse.addDataSet("},
+      {"regex": "(?<!dataResponse\\.)\\b\\w+\\.addStr\\s*\\(",    "to": "dataResponse.addParam("},
+      {"regex": "\\bout_vl\\.addParam\\s*\\(",                    "to": "dataResponse.addParam("},
+      {"regex": "\\bout_vl\\.addInt\\s*\\(",                      "to": "dataResponse.addParam("},
+      {"regex": "\\bout_vl\\.addDouble\\s*\\(",                   "to": "dataResponse.addParam("},
+      {"regex": "\\bout_vl\\.addLong\\s*\\(",                     "to": "dataResponse.addParam("},
+      {
+        "description": "out_vl.addVariable(\"key\", numVal) → dataResponse.addParam(\"key\", String.valueOf(numVal))",
+        "regex":       "\\bout_vl\\.addVariable\\s*\\(\\s*(\"[^\"]+\")\\s*,\\s*([^)]+)\\s*\\)\\s*;",
+        "to":          "dataResponse.addParam($1, String.valueOf($2));"
+      }
+    ]
+  },
+  "getValueAsString_pattern": {
+    "description": "getValueAsString → dataRequest.getString (ServletConverter01 기반)",
+    "rules": [
+      {
+        "description": "Formatter.nullTrim(*.getValueAsString(\"key\")) → dataRequest.getString(\"key\")",
+        "regex":       "Formatter\\.nullTrim\\s*\\(\\s*\\w+\\.getValueAsString\\s*\\(\\s*\"([^\"]+)\"\\s*\\)\\s*\\)",
+        "replacement": "dataRequest.getString(\"$1\")"
+      },
+      {
+        "description": "*.getValueAsString(\"key\") → dataRequest.getString(\"key\")",
+        "regex":       "\\b\\w+\\.getValueAsString\\s*\\(\\s*\"([^\"]+)\"\\s*\\)",
+        "replacement": "dataRequest.getString(\"$1\")"
+      }
+    ]
+  },
+  "platform_code_removals": {
+    "description": "MiPlatform / tobesoft 플랫폼 관련 코드 제거",
+    "remove_statements": [
+      "platformRequest.receiveData();",
+      "platformResponse.sendData(out_vl, out_dl);"
+    ],
+    "remove_declarations": [
+      "VariableList out_vl = new VariableList();",
+      "DatasetList out_dl = new DatasetList();",
+      "VariableList in_vl = platformRequest.getVariableList();",
+      "DatasetList in_dl = platformRequest.getDatasetList();"
+    ],
+    "remove_fields": [
+      "private static final long serialVersionUID"
+    ]
+  },
+  "datasetmanager_patterns": {
+    "description": "DataSetManager 관련 패턴 처리",
+    "convertResultDataSet": {
+      "description": "Dataset 선언+addDataset이 1:1로 붙어있는 경우",
+      "pattern_multiline": true,
+      "regex":       "Dataset\\s+(\\w+)\\s*=\\s*DataSetManager\\.convertResultDataSet\\s*\\(\\s*(\\w+)\\s*,[^)]+\\)\\s*;\\s*\\w+\\.addDataset\\s*\\(\\s*\"([^\"]+)\"\\s*,\\s*\\1\\s*\\)\\s*;",
+      "replacement": "dataResponse.addDataSet(\"$3\", $2);"
+    },
+    "convertResultDataSet_noArg": {
+      "description": "DataSetManager.convertResultDataSet(collection) — DtoClass 인자 없는 버전, 1:1 붙어있는 경우",
+      "pattern_multiline": true,
+      "regex":       "Dataset\\s+(\\w+)\\s*=\\s*DataSetManager\\.convertResultDataSet\\s*\\(\\s*(\\w+)\\s*\\)\\s*;\\s*\\w+\\.addDataset\\s*\\(\\s*\"([^\"]+)\"\\s*,\\s*\\1\\s*\\)\\s*;",
+      "replacement": "dataResponse.addDataSet(\"$3\", $2);"
+    },
+    "convertResultDataSet_separated": {
+      "description": "선언부/addDataset부가 분리된 경우: Dataset 선언만 있는 줄은 제거, addDataset은 output_replacements 규칙으로 처리",
+      "regex":       "Dataset\\s+\\w+\\s*=\\s*DataSetManager\\.convertResultDataSet\\s*\\([^;]+\\)\\s*;",
+      "replacement": ""
+    },
+    "getEntities": {
+      "description": "new DataSetManager() 인스턴스 생성 후 getEntities 호출 → static DataSetManager.getEntities + dataRequest.getDataSet으로 변환",
+      "remove_instantiation_regex": "DataSetManager\\s+\\w+\\s*=\\s*new\\s+DataSetManager\\(\\)\\s*;",
+      "instance_call_regex":        "Collection\\s+(\\w+)\\s*=\\s*\\w+\\.getEntities\\s*\\(\\s*(\\w+)\\s*,\\s*(\\w+)\\.class\\s*\\)\\s*;",
+      "instance_call_replacement":  "ArrayList<$3> $1 = DataSetManager.getEntities(dataRequest.getDataSet(\"$2\"), $3.class);",
+      "note": "第二引数の Dataset 変数名 → dataRequest.getDataSet(\"変数名\") へ変換。変数名はDS名と同一前提"
+    }
+  },
+  "dataset_row_iteration_patterns": {
+    "description": "MiPlatform Dataset 행 반복 접근 → List<Map<String,Object>> 기반 for-each 변환",
+    "method_param": {
+      "from": "Dataset (\\w+)",
+      "to":   "List<Map<String, Object>> dataList",
+      "note": "메서드 파라미터 Dataset → List<Map<String,Object>> 치환"
+    },
+    "row_loop": {
+      "from_regex": "for\\s*\\(\\s*int\\s+i\\s*=\\s*0\\s*;\\s*i\\s*<\\s*\\w+\\.getRowCount\\(\\)\\s*;\\s*i\\+\\+\\s*\\)",
+      "to":         "for (Map<String, Object> row : dataList)"
+    },
+    "column_loop": {
+      "from_regex": "for\\s*\\(\\s*int\\s+k\\s*=\\s*0\\s*;\\s*k\\s*<\\s*\\w+\\.getColumnCount\\(\\)\\s*;\\s*k\\+\\+\\s*\\)",
+      "to":         "for (String colKey : row.keySet())"
+    },
+    "getColumnID": {
+      "from_regex": "\\w+\\.getColumnID\\s*\\(\\s*k\\s*\\)",
+      "to":         "colKey"
+    },
+    "getColumnAsString": {
+      "from_regex": "\\w+\\.getColumnAsString\\s*\\(\\s*i\\s*,\\s*\"([^\"]+)\"\\s*\\)",
+      "to":         "(String) row.get(\"$1\")"
+    },
+    "getColumnAsString_var": {
+      "from_regex": "\\w+\\.getColumnAsString\\s*\\(\\s*i\\s*,\\s*(\\w+)\\s*\\)",
+      "to":         "(String) row.get($1)"
+    },
+    "getColumnAsDouble": {
+      "from_regex": "\\w+\\.getColumnAsDouble\\s*\\(\\s*i\\s*,\\s*\"([^\"]+)\"\\s*\\)",
+      "to":         "Double.parseDouble(StringUtil.nvl((String) row.get(\"$1\"), \"0\"))"
+    },
+    "getColumnAsDouble_var": {
+      "from_regex": "\\w+\\.getColumnAsDouble\\s*\\(\\s*i\\s*,\\s*(\\w+)\\s*\\)",
+      "to":         "Double.parseDouble(StringUtil.nvl((String) row.get($1), \"0\"))"
+    },
+    "getColumnAsInt": {
+      "from_regex": "\\w+\\.getColumnAsInt\\s*\\(\\s*i\\s*,\\s*\"([^\"]+)\"\\s*\\)",
+      "to":         "Integer.parseInt(StringUtil.nvl((String) row.get(\"$1\"), \"0\"))"
+    },
+    "getColumnAsLong": {
+      "from_regex": "\\w+\\.getColumnAsLong\\s*\\(\\s*i\\s*,\\s*\"([^\"]+)\"\\s*\\)",
+      "to":         "Long.parseLong(StringUtil.nvl((String) row.get(\"$1\"), \"0\"))"
+    }
+  },
+  "manual_processing_required": {
+    "description": "패턴으로 자동화 불가 — 수동 처리 필요 항목",
+    "items": [
+      {
+        "name": "멀티 서비스 필드 분리",
+        "description": "AS-IS의 여러 EJB Home(IBunkerOrderHome, IErpHome 등)을 각각 별도 Spring Service 필드로 분리해야 함. Home 타입명 → Service 클래스명 매핑 규칙이 프로젝트마다 달라 자동화 불가.",
+        "example_as_is": "IBunkerOrderHome, IBunkerRequestHome, IErpHome, IOperationErpInterfaceHome",
+        "example_to_be":  "private final BunkerOrderService bunkerOrderService;\nprivate final BunkerRequestService bunkerRequestService;\nprivate final ErpService erpService;\nprivate final OperationErpInterfaceService operationErpInterfaceService;"
+      },
+      {
+        "name": "지역변수 snake_case → camelCase",
+        "description": "메서드 내 지역변수명(req_no, order_no, vsl_code 등)을 camelCase(reqNo, orderNo, vslCode)로 변환. 변수 사용처까지 일괄 rename 필요하며 DTO setter 인자명과 혼동 위험이 있어 수동 처리.",
+        "example_as_is": "String req_no = dataRequest.getString(\"req_no\");",
+        "example_to_be":  "String reqNo = dataRequest.getString(\"req_no\");"
+      }
+    ]
+  },
+  "dataset_patterns": {
+    "description": "Dataset + getEntity/getEntities → Spring 스타일 List 변환 (ServletConverter01 기반)",
+    "getEntity": {
+      "pattern":     "Dataset\\s+(\\w+)\\s*=\\s*[\\w\\.]+getDataset\\s*\\(\\s*\"([^\"]+)\"\\s*\\)\\s*;\\s*(\\w+)\\s+(\\w+)\\s*=\\s*\\(\\s*\\3\\s*\\)\\s*dataSetManager\\.getEntity\\s*\\(\\s*\\1\\s*,\\s*\\3\\.class\\s*\\)\\s*;",
+      "replacement": "List<$3> $1 = dataRequest.getObjectList(\"$2\", $3.class);\n$3 $4 = null;\nif($1.size() > 0) {\n    $4 = $1.get(0);\n} else {\n    $4 = new $3();\n}"
+    },
+    "getEntities": {
+      "pattern":     "Dataset\\s+(\\w+)\\s*=\\s*[\\w\\.]+getDataset\\s*\\(\\s*\"([^\"]+)\"\\s*\\)\\s*;\\s*Collection\\s+(\\w+)\\s*=\\s*dataSetManager\\.getEntities\\s*\\(\\s*\\1\\s*,\\s*(\\w+)\\.class\\s*\\)\\s*;",
+      "replacement": "List<$4> $1 = dataRequest.getDataSet(\"$2\");\nCollection $3 = $1;"
+    }
+  },
+  "functionGubun_branching": {
+    "description": "execute() 내 functionGubun/type 분기 → 개별 @RequestMapping 메서드로 분리 (ServletConverter01 기반)",
+    "branch_condition_regex": "\"([^\"]+)\"\\.equals\\s*\\(\\s*(functionGubun|type)\\s*\\)",
+    "method_template": {
+      "annotation":  "@RequestMapping(\"{methodName}.do\")",
+      "signature":   "public void {methodName}(UxbDataRequest dataRequest, UxbDataResponse dataResponse)",
+      "first_line":  "Map<String, Object> paramMap = dataRequest.getParamMap();",
+      "wrap_try":    true,
+      "end_line":    "dataResponse.success();"
+    }
+  },
+  "url_patterns": {
+    "description": "URL·메서드명 camelCase 변환 (ServletConverter04 기반)",
+    "method_naming": "camelCase",
+    "url_naming":    "camelCase",
+    "url_suffix":    ".do",
+    "snake_to_camel_regex": "[_-]([a-zA-Z])"
+  },
+  "controller_template": {
+    "description": "Controller 클래스 생성 틀 (ServletConverter01 generate_controller 기반)",
+    "package":     "com.pan.som.controller.{subpackage}",
+    "annotations": [
+      "@Controller",
+      "@Slf4j",
+      "@RequiredArgsConstructor",
+      "@RequestMapping(\"/{mapping}/*\")"
+    ],
+    "extends":        "BaseController",
+    "service_field":  "private final {ServiceClass} service;"
+  },
+  "service_template": {
+    "description": "Service 클래스 생성 틀 (ServletConverter03 기반 — 빈 껍데기 + 메서드 스텁)",
+    "package":     "com.pan.som.service.{subpackage}",
+    "annotations": ["@Service", "@Slf4j"],
+    "imports": [
+      "org.springframework.stereotype.Service",
+      "lombok.extern.slf4j.Slf4j",
+      "java.util.Collection",
+      "java.util.HashMap"
+    ],
+    "method_stub": "public {returnType} {methodName}({params}) {\n    // TODO: Implement\n    {returnStatement}\n}"
+  }
+}
