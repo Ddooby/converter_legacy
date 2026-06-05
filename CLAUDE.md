@@ -59,18 +59,18 @@ converter_legacy/
                                         DAO 파일이면 XxxMapper.xml 도 함께 배치
 
 2. 패턴 학습 (Claude API 호출 — 샘플 추가 시에만 실행)
-   python -m converter.dao.convert learn
+   python -m converter.dao.daoMain learn
 
 3. 변환 실행 (API 호출 없음)
    converter/dao/input/ ← 변환할 EJB 파일 배치
-   python -m converter.dao.convert convert
+   python -m converter.dao.daoMain convert
 
 4. 결과 확인
    converter/dao/output/ ← 변환된 Java + Mapper XML 파일 확인
 
 5. 변환 파일 검증
    converter/dao/validate/ ← 가공한 파일 배치
-   python -m converter.dao.convert validate
+   python -m converter.dao.daoMain validate
 ```
 
 ---
@@ -146,7 +146,7 @@ cp .env.example .env
 ### Claude API 사용 원칙
 - `analyzer.py` 전용 — 샘플에서 치환 규칙을 추출할 때만 호출
 - 출력 형식: 코드가 직접 실행 가능한 `import_replacements` / `annotation_replacements` / `text_replacements` JSON
-- 변환 규칙이 바뀌면 샘플을 추가하고 `python -m converter.dao.convert learn --relearn` 재실행
+- 변환 규칙이 바뀌면 샘플을 추가하고 `python -m converter.dao.daoMain learn --relearn` 재실행
 - `converter.py` 는 API를 **호출하지 않음** — 저장된 패턴 JSON + 내장 규칙만 사용
 
 ### 코드 스타일

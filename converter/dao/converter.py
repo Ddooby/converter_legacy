@@ -26,7 +26,7 @@ OUTPUT_DIR = _env_path("OUTPUT_DIR", "converter/dao/output")
 PATTERNS_FILE = _env_path("PATTERNS_FILE", "converter/dao/patterns/learned_patterns.json")
 
 # Panocean Git 프로젝트 경로 (output 파일 생성 시 프로젝트 폴더에도 같이 생성)
-EXTERNAL_GEN_YN = True  # output 파일을 외부 프로젝트에도 생성할지 여부;
+EXTERNAL_GEN_YN = os.getenv("EXTERNAL_GEN_YN", "true").strip().lower() == "true"
 EXTERNAL_DAO_BASE = _env_path_optional("EXTERNAL_DAO_BASE")
 EXTERNAL_MAPPER_BASE = _env_path_optional("EXTERNAL_MAPPER_BASE")
 

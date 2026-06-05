@@ -83,10 +83,10 @@ pip install -r requirements.txt
 
 # 변환 실행
 # converter/dao/input/ 폴더에 변환할 .java 파일을 넣은 후 실행
-python -m converter.dao.convert convert
+python -m converter.dao.daoMain convert
 
 # 패턴 파일 확인
-python -m converter.dao.convert patterns
+python -m converter.dao.daoMain patterns
 ```
 
 > 결과 파일은 `converter/dao/output/` 폴더에 생성됩니다.
@@ -200,13 +200,13 @@ Claude API 호출 없이 정적 분석만으로 동작합니다.
 
 ```bash
 # 기본 (converter/dao/validate/ 폴더 검증)
-python -m converter.dao.convert validate
+python -m converter.dao.daoMain validate
 
 # 검증 폴더 지정
-python -m converter.dao.convert validate --dir converter/dao/output
+python -m converter.dao.daoMain validate --dir converter/dao/output
 
 # 결과 보고서 파일로 저장
-python -m converter.dao.convert validate --dir converter/dao/validate --report converter/dao/validate/_validate_report.txt
+python -m converter.dao.daoMain validate --dir converter/dao/validate --report converter/dao/validate/_validate_report.txt
 ```
 
 `.env` 에 `VALIDATE_DIR=...` 를 두면 `--dir` 생략 가능.
