@@ -35,16 +35,22 @@ if CTRL_OVERWRITE_MODE not in _VALID_MODES:
 
 
 def _read_source(path: Path) -> str:
+    raw = path.read_bytes()
     try:
         import chardet
-        raw = path.read_bytes()
         enc = chardet.detect(raw)["encoding"] or "utf-8"
         try:
             return raw.decode(enc)
         except Exception:
             return raw.decode("cp949", errors="replace")
     except ImportError:
-        return path.read_text(encoding="utf-8", errors="replace")
+        # chardet 없을 때: utf-8 → cp949 → euc-kr 순으로 strict 시도
+        for enc in ("utf-8", "cp949", "euc-kr"):
+            try:
+                return raw.decode(enc)
+            except UnicodeDecodeError:
+                continue
+        return raw.decode("cp949", errors="replace")
 
 
 def _safe_write(path: Path, content: str) -> bool:
@@ -102,12 +108,8 @@ class RuleEngine:
                 if field not in line
             )
 
-        # 5. getValueAsString 패턴 치환
-        for rule in patterns.get("getValueAsString_pattern", {}).get("rules", []):
-            regex = rule.get("regex", "")
-            replacement = _java_to_python_backref(rule.get("replacement", ""))
-            if regex:
-                code = re.sub(regex, replacement, code)
+        # 5. getValueAsString 패턴 치환 → _apply_get_value_as_string 에서 분기 블록 스코프 내 적용
+        #    전역 적용 시 헬퍼 메서드에도 dataRequest.getString() 이 주입되는 오염 문제 방지
 
         # 6. output 치환 (addDataset, addStr, out_vl 등)
         for rule in patterns.get("output_replacements", {}).get("rules", []):
@@ -172,7 +174,7 @@ class ServletTransformer:
         code = source
 
         # 1. EJB Home/Remote 패턴 제거 → service 호출로 변환
-        code = self._replace_ejb_home_remote(code)
+        code, service_fields = self._replace_ejb_home_remote(code)
 
         # 2. Logger 필드 제거 (@Slf4j 로 대체)
         code = re.sub(
@@ -189,8 +191,8 @@ class ServletTransformer:
         # 4. execute() 내 functionGubun 분기 → @RequestMapping 메서드 생성
         code = self._convert_execute_to_request_mappings(code)
 
-        # 5. 클래스 선언 변환 (Servlet → Controller, 어노테이션 추가)
-        code = self._convert_class_declaration(code, class_name)
+        # 5. 클래스 선언 변환 (Servlet → Controller, 어노테이션 + service 필드 추가)
+        code = self._convert_class_declaration(code, class_name, service_fields)
 
         # 6. RuleEngine 규칙 일괄 적용 (import 치환, 플랫폼 코드 제거 등)
         code = self.rule_engine.apply(code, self.patterns)
@@ -198,13 +200,17 @@ class ServletTransformer:
         # 7. 패키지 경로 단일 레벨 정규화: rule_engine이 channel→controller 치환 후 실행
         code = self._normalize_package(code)
 
-        # 8. margeCollections Dataset → List<Map<String, Object>> 변환
+        # 8. service import 추가 + EJB 인터페이스 import 제거 (패키지 정규화 후 실행)
+        code = self._add_service_imports(code, service_fields)
+        code = self._remove_ejb_interface_imports(code)
+
+        # 9. margeCollections Dataset → List<Map<String, Object>> 변환
         code = self._convert_marge_collections(code)
 
-        # 9. 중복 캐스트 제거: (String) (String) → (String)
+        # 10. 중복 캐스트 제거: (String) (String) → (String)
         code = re.sub(r'\(String\)\s*\(String\)', '(String)', code)
 
-        # 10. 빈 줄 3개 이상 → 1개로 압축
+        # 11. 빈 줄 3개 이상 → 1개로 압축
         code = re.sub(r'\n{3,}', '\n\n', code)
 
         return code
@@ -213,10 +219,12 @@ class ServletTransformer:
     # EJB Home/Remote 제거
     # ------------------------------------------------------------------
 
-    def _replace_ejb_home_remote(self, code: str) -> str:
+    def _replace_ejb_home_remote(self, code: str) -> tuple[str, list[tuple[str, str]]]:
+        """EJB Home/Remote 패턴 제거. (code, [(ServiceClass, serviceVar), ...]) 반환."""
         lines = code.splitlines()
+        collected: dict[str, str] = {}  # serviceVar → ServiceClass (중복 제거)
         while True:
-            home_vars: dict[str, int] = {}
+            home_vars: dict[str, tuple[str, int]] = {}  # var_name → (home_type, line_idx)
             remote_vars: dict[str, tuple[str, int]] = {}
             call_lines: list[tuple] = []
 
@@ -226,7 +234,7 @@ class ServletTransformer:
                     line
                 )
                 if m:
-                    home_vars[m.group(2)] = idx
+                    home_vars[m.group(2)] = (m.group(1), idx)
 
             for idx, line in enumerate(lines):
                 m = re.search(r'(\w+)\s+(\w+)\s*=\s*(?:\([^)]+\)\s*)?(\w+)\.create\(\);', line)
@@ -251,14 +259,17 @@ class ServletTransformer:
                 if remote_var in remote_vars:
                     home_var, remote_idx = remote_vars[remote_var]
                     if home_var in home_vars:
-                        home_idx = home_vars[home_var]
+                        home_type, home_idx = home_vars[home_var]
+                        service_var = self._home_type_to_service_var(home_type)
+                        service_cls = self._home_type_to_service_class(home_type)
+                        collected[service_var] = service_cls
                         to_remove.add(home_idx)
                         to_remove.add(remote_idx)
                         indent = re.match(r'(\s*)', lines[call_idx]).group(1)
                         if result_var:
-                            to_replace[call_idx] = f"{indent}{result_var} = service.{method_name}({args});"
+                            to_replace[call_idx] = f"{indent}{result_var} = {service_var}.{method_name}({args});"
                         else:
-                            to_replace[call_idx] = f"{indent}service.{method_name}({args});"
+                            to_replace[call_idx] = f"{indent}{service_var}.{method_name}({args});"
                         found = True
 
             if not found:
@@ -274,7 +285,28 @@ class ServletTransformer:
                     new_lines.append(line)
             lines = new_lines
 
-        return '\n'.join(lines)
+        service_fields = [(cls, var) for var, cls in sorted(collected.items())]
+        return '\n'.join(lines), service_fields
+
+    @staticmethod
+    def _home_type_to_service_var(home_type: str) -> str:
+        """ILubePriceHome → lubePriceService"""
+        name = home_type
+        if name.startswith('I'):
+            name = name[1:]
+        if name.endswith('Home'):
+            name = name[:-4]
+        return name[0].lower() + name[1:] + 'Service'
+
+    @staticmethod
+    def _home_type_to_service_class(home_type: str) -> str:
+        """ILubePriceHome → LubePriceService"""
+        name = home_type
+        if name.startswith('I'):
+            name = name[1:]
+        if name.endswith('Home'):
+            name = name[:-4]
+        return name + 'Service'
 
     # ------------------------------------------------------------------
     # 패키지 정규화: channel.a.b → controller.a
@@ -299,14 +331,15 @@ class ServletTransformer:
     # 클래스 선언 변환
     # ------------------------------------------------------------------
 
-    def _convert_class_declaration(self, code: str, class_name: str) -> str:
-        controller_name = class_name.replace("Servlet", "Controller")
+    def _convert_class_declaration(self, code: str, class_name: str,
+                                    service_fields: list[tuple[str, str]]) -> str:
+        controller_name = re.sub(r'Ser[lv]{2}et', 'Controller', class_name)
 
         # 클래스명 변경
         code = code.replace(class_name, controller_name)
 
-        # extends GeneralServlet 제거
-        code = re.sub(r'\s+extends\s+\w*Servlet\b', '', code)
+        # extends GeneralServlet / GeneralSerlvet 제거 (오타 포함)
+        code = re.sub(r'\s+extends\s+\w*Ser[lv]{2}et\b', '', code)
         code = re.sub(r'\s+extends\s+BaseController\b', '', code)
 
         # 클래스 선언 앞에 어노테이션 추가
@@ -324,6 +357,17 @@ class ServletTransformer:
             code
         )
 
+        # 클래스 여는 중괄호 직후 service 필드 삽입
+        if service_fields:
+            fields_block = "\n".join(
+                f"    private final {cls} {var};" for cls, var in service_fields
+            )
+            code = re.sub(
+                r'(public\s+class\s+' + re.escape(controller_name) + r'[^{]*\{)',
+                r'\1\n\n' + fields_block + '\n',
+                code
+            )
+
         return code
 
     def _extract_request_mapping(self, controller_name: str) -> str:
@@ -332,6 +376,36 @@ class ServletTransformer:
         if name:
             name = name[0].lower() + name[1:]
         return name
+
+    @staticmethod
+    def _remove_ejb_interface_imports(code: str) -> str:
+        """변환 후 남은 EJB Home/Remote 인터페이스 import 제거 (I[대문자]로 시작하는 클래스)."""
+        lines = code.splitlines(keepends=True)
+        result = []
+        for line in lines:
+            m = re.match(r'\s*import\s+[\w.]+\.(I[A-Z]\w+)\s*;\s*\n?', line)
+            if m:
+                continue  # EJB 인터페이스 import 제거
+            result.append(line)
+        return ''.join(result)
+
+    def _add_service_imports(self, code: str, service_fields: list[tuple[str, str]]) -> str:
+        """패키지 정규화 후 service import를 controller 패키지 기준으로 추가."""
+        if not service_fields:
+            return code
+        pkg_m = re.search(r'package\s+com\.pan\.som\.controller\.(\w+)', code)
+        if not pkg_m:
+            return code
+        submodule = pkg_m.group(1)
+        for service_cls, _ in service_fields:
+            imp = f"import com.pan.som.service.{submodule}.{service_cls};"
+            if imp not in code:
+                code = re.sub(
+                    r'(package\s+[\w.]+;\s*\n)',
+                    r'\1' + imp + '\n',
+                    code, count=1
+                )
+        return code
 
     # ------------------------------------------------------------------
     # execute() → @RequestMapping 메서드 변환
@@ -397,7 +471,8 @@ class ServletTransformer:
     def _parse_function_gubun_blocks(self, execute_body: str) -> list[dict]:
         """functionGubun/type 분기 블록을 파싱해 메서드 목록으로 반환."""
         pattern = re.compile(
-            r'"([^"]+)"\s*\.equals\s*\(\s*(?:functionGubun|type)\s*\)',
+            r'(?:"([^"]+)"\s*\.equals\s*\(\s*(?:functionGubun|type)\s*\)'
+            r'|(?:functionGubun|type)\s*\.equals\s*\(\s*"([^"]+)"\s*\))',
             re.IGNORECASE
         )
         matches = list(pattern.finditer(execute_body))
@@ -406,7 +481,8 @@ class ServletTransformer:
 
         methods = []
         for idx, match in enumerate(matches):
-            method_name = self._to_camel_case(match.group(1))
+            gubun_value = match.group(1) or match.group(2)
+            method_name = self._to_camel_case(gubun_value)
             block_start = match.end()
 
             # if/else if 블록 시작 찾기
@@ -427,9 +503,12 @@ class ServletTransformer:
             # try { ... } catch 제거 — 내용만 추출
             block_body = self._strip_try_catch(block_body)
 
+            # getValueAsString → dataRequest.getString 변환 (분기 블록 스코프 내에서만 적용)
+            block_body = self._apply_get_value_as_string(block_body)
+
             methods.append({
                 "name": method_name,
-                "url": match.group(1),
+                "url": gubun_value,
                 "body": block_body.strip(),
             })
 
@@ -450,6 +529,15 @@ class ServletTransformer:
                 depth -= 1
             i += 1
         return code[body_start:i - 1]
+
+    def _apply_get_value_as_string(self, code: str) -> str:
+        """getValueAsString → dataRequest.getString 변환 (블록 스코프 내 전용)."""
+        for rule in self.patterns.get("getValueAsString_pattern", {}).get("rules", []):
+            regex = rule.get("regex", "")
+            replacement = _java_to_python_backref(rule.get("replacement", ""))
+            if regex:
+                code = re.sub(regex, replacement, code)
+        return code
 
     def _render_method(self, method: dict) -> str:
         name = method["name"]
@@ -636,7 +724,7 @@ class ServletConverter:
         logger.info(f"변환 중: {src.name}")
         result = self.transformer.transform(source, class_name)
 
-        out_name = class_name.replace("Servlet", "Controller") + ".java"
+        out_name = re.sub(r'Ser[lv]{2}et', 'Controller', class_name) + ".java"
         out_path = CTRL_OUTPUT_DIR / out_name
         if not _safe_write(out_path, result):
             return None

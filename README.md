@@ -225,7 +225,48 @@ python -m converter.dao.daoMain validate --dir converter/dao/validate --report c
 
 ---
 
-## 04. BigDecimal 후처리 패치 (`converter/dao/patch.py`)
+## 04. Servlet → Controller 변환 (`converter/controller/controllerMain.py`)
+
+EJB Servlet 파일을 Spring MVC Controller 파일로 변환하는 스크립트입니다.
+Claude API 호출 없이 저장된 패턴(`learned_patterns.json`)과 내장 규칙만으로 동작합니다.
+
+### 폴더 구조
+
+```
+converter/controller/
+├── input/         ← 변환할 Servlet.java 파일 배치
+├── output/        ← 변환된 Controller.java 파일 생성
+└── patterns/
+    └── learned_patterns.json   ← 변환 패턴 캐시
+```
+
+### 실행 방법
+
+```bash
+# input/ 폴더에 변환할 *Servlet.java 파일을 넣은 후 실행
+python -m converter.controller.controllerMain convert
+
+# 패턴 파일 내용 확인
+python -m converter.controller.controllerMain patterns
+```
+
+> 결과 파일은 `converter/controller/output/` 폴더에 생성됩니다.
+> 파일명은 `XxxServlet.java` → `XxxController.java` 로 자동 변경됩니다.
+
+### 환경변수 (`.env` 선택 설정)
+
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `CTRL_INPUT_DIR` | `converter/controller/input` | 입력 폴더 경로 |
+| `CTRL_OUTPUT_DIR` | `converter/controller/output` | 출력 폴더 경로 |
+| `CTRL_PATTERNS_FILE` | `converter/controller/patterns/learned_patterns.json` | 패턴 파일 경로 |
+| `CTRL_OVERWRITE_MODE` | `overwrite` | 출력 파일 중복 시 처리 (`overwrite` / `skip` / `backup`) |
+| `CTRL_EXTERNAL_GEN_YN` | `false` | 외부 경로에 결과 생성 여부 |
+| `CTRL_EXTERNAL_BASE` | (없음) | `CTRL_EXTERNAL_GEN_YN=true` 시 출력 기준 경로 |
+
+---
+
+## 05. BigDecimal 후처리 패치 (`converter/dao/patch.py`)
 
 자동 변환 또는 수동 커스텀이 완료된 Java 파일에 **AMT/AMOUNT 컬럼 타입을 BigDecimal로 후처리** 적용하는 스크립트입니다.
 Claude API 호출 없이 정규식 치환만으로 동작합니다.
