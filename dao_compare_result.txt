@@ -1,25 +1,36 @@
-Business   : C:\Projects\somSecond\SOM_Business_OperSt\ejbModule\com\stx\som\business\dao\globalOperationStatus
-Common     : C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\globalOperationStatus
-Git 1차 전환 : C:\Projects\Panocean\src\main\java\com\pan\som\dao\globalOperationStatus
+Business   : C:\Projects\somSecond\SOM_Business_Sysm\ejbModule\com\stx\som\business\dao\basicData
+Common     : C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\basicData
+Git 1차 전환 : C:\Projects\Panocean\src\main\java\com\pan\som\dao\basicData
 
-[Business+Common에 있고 Git 1차 전환에 없는 파일 - 2개]
-  OVSPortLineUpDAO.java                              [SOM_BUSINESS]
-  VoucherStatusCollectionDAO.java                    [SOM_BUSINESS]
+[Business+Common에 있고 Git 1차 전환에 없는 파일 - 0개]
 
-[Git 1차 전환에만 있는 파일 - 0개]
+[Git 1차 전환에만 있는 파일 - 13개]
+  ApprovedListDAO.java
+  BasicCodePopupDAO.java
+  CBDCanalChargeMDAO.java
+  CBDFreightTankerRateMDAO.java
+  CBDFreightTankerTaxMDAO.java
+  CBDPortChgHDAO.java
+  CBDPortInConsumptionTankerMDAO.java
+  DryBulkDAO.java
+  DryBulkDAO2.java
+  EISDeptMstDAO.java
+  EISVslUseLstDAO.java
+  IndexMngCommonDAO.java
+  InternalControlDAO.java
 
 [공통 파일 - 14개]
-  OVSAgentStsInfoDAO.java
-  OVSDailyReportDAO.java
-  OVSOpBoardPortSearchDAO.java
-  OVSOpBoardTropicalSearchDAO.java
-  OVSOpBoardVslSearchDAO.java
-  OVSOpBoardWeatherSearchDAO.java
-  OVSVslStsChkListAutoDAO.java
-  OVSVslStsChkListDetailDAO.java
-  OVSVslStsChkListHeadDAO.java
-  OVSVslStsInfoDAO.java
-  OVSVslStsMDAO.java
-  OperationNoticeDAO.java
-  SCBVslMoveMDAO.java
-  VslAccountBalanceListDAO.java
+  CBDCgoExpCarMDAO.java
+  CBDCgoExpLinerMDAO.java
+  CBDCgoExpLinerTaxMDAO.java
+  CBDCgoExpTnkMDAO.java
+  CBDCgoExpTramperMDAO.java
+  CBDDistanceMDAO.java
+  CBDHeatCleanBunkerMDAO.java
+  CBDManeuvPortMDAO.java
+  CBDNewPortChgMDAO.java
+  CBDPanamaCanalLaneInfoDAO.java
+  CBDPortChargeBulkMDAO.java
+  CBDPortChargeCarMDAO.java
+  CBDPortChargeTankerMDAO.java
+  CBDVslSpdBnkMDAO.java

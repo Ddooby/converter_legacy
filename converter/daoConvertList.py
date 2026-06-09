@@ -13,10 +13,10 @@ from pathlib import Path
 # ─────────────────────────────────────────────
 # 경로 설정 (여기만 수정하면 됨)
 # ─────────────────────────────────────────────
-PATH_SOM   = r"C:\Projects\somSecond\SOM_Business_OperSt\ejbModule\com\stx\som\business\dao\globalOperationStatus"
-PATH_COMMON = r"C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\globalOperationStatus"
+PATH_SOM   = r"C:\Projects\somSecond\SOM_Business_Sysm\ejbModule\com\stx\som\business\dao\basicData"
+PATH_COMMON = r"C:\Projects\somSecond\SOM_Common\CommonFnDaoSource\com\stx\som\business\dao\basicData"
 
-PATH_GIT   = r"C:\Projects\Panocean\src\main\java\com\pan\som\dao\globalOperationStatus"
+PATH_GIT   = r"C:\Projects\Panocean\src\main\java\com\pan\som\dao\basicData"
 
 EXTENSIONS = [".java"]  # 빈 리스트면 전체 파일 비교
 # ─────────────────────────────────────────────
