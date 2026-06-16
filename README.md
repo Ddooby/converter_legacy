@@ -316,3 +316,77 @@ PATCH_DIR=C:\Projects\MyApp\src\main\java\com\example\dao
 > `patch.py` 는 이미 변환·커스텀 완료된 파일에 소급 적용하는 용도입니다.
 
 ---
+
+## 06. MiPlatform XFDL → Nexacro XFDL 변환 (`converter/nexacro/nexacroMain.py`)
+
+1차 AI 변환된 XFDL 파일을 정제된 Nexacro XFDL로 자동 변환하는 스크립트입니다.
+Claude API 호출 없이 저장된 패턴(`nexacro_convert_patterns.json`)과 내장 규칙만으로 동작합니다.
+
+### 폴더 구조
+
+```
+converter/nexacro/
+├── as-is/         ← 변환할 XFDL 파일 배치 (1차 AI변환본)
+├── to-be/         ← 변환된 XFDL 파일 생성 (정제본)
+├── output/        ← 테스트 출력용 임시 폴더
+├── reference/     ← Java 변환 참고 소스 (패턴 추출 기준)
+├── patterns/
+│   └── nexacro_convert_patterns.json   ← 변환 패턴 정의
+├── nexacroMain.py ← CLI 진입점
+└── converter.py   ← 변환 엔진
+```
+
+### 실행 방법
+
+```bash
+# 기본 (as-is/ 폴더 전체 → to-be/ 폴더)
+python -m converter.nexacro.nexacroMain
+
+# 단일 파일 변환
+python -m converter.nexacro.nexacroMain path/to/input.xfdl
+
+# 단일 파일 변환 + 출력 경로 지정
+python -m converter.nexacro.nexacroMain path/to/input.xfdl path/to/output.xfdl
+
+# 폴더 단위 변환
+python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_dir
+```
+
+> 결과 파일은 기본적으로 `converter/nexacro/to-be/` 폴더에 생성됩니다.
+
+### 주요 변환 규칙 (Script 영역)
+
+| AS-IS | TO-BE |
+|-------|-------|
+| `pThis` | `this` |
+| `com.isEmpty(pThis, x)` | `com.isEmpty(x)` |
+| `.getRowCount()` | `.rowcount` |
+| `== "insert"` / `!= "NORMAL"` | `Dataset.ROWTYPE_INSERT` / `Dataset.ROWTYPE_NORMAL` |
+| `this.close(null)` | `com.fnClose(this)` |
+| `gdsCCDUserMDS` | `gdsUserInfo` (컬럼명 camelCase 포함) |
+| UXB INFO getBindDataset 마커 | `com.getBindDataset(this, 컴포넌트)` |
+| `[AIChanger]` 마커 (Script) | 실제 함수 호출 (`com.drawDetailGridBkColor` 등) |
+| 경고 주석 (`변수 확인 필요` 등) | 제거 |
+| `fnValidationCheck`, `fnInquiryTrans` | `async function` + 내부 `await` 자동 추가 |
+| `fnSave`, `fnAdd` 등 액션 함수 | `(async () => { ... }).call(this);` 감싸기 |
+| `fnAuthButtonControl` 내 IsExistVar 마커 | `take.nvl(this.parent.param)` 패턴으로 재작성 |
+
+### 주요 변환 규칙 (Layout Cell 영역)
+
+| AS-IS | TO-BE |
+|-------|-------|
+| `cssclass="EXPR(...)"` | `cssclass="expr:(...)"` |
+| `[AIChanger] drawDetailGridDisableColor` 마커 | `com.drawDetailGridDisableColor(...)` |
+| `[AIChanger] drawDetailGridBkColor` 마커 | `com.drawDetailGridBkColor(...)` |
+| `background="..."` 속성 | `cssclass="..."` 로 변환 또는 병합 |
+
+### 패턴 파일 업데이트 방법
+
+1. `converter/nexacro/as-is/` 에 변환할 XFDL 파일 배치
+2. 수동으로 다듬은 정제본을 `converter/nexacro/to-be/` 에 동일 파일명으로 배치
+3. AS-IS / TO-BE diff를 보고 `nexacro_convert_patterns.json` 갱신
+4. `nexacroMain.py` 재실행으로 자동 변환 결과 검증
+
+> **참고:** SVC_LOC URL 변환(`com.pageCtx` → REST URL)과 Script 헤더 구조 변경은 서블릿-URL 매핑 정보가 필요하므로 수동 처리 항목입니다.
+
+---

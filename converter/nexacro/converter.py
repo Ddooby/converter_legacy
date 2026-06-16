@@ -1,0 +1,387 @@
+"""
+Nexacro XFDL Converter
+1차 AI변환 XFDL → 정제본 XFDL 자동 변환기
+"""
+
+import re
+import json
+import logging
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+PATTERNS_FILE = Path(__file__).parent / "patterns" / "nexacro_convert_patterns.json"
+
+SCRIPT_START = '<Script type="xscript5.1"><![CDATA['
+SCRIPT_END = "]]></Script>"
+
+
+class XfdlConverter:
+    def __init__(self, patterns_file: Path = PATTERNS_FILE):
+        with open(patterns_file, encoding="utf-8") as f:
+            self.p = json.load(f)
+
+    # ──────────────────────────────────────────
+    # Public
+    # ──────────────────────────────────────────
+
+    def convert_file(self, input_path: Path, output_path: Path) -> None:
+        content = input_path.read_text(encoding="utf-8-sig")  # BOM 자동 제거
+        result = self.convert(content)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(result, encoding="utf-8")
+        logger.info("변환 완료: %s", output_path)
+
+    def convert(self, content: str) -> str:
+        idx_start = content.find(SCRIPT_START)
+        idx_end = content.find(SCRIPT_END)
+
+        if idx_start == -1 or idx_end == -1:
+            return self._convert_layout(content)
+
+        layout = content[:idx_start]
+        script = content[idx_start + len(SCRIPT_START): idx_end]
+        tail = content[idx_end + len(SCRIPT_END):]
+
+        layout = self._convert_layout(layout)
+        script = self._convert_script(script)
+
+        return layout + SCRIPT_START + script + SCRIPT_END + tail
+
+    # ──────────────────────────────────────────
+    # Layout section
+    # ──────────────────────────────────────────
+
+    def _convert_layout(self, content: str) -> str:
+        lines = content.split("\n")
+        return "\n".join(
+            self._convert_cell_line(ln) if "<Cell" in ln else ln
+            for ln in lines
+        )
+
+    def _convert_cell_line(self, line: str) -> str:
+        cell_p = self.p["layout_cell_patterns"]
+
+        for r in cell_p["expr_replacements"]:
+            line = line.replace(r["from"], r["to"])
+
+        for r in cell_p["aichanger_marker_removals"]:
+            line = line.replace(r["from"], r["to"])
+
+        line = self._convert_cell_cssclass(line, cell_p)
+        return line
+
+    def _convert_cell_cssclass(self, line: str, cell_p: dict) -> str:
+        rules = cell_p["property_to_cssclass"]
+        color_repls = {r["from"]: r["to"] for r in rules["color_value_replacements"]}
+
+        for rule in rules["rules"]:
+            prop = rule["property"]
+            action = rule["action"]
+
+            if prop == "background":
+                if action == "rename_to_cssclass" and f' {prop}=' in line and 'cssclass=' not in line:
+                    line = line.replace(f' {prop}=', ' cssclass=')
+
+                elif action == "replace_cssclass_with_value":
+                    if f' {prop}=' in line and 'cssclass=' in line and 'expr:' not in line:
+                        bac_val = self._extract_attr(line, prop)
+                        if bac_val:
+                            line = self._remove_attr(line, prop)
+                            line = self._set_attr(line, "cssclass", bac_val)
+
+                elif action == "append_to_cssclass_expr":
+                    if f' {prop}=' in line and 'cssclass=' in line and 'expr:' in line:
+                        bac_val = self._extract_attr(line, prop)
+                        if bac_val:
+                            css_val = self._extract_attr(line, "cssclass")
+                            bac_clean = bac_val.replace("expr:", "")
+                            new_css = f'{css_val}+&quot;,&quot;+{bac_clean}'
+                            line = self._remove_attr(line, prop)
+                            line = self._set_attr(line, "cssclass", new_css)
+
+            elif prop == "color" and f' color=' in line:
+                color_val = self._extract_attr(line, "color")
+                if color_val:
+                    color_mapped = color_repls.get(color_val, color_val)
+                    line = self._remove_attr(line, "color")
+                    if color_mapped:
+                        if 'cssclass=' in line:
+                            css_val = self._extract_attr(line, "cssclass")
+                            if css_val:
+                                line = self._set_attr(line, "cssclass", f'{css_val}+&quot;,&quot;+{color_mapped}')
+                        else:
+                            line = line.replace("/>", f' cssclass="{color_mapped}"/>')
+
+        return line
+
+    # ──────────────────────────────────────────
+    # Script section
+    # ──────────────────────────────────────────
+
+    def _convert_script(self, content: str) -> str:
+        """
+        변환 순서:
+        1. fnAuthButtonControl 전용 패턴 (경고 주석 포함 상태에서 매칭)
+        2. 경고 주석 제거 (범용)
+        3. AIChanger 마커 (script 내)
+        4. UXB INFO getBindDataset
+        5. SVC_LOC URL 변환 (com.pageCtx + Servlet → camelCase path)
+        6. Dataset getColumn 컬럼명 camelCase 변환
+        7. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
+        8. async/await 변환 — com.* 호출 함수 전체 래핑
+        """
+        content = self._fix_fnauth_button_control(content)
+        content = self._apply_warning_removals(content)
+        content = self._apply_aichanger_markers(content)
+        content = self._apply_uxb_info(content)
+        content = self._convert_svc_url(content)
+        content = self._convert_dataset_get_column(content)
+        content = self._apply_text_replacements(content)
+        content = self._convert_fn_message_domain(content)
+        content = self._apply_async_patterns(content)
+        return content
+
+    def _apply_warning_removals(self, content: str) -> str:
+        for r in self.p["script_warning_removals"]:
+            if r.get("is_regex"):
+                flags = re.DOTALL if r.get("flags") == "DOTALL" else 0
+                content = re.sub(r["from_pattern"], r["to"], content, flags=flags)
+            else:
+                content = content.replace(r["from"], r["to"])
+        return content
+
+    def _apply_aichanger_markers(self, content: str) -> str:
+        for r in self.p["script_aichanger_markers"]["items"]:
+            content = content.replace(r["from"], r["to"])
+        return content
+
+    def _apply_uxb_info(self, content: str) -> str:
+        r = self.p["script_uxb_info"]["get_bind_dataset"]
+        return re.sub(r["from_pattern"], r["to"], content)
+
+    def _convert_svc_url(self, content: str) -> str:
+        """
+        "SVC_LOC::" + com.pageCtx + "/XxxServlet" 패턴을 찾아
+        직전에 나온 functionGubun 값을 기반으로 REST URL로 변환.
+        예) SalesOpportunityListServlet + functionGubun=ONLOAD_LIST
+            → "SVC_LOC::salesOpportunityList/ONLOAD_LIST.do"
+        """
+        url_pat = re.compile(
+            r'"SVC_LOC::"\s*\+\s*com\.pageCtx\s*\+\s*"/([\w]+Servlet)"'
+        )
+        result = []
+        last_end = 0
+        for m in url_pat.finditer(content):
+            result.append(content[last_end:m.start()])
+            servlet_name = m.group(1)
+            preceding = content[:m.start()]
+            gubun_matches = list(re.finditer(r'functionGubun\s*=\s*"?([A-Za-z0-9_]+)"?', preceding))
+            if gubun_matches:
+                func_gubun = gubun_matches[-1].group(1)
+                path = servlet_name[:-7] if servlet_name.endswith("Servlet") else servlet_name
+                path = path[0].lower() + path[1:]
+                result.append(f'"SVC_LOC::{path}/{func_gubun}.do"')
+            else:
+                result.append(m.group(0))
+            last_end = m.end()
+        result.append(content[last_end:])
+        return "".join(result)
+
+    def _snake_to_camel(self, name: str) -> str:
+        parts = name.split("_")
+        return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+    def _convert_dataset_get_column(self, content: str) -> str:
+        """getColumn 컬럼명 snake_case → camelCase 변환 (단/쌍따옴표 모두 처리, 쌍따옴표로 통일)"""
+        # gdsCCDUserMDS → gdsUserInfo 이름 변환 (단일/두 파라미터 모두)
+        content = re.sub(
+            r"gdsCCDUserMDS\.getColumn\((?:[^,)]+,\s*)?['\"]([^'\"]+)['\"]\)",
+            lambda m: f'gdsUserInfo.getColumn("{self._snake_to_camel(m.group(1))}")',
+            content,
+        )
+        # gdsUserInfo.getColumn([rowIdx,] 'col'/"col") → camelCase
+        content = re.sub(
+            r"(gdsUserInfo\.getColumn\([^)]*)['\"]([^'\"]+)['\"](\s*\))",
+            lambda m: f'{m.group(1)}"{self._snake_to_camel(m.group(2))}"{m.group(3)}',
+            content,
+        )
+        return content
+
+    def _convert_fn_message_domain(self, content: str) -> str:
+        """따옴표 없이 나오는 Domain.msg~ → "Domain.msg~" 로 감싸기"""
+        return re.sub(r"(?<!['\"])(Domain\.msg[\w.]+)(?!['\"])", r'"\1"', content)
+
+    def _apply_text_replacements(self, content: str) -> str:
+        for r in self.p["script_text_replacements"]:
+            content = content.replace(r["from"], r["to"])
+        return content
+
+    def _fix_fnauth_button_control(self, content: str) -> str:
+        """경고 주석이 아직 남아 있는 상태에서 fnAuthButtonControl 패턴 적용"""
+        fna = self.p["script_fnauth_button_control"]
+
+        r1 = fna["is_exist_var_fix"]
+        content = re.sub(r1["from_pattern"], r1["to"], content, flags=re.DOTALL)
+
+        r2 = fna["com_call_guard_fix"]
+        content = re.sub(r2["from_pattern"], r2["to"], content)
+
+        return content
+
+    # ──────────────────────────────────────────
+    # Async / await
+    # ──────────────────────────────────────────
+
+    def _apply_async_patterns(self, content: str) -> str:
+        """
+        1단계: 모든 함수 body 수집
+        2단계: com.* 직접 호출이 있는 함수 → async 대상
+        3단계: async 함수를 호출하는 함수도 async로 전파
+        4단계: 역순으로 래핑 — return (async () => {...}).call(this)
+        """
+        await_cfg = self.p["async_patterns"]["com_functions_need_await"]
+        await_com_funcs: list = await_cfg["items"]
+        com_prefix_await: bool = await_cfg.get("com_prefix_await", False)
+        excl: set = set(await_cfg.get("com_prefix_sync_exclusions", []))
+
+        decl_pat = re.compile(r'this\.(\w+)\s*=\s*function\s*\([^)]*\)')
+
+        # 1단계: 원본 content 기준 함수 body 수집
+        func_bodies: dict[str, str] = {}
+        for m in decl_pat.finditer(content):
+            fname = m.group(1)
+            op = content.find("{", m.end())
+            if op == -1:
+                continue
+            cp = self._find_matching_brace(content, op)
+            if cp == -1:
+                continue
+            func_bodies[fname] = content[op + 1: cp]
+
+        # 2단계: com.* 직접 호출 → async 대상
+        async_funcs: set[str] = set()
+        for fname, body in func_bodies.items():
+            needs = any(f in body for f in await_com_funcs)
+            if not needs and com_prefix_await:
+                needs = any(c not in excl for c in re.findall(r'\b(com\.\w+)\(', body))
+            if needs:
+                async_funcs.add(fname)
+
+        # 3단계: async 함수를 호출하는 함수도 async로 전파
+        changed = True
+        while changed:
+            changed = False
+            for fname, body in func_bodies.items():
+                if fname in async_funcs:
+                    continue
+                if any(re.search(rf'\bthis\.{re.escape(af)}\s*\(', body) for af in async_funcs):
+                    async_funcs.add(fname)
+                    changed = True
+
+        # 3.5단계: 다른 async 함수에서 호출되는 함수 파악 → 해당 함수만 return 필요
+        called_by_async: set[str] = set()
+        for fname in async_funcs:
+            body = func_bodies.get(fname, "")
+            for af in async_funcs:
+                if af != fname and re.search(rf'\bthis\.{re.escape(af)}\s*\(', body):
+                    called_by_async.add(af)
+
+        # 4단계: 역순 래핑 (뒤에서부터 수정해야 앞 위치 유지)
+        tab = self.p["async_patterns"].get("wrapper_indent", "\t")
+        for m in reversed(list(decl_pat.finditer(content))):
+            fname = m.group(1)
+            if fname not in async_funcs:
+                continue
+
+            op = content.find("{", m.end())
+            if op == -1:
+                continue
+            cp = self._find_matching_brace(content, op)
+            if cp == -1:
+                continue
+
+            inner = content[op + 1: cp]
+            if "(async () =>" in inner:
+                continue
+
+            inner = self._add_await_to_content(inner, await_com_funcs, com_prefix_await, excl, async_funcs)
+
+            indented = "\n".join(f"{tab}{ln}" for ln in inner.split("\n"))
+            if fname in called_by_async:
+                wrapped = f"{{\n{tab}return (async () => {{{indented}\n{tab}}}).call(this);\n}}"
+            else:
+                wrapped = f"{{\n{tab}(async () => {{{indented}\n{tab}}}).call(this);\n}}"
+
+            content = content[:op] + wrapped + content[cp + 1:]
+
+        return content
+
+    def _add_await_to_content(self, content: str, await_funcs: list,
+                               com_prefix_await: bool = False, com_exclusions: set = None,
+                               async_script_funcs: set = None) -> str:
+        lines = content.split("\n")
+        return "\n".join(
+            self._add_await_to_line(ln, await_funcs, com_prefix_await, com_exclusions, async_script_funcs)
+            for ln in lines
+        )
+
+    def _add_await_to_line(self, line: str, await_funcs: list,
+                            com_prefix_await: bool = False, com_exclusions: set = None,
+                            async_script_funcs: set = None) -> str:
+        stripped = line.lstrip()
+        if stripped.startswith("//") or stripped.startswith("/*") or "await " in line:
+            return line
+        # 명시적 com.* 함수
+        for func in await_funcs:
+            if func in line:
+                line = line.replace(func, "await " + func, 1)
+                return line
+        # 광범위 com.* 프리픽스
+        if com_prefix_await:
+            excl = com_exclusions or set()
+            cm = re.search(r'\b(com\.\w+)\(', line)
+            if cm:
+                full_call = cm.group(1)
+                if full_call not in excl and full_call not in await_funcs:
+                    line = line.replace(full_call + "(", "await " + full_call + "(", 1)
+                    return line
+        # Script 내 async 함수 호출 (this.fnXxx())
+        if async_script_funcs:
+            sm = re.search(r'\bthis\.(\w+)\s*\(', line)
+            if sm and sm.group(1) in async_script_funcs:
+                call = f"this.{sm.group(1)}("
+                line = line.replace(call, "await " + call, 1)
+        return line
+
+    # ──────────────────────────────────────────
+    # Brace matching
+    # ──────────────────────────────────────────
+
+    def _find_matching_brace(self, content: str, open_pos: int) -> int:
+        """open_pos 위치의 { 에 매칭되는 } 위치 반환 (문자열/주석 미인식, 단순 카운팅)"""
+        depth = 0
+        for i in range(open_pos, len(content)):
+            if content[i] == "{":
+                depth += 1
+            elif content[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    return i
+        return -1
+
+    # ──────────────────────────────────────────
+    # XML attribute helpers
+    # ──────────────────────────────────────────
+
+    def _extract_attr(self, line: str, attr: str) -> str | None:
+        m = re.search(rf'\s{attr}="([^"]*)"', line)
+        return m.group(1) if m else None
+
+    def _remove_attr(self, line: str, attr: str) -> str:
+        return re.sub(rf'\s{attr}="[^"]*"', " ", line)
+
+    def _set_attr(self, line: str, attr: str, value: str) -> str:
+        if f'{attr}=' in line:
+            return re.sub(rf'{attr}="[^"]*"', f'{attr}="{value}"', line)
+        return line.replace("/>", f' {attr}="{value}"/>')

@@ -1,0 +1,313 @@
+{
+  "version": "1.1",
+  "description": "MiPlatform XFDL (1차 AI변환) → Nexacro XFDL (정제본) 변환 패턴",
+  "source_reference": [
+    "GridCellConverter.java",
+    "FindComAsync.java",
+    "FindContent.java",
+    "NexacroComJSFindConverter.java",
+    "VoyageListNewForm.xfdl (as-is vs to-be diff)"
+  ],
+
+  "layout_cell_patterns": {
+    "description": "<Cell> 요소에 적용되는 변환 (XML Layout 영역, <Script> 태그 이전)",
+
+    "expr_replacements": [
+      {
+        "id": "cell_expr_uppercase",
+        "from": "EXPR(",
+        "to": "expr:("
+      }
+    ],
+
+    "aichanger_marker_removals": [
+      {
+        "id": "aichanger_disable_cssclass",
+        "from": "/*[AIChanger] com.drawDetailGridDisableColor 사용 불가 cssclass expr로 처리 필요*/ //",
+        "to": "com.drawDetailGridDisableColor"
+      },
+      {
+        "id": "aichanger_bkcolor_cssclass",
+        "from": "/*[AIChanger] com.drawDetailGridBkColor 사용 불가 cssclass expr로 처리 필요*/ //",
+        "to": "com.drawDetailGridBkColor"
+      },
+      {
+        "id": "aichanger_disable_background",
+        "from": "/*[AIChanger] com.drawDetailGridDisableColor 사용 불가 background expr로 처리 필요*/ //",
+        "to": "com.drawDetailGridDisableColor"
+      },
+      {
+        "id": "aichanger_bkcolor_background",
+        "from": "/*[AIChanger] com.drawDetailGridBkColor 사용 불가 background expr로 처리 필요*/ //",
+        "to": "com.drawDetailGridBkColor"
+      }
+    ],
+
+    "property_to_cssclass": {
+      "description": "background/color 속성 → cssclass 변환 (GridCellConverter.java 로직 기반)",
+      "rules": [
+        {
+          "id": "background_rename_to_cssclass",
+          "property": "background",
+          "action": "rename_to_cssclass",
+          "condition": "no_existing_cssclass"
+        },
+        {
+          "id": "background_merge_cssclass_no_expr",
+          "property": "background",
+          "action": "replace_cssclass_with_value",
+          "condition": "existing_cssclass_without_expr"
+        },
+        {
+          "id": "background_merge_cssclass_with_expr",
+          "property": "background",
+          "action": "append_to_cssclass_expr",
+          "merge_separator": "+&quot;,&quot;+",
+          "condition": "existing_cssclass_with_expr"
+        },
+        {
+          "id": "color_merge_cssclass",
+          "property": "color",
+          "action": "merge_to_cssclass"
+        }
+      ],
+      "color_value_replacements": [
+        { "from": "#000000", "to": "" },
+        { "from": "#e40000", "to": "cellredFC" }
+      ]
+    }
+  },
+
+  "script_text_replacements": [
+    {
+      "id": "com_isEmpty_remove_pThis",
+      "description": "com.isEmpty 첫 번째 인자(pThis) 제거 — pThis→this 보다 먼저 실행",
+      "from": "com.isEmpty(pThis, ",
+      "to": "com.isEmpty("
+    },
+    {
+      "id": "pThis_to_this",
+      "description": "전역 컨텍스트 참조 변수 → this 치환 (특정 패턴 치환 이후 실행)",
+      "from": "pThis",
+      "to": "this"
+    },
+    {
+      "id": "rowcount_property",
+      "description": "getRowCount() 메서드 → rowcount 프로퍼티",
+      "from": ".getRowCount()",
+      "to": ".rowcount"
+    },
+    {
+      "id": "rowtype_insert_lowercase",
+      "description": "rowtype 문자열 비교 → Dataset 상수 (insert)",
+      "from": "== \"insert\"",
+      "to": "== Dataset.ROWTYPE_INSERT"
+    },
+    {
+      "id": "rowtype_insert_uppercase",
+      "from": "== \"INSERT\"",
+      "to": "== Dataset.ROWTYPE_INSERT"
+    },
+    {
+      "id": "rowtype_normal_upper",
+      "description": "NORMAL rowtype 비교 → Dataset 상수",
+      "from": ".toUpperCase() != \"NORMAL\"",
+      "to": " != Dataset.ROWTYPE_NORMAL"
+    },
+    {
+      "id": "rowtype_update_lowercase",
+      "description": "rowtype 문자열 비교 → Dataset 상수 (update)",
+      "from": "== \"update\"",
+      "to": "== Dataset.ROWTYPE_UPDATE"
+    },
+    {
+      "id": "rowtype_update_uppercase",
+      "from": "== \"UPDATE\"",
+      "to": "== Dataset.ROWTYPE_UPDATE"
+    },
+    {
+      "id": "rowtype_delete_lowercase",
+      "description": "rowtype 문자열 비교 → Dataset 상수 (delete)",
+      "from": "== \"delete\"",
+      "to": "== Dataset.ROWTYPE_DELETE"
+    },
+    {
+      "id": "rowtype_delete_uppercase",
+      "from": "== \"DELETE\"",
+      "to": "== Dataset.ROWTYPE_DELETE"
+    },
+    {
+      "id": "close_null_to_fnclose",
+      "description": "직접 close 호출 → com.fnClose 사용",
+      "from": "this.close(null)",
+      "to": "com.fnClose(this)"
+    },
+    {
+      "id": "gds_user_info",
+      "description": "구 사용자 정보 Dataset 명 → 신규 Dataset 명",
+      "from": "gdsCCDUserMDS",
+      "to": "gdsUserInfo"
+    },
+    {
+      "id": "col_user_id_camel",
+      "description": "컬럼명 snake_case → camelCase (user_id)",
+      "from": ",'user_id')",
+      "to": ",'userId')"
+    },
+    {
+      "id": "col_user_name_camel",
+      "description": "컬럼명 snake_case → camelCase (user_name)",
+      "from": ",'user_name')",
+      "to": ",'userNm')"
+    },
+    {
+      "id": "col_team_code_camel",
+      "description": "컬럼명 snake_case → camelCase (team_code)",
+      "from": ",'team_code')",
+      "to": ",'teamCode')"
+    }
+  ],
+
+  "script_aichanger_markers": {
+    "description": "Script 영역 내 [AIChanger] 마커 → 실제 함수 호출로 변환",
+    "items": [
+      {
+        "id": "aichanger_bkcolor_script",
+        "from": "/*[AIChanger] com.drawDetailGridBkColor 사용 불가 cssclass expr로 처리 필요*/ //(",
+        "to": "com.drawDetailGridBkColor("
+      },
+      {
+        "id": "aichanger_disable_script",
+        "from": "/*[AIChanger] com.drawDetailGridDisableColor 사용 불가 cssclass expr로 처리 필요*/ //(",
+        "to": "com.drawDetailGridDisableColor("
+      }
+    ]
+  },
+
+  "script_warning_removals": [
+    {
+      "id": "aichanger_statusbar_remove",
+      "description": "AIChanger 스테이터스바 주석 → // 만 남김",
+      "is_regex": true,
+      "from_pattern": "/\\*\\[AIChanger\\] com\\.fnAfterInquiryShowStatusBarMessage[^*]*\\*/\\s*//",
+      "to": "//"
+    },
+    {
+      "id": "uxb_convert_info_remove",
+      "description": "[UXB변환 Info] 제거필요 주석과 후속 코드 라인 제거",
+      "is_regex": true,
+      "from_pattern": "/\\* \\[UXB변환 Info\\]\\s*제거필요\\*/[^\n]+",
+      "to": ""
+    }
+  ],
+
+  "script_uxb_info": {
+    "get_bind_dataset": {
+      "id": "uxb_info_get_bind_dataset",
+      "description": "UXB INFO getBindDataset 마커 → com.getBindDataset 호출로 변환",
+      "is_regex": true,
+      "from_pattern": "this\\[((?:this\\.)?\\w+)\\s*\\.\\s*/\\*\\*UXB INFO : com\\.getBindDataset\\(pThis\\[폼\\], objComp\\[컴포넌트\\]\\); 로 변경 필요 \\*\\*\\/\\]",
+      "to": "com.getBindDataset(this, \\1)"
+    }
+  },
+
+  "script_fnauth_button_control": {
+    "description": "fnAuthButtonControl 내 마커 패턴 → 표준 코드로 변환",
+    "is_exist_var_fix": {
+      "id": "fnauthbtn_is_exist_var",
+      "description": "IsExistVar 마커 → take.nvl(this.parent.param) 패턴",
+      "is_regex": true,
+      "flags": "DOTALL",
+      "from_pattern": "if\\(/\\* 함수\\([^)]+\\)를 찾을 수 없습니다\\.\\*/\\s*this\\.IsExistVar\\)\\s*/\\* 변수\\([^)]+\\)가 있는지 확인이 필요합니다\\.\\s+변수\\([^)]+\\)가 있는지 확인이 필요합니다\\.\\*/\\s*strAuthParam = this\\.param;",
+      "to": "if(take.nvl(this.parent.param) != \"\") {\n\t\tstrAuthParam = this.parent.param;\n\t}"
+    },
+    "com_call_guard_fix": {
+      "id": "fnauthbtn_null_guard",
+      "description": "ArgFormId 경고 주석 제거 + null 체크 추가",
+      "is_regex": true,
+      "from_pattern": "/\\* 변수\\(ArgFormId\\)가 있는지 확인이 필요합니다\\.\\s+변수\\(ArgFormId\\)가 있는지 확인이 필요합니다\\.\\*/\\s*com\\.fnAuthButtonControl\\(",
+      "to": "if(!com.isNull(this.ArgFormId))\n\t\tcom.fnAuthButtonControl("
+    }
+  },
+
+  "async_patterns": {
+    "description": "async/await 변환 규칙",
+    "note_on_method": "<Script> 이외에서 호출되는 함수 → (async()=>{}).call(this) 감싸기, Script 내에서 호출되는 함수 → async function 키워드 추가",
+
+    "com_functions_need_await": {
+      "description": "await를 붙일 com.* 함수 목록. com_prefix_await=true 시 exclusions 제외한 모든 com.* 에 await 추가",
+      "com_prefix_await": true,
+      "com_prefix_sync_exclusions": [
+        "com.isEmpty",
+        "com.isNull",
+        "com.isNullField",
+        "com.nvl",
+        "com.fnClose",
+        "com.length",
+        "com.substr",
+        "com.indexOf",
+        "com.getBindDataset",
+        "com.drawDetailGridBkColor",
+        "com.drawDetailGridDisableColor",
+        "com.drawGridDisableColor",
+        "com.drawGridDisableColorForGrid",
+        "com.drawGridDisableColorForTab"
+      ],
+      "items": [
+        "com.commCodeInquiry",
+        "com.isNullFieldGrid",
+        "com.fnMessageOpenForm"
+      ]
+    },
+
+    "functions_need_wrapper": {
+      "description": "미사용 — Script 내 모든 함수를 스캔해 com.* 호출이 있으면 자동 래핑",
+      "items": []
+    },
+
+    "wrapper_indent": "\t"
+  },
+
+  "layout_grid_css_patterns": {
+    "description": "그리드 CSS 함수 변환 (GridCellConverter.java 기반)",
+    "items": [
+      {
+        "id": "grid_disable_all",
+        "from": "g_drawGridDisableColor();",
+        "to": "com.drawGridDisableColor(this);"
+      },
+      {
+        "id": "grid_disable_for_grid",
+        "is_regex": true,
+        "from_pattern": "g_drawGridDisableColor_forGrid\\((.+?)\\)",
+        "to": "com.drawGridDisableColorForGrid(this.\\1)"
+      },
+      {
+        "id": "grid_disable_for_tab",
+        "from": "g_drawGridDisableColor_forTab();",
+        "to": "com.drawGridDisableColorForTab(this);"
+      }
+    ]
+  },
+
+  "conversion_order": [
+    "1. layout_cell_patterns.expr_replacements (Cell 라인)",
+    "2. layout_cell_patterns.aichanger_marker_removals (Cell 라인)",
+    "3. layout_cell_patterns.property_to_cssclass (Cell 라인)",
+    "4. script_warning_removals (Script 전체, 순서 중요: 경고 주석 먼저 제거)",
+    "5. script_aichanger_markers (Script 전체)",
+    "6. script_uxb_info.get_bind_dataset (Script 전체)",
+    "7. script_fnauth_button_control (Script 전체)",
+    "8. script_text_replacements (Script 전체 - pThis는 마지막에)",
+    "9. async_patterns (Script 함수 단위)"
+  ],
+
+  "notes": [
+    "Cell 변환은 <Script> 태그 이전 Layout 영역에서만 적용",
+    "Script 변환은 <Script type='xscript5.1'><![CDATA[...]]></Script> 내부에만 적용",
+    "pThis 치환(8번)은 경고 주석 제거(4번) 이후 실행 - 주석 내 pThis까지 오염되는 것 방지",
+    "async wrapper 감싸기는 함수 body 블록({})을 통째로 인덴트 처리",
+    "SVC_LOC URL 변환(com.pageCtx 제거)은 서블릿→REST 매핑이 필요하므로 자동 변환 불가 - TODO 주석으로 마킹",
+    "comment 말미 'a' 제거(//Inquirya → //Inquiry)는 리스크 있어 수동 처리 권장"
+  ]
+}

@@ -13,3 +13,5 @@ build/
 .venv/
 venv/
 validate/
+converter/nexacro/as-is/
+converter/nexacro/to-be/

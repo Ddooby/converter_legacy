@@ -539,7 +539,7 @@ class DaoTransformer:
         self._rs_list_var_map: dict[tuple[str, str], str] = {}
 
         prep_re = re.compile(
-            r'(\w+)\s*=\s*(?:conn|connection)\.prepareStatement\((\w+)\.toString\(\)\)\s*;'
+            r'(\w+)\s*=\s*(?:conn|connection)\.prepareStatement\((\w+)\.toString\(\)(?:[^)]*)\)\s*;'
         )
 
         # 메서드별 쿼리 수 사전 집계 (변수명 suffix 결정용) — 블록 주석 내부 제외
