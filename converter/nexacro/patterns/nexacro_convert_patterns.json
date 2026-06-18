@@ -165,6 +165,33 @@
       "description": "컬럼명 snake_case → camelCase (team_code)",
       "from": ",'team_code')",
       "to": ",'teamCode')"
+    },
+    {
+      "id": "for_loop_var_declaration",
+      "description": "for 루프 변수 선언 누락 → var 추가 (var/let/const 이미 있으면 제외)",
+      "is_regex": true,
+      "from_pattern": "for\\(\\s*(?!var |let |const )([a-zA-Z_]\\w*)\\s*=",
+      "to": "for( var \\1 ="
+    },
+    {
+      "id": "filter_eq_to_double_eq",
+      "description": "Dataset.filter() 내 비교 연산자 = → == (컬럼명=\" 패턴 대상)",
+      "is_regex": true,
+      "from_pattern": "(\\.filter\\(\"[^\"]*\\w+|\" && \\w+)=(\"\\s*\\+)",
+      "to": "\\1==\\2"
+    },
+    {
+      "id": "oz_split_this_to_com",
+      "description": "OZ 분할 출력 전역 참조 → com 네임스페이스",
+      "from": "this.G_OzSplit",
+      "to": "com.G_OzSplit"
+    },
+    {
+      "id": "exozviewer300_line_remove",
+      "description": "EXOZViewer300 컴포넌트 참조 라인 제거 (com.createReportOZ 로 대체됨)",
+      "is_regex": true,
+      "from_pattern": "[^\n]*this\\.EXOZViewer300[^\n]*\n?",
+      "to": ""
     }
   ],
 

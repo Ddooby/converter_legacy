@@ -129,7 +129,8 @@ class XfdlConverter:
         5. SVC_LOC URL 변환 (com.pageCtx + Servlet → camelCase path)
         6. Dataset getColumn 컬럼명 camelCase 변환
         7. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
-        8. async/await 변환 — com.* 호출 함수 전체 래핑
+        8. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
+        9. async/await 변환 — com.* 호출 함수 전체 래핑
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -139,6 +140,7 @@ class XfdlConverter:
         content = self._convert_dataset_get_column(content)
         content = self._apply_text_replacements(content)
         content = self._convert_fn_message_domain(content)
+        content = self._inject_external_js_refs(content)
         content = self._apply_async_patterns(content)
         return content
 
@@ -208,13 +210,49 @@ class XfdlConverter:
         )
         return content
 
+    def _inject_external_js_refs(self, content: str) -> str:
+        """
+        스크립트 내 sa.* / so.* / ins.* 호출을 감지해
+        //공통 라이브러리 호출 주석 바로 아래에 take.loadJs 라인을 삽입한다.
+        이미 take.loadJs가 있으면 중복 삽입하지 않는다.
+        """
+        ANCHOR = "//공통 라이브러리 호출"
+        JS_MAP = {
+            "sa": '/biz/commonJs/sa.js',
+            "so": '/biz/commonJs/so.js',
+            "ins": '/biz/commonJs/ins.js',
+        }
+
+        anchor_pos = content.find(ANCHOR)
+        if anchor_pos == -1:
+            return content
+
+        needed: list[str] = []
+        for prefix, js_path in JS_MAP.items():
+            load_line = f'take.loadJs(this, "{prefix}JsLoad_" + this.name, "{js_path}");'
+            if load_line in content:
+                continue
+            if re.search(rf'\b{prefix}\.', content):
+                needed.append(load_line)
+
+        if not needed:
+            return content
+
+        insert_after = anchor_pos + len(ANCHOR)
+        inject = "\n" + "\n".join(needed)
+        return content[:insert_after] + inject + content[insert_after:]
+
     def _convert_fn_message_domain(self, content: str) -> str:
         """따옴표 없이 나오는 Domain.msg~ → "Domain.msg~" 로 감싸기"""
         return re.sub(r"(?<!['\"])(Domain\.msg[\w.]+)(?!['\"])", r'"\1"', content)
 
     def _apply_text_replacements(self, content: str) -> str:
         for r in self.p["script_text_replacements"]:
-            content = content.replace(r["from"], r["to"])
+            if r.get("is_regex"):
+                flags = re.DOTALL if r.get("flags") == "DOTALL" else 0
+                content = re.sub(r["from_pattern"], r["to"], content, flags=flags)
+            else:
+                content = content.replace(r["from"], r["to"])
         return content
 
     def _fix_fnauth_button_control(self, content: str) -> str:
@@ -307,7 +345,7 @@ class XfdlConverter:
 
             inner = self._add_await_to_content(inner, await_com_funcs, com_prefix_await, excl, async_funcs)
 
-            indented = "\n".join(f"{tab}{ln}" for ln in inner.split("\n"))
+            indented = "\n".join(f"{tab}{ln}".rstrip() for ln in inner.split("\n"))
             if fname in called_by_async:
                 wrapped = f"{{\n{tab}return (async () => {{{indented}\n{tab}}}).call(this);\n}}"
             else:
