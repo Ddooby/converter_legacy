@@ -27,12 +27,12 @@ class XfdlConverter:
 
     def convert_file(self, input_path: Path, output_path: Path) -> None:
         content = input_path.read_text(encoding="utf-8-sig")  # BOM 자동 제거
-        result = self.convert(content)
+        result = self.convert(content, form_name=input_path.stem)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(result, encoding="utf-8")
         logger.info("변환 완료: %s", output_path)
 
-    def convert(self, content: str) -> str:
+    def convert(self, content: str, form_name: str = "") -> str:
         idx_start = content.find(SCRIPT_START)
         idx_end = content.find(SCRIPT_END)
 
@@ -44,7 +44,7 @@ class XfdlConverter:
         tail = content[idx_end + len(SCRIPT_END):]
 
         layout = self._convert_layout(layout)
-        script = self._convert_script(script)
+        script = self._convert_script(script, form_name=form_name)
 
         return layout + SCRIPT_START + script + SCRIPT_END + tail
 
@@ -54,12 +54,19 @@ class XfdlConverter:
 
     def _convert_layout(self, content: str) -> str:
         lines = content.split("\n")
-        return "\n".join(
-            self._convert_cell_line(ln) if "<Cell" in ln else ln
-            for ln in lines
-        )
+        result = []
+        in_body_band = False
+        for ln in lines:
+            if '<Band id="body"' in ln:
+                in_body_band = True
+            elif "</Band>" in ln:
+                in_body_band = False
+            if "<Cell" in ln:
+                ln = self._convert_cell_line(ln, in_body_band)
+            result.append(ln)
+        return "\n".join(result)
 
-    def _convert_cell_line(self, line: str) -> str:
+    def _convert_cell_line(self, line: str, in_body_band: bool = False) -> str:
         cell_p = self.p["layout_cell_patterns"]
 
         for r in cell_p["expr_replacements"]:
@@ -69,6 +76,16 @@ class XfdlConverter:
             line = line.replace(r["from"], r["to"])
 
         line = self._convert_cell_cssclass(line, cell_p)
+
+        if in_body_band:
+            line = self._convert_cell_date_format(line)
+
+        return line
+
+    def _convert_cell_date_format(self, line: str) -> str:
+        """body 밴드 내 displaytype="date" 셀에 calendardateformat="yyyy-MM-dd" 추가"""
+        if 'displaytype="date"' in line and "calendardateformat=" not in line:
+            line = line.replace('displaytype="date"', 'displaytype="date" calendardateformat="yyyy-MM-dd"')
         return line
 
     def _convert_cell_cssclass(self, line: str, cell_p: dict) -> str:
@@ -119,7 +136,7 @@ class XfdlConverter:
     # Script section
     # ──────────────────────────────────────────
 
-    def _convert_script(self, content: str) -> str:
+    def _convert_script(self, content: str, form_name: str = "") -> str:
         """
         변환 순서:
         1. fnAuthButtonControl 전용 패턴 (경고 주석 포함 상태에서 매칭)
@@ -140,9 +157,15 @@ class XfdlConverter:
         content = self._convert_dataset_get_column(content)
         content = self._apply_text_replacements(content)
         content = self._convert_fn_message_domain(content)
+        if form_name:
+            content = self._replace_system_form_name(content, form_name)
         content = self._inject_external_js_refs(content)
         content = self._apply_async_patterns(content)
         return content
+
+    def _replace_system_form_name(self, content: str, form_name: str) -> str:
+        """JSDoc 헤더의 'SYSTEM FORM NAME' 플레이스홀더 → xfdl 파일명(확장자 제외)으로 치환"""
+        return content.replace("SYSTEM FORM NAME", form_name)
 
     def _apply_warning_removals(self, content: str) -> str:
         for r in self.p["script_warning_removals"]:

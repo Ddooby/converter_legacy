@@ -43,6 +43,19 @@
       }
     ],
 
+    "body_cell_date_format": {
+      "description": "<Band id=\"body\"> 내 displaytype=\"date\" Cell → calendardateformat=\"yyyy-MM-dd\" 자동 추가 (없을 때만)",
+      "items": [
+        {
+          "id": "body_cell_date_calendardateformat",
+          "condition": "in_body_band",
+          "attr_check": "displaytype=\"date\"",
+          "attr_add_if_missing": "calendardateformat",
+          "attr_add_value": "yyyy-MM-dd"
+        }
+      ]
+    },
+
     "property_to_cssclass": {
       "description": "background/color 속성 → cssclass 변환 (GridCellConverter.java 로직 기반)",
       "rules": [
@@ -192,6 +205,12 @@
       "is_regex": true,
       "from_pattern": "[^\n]*this\\.EXOZViewer300[^\n]*\n?",
       "to": ""
+    },
+    {
+      "id": "com_replace_at_input_to_input",
+      "description": "com.replace() 2번째 인자 '@input' → 'input' (AS-IS 플레이스홀더 제거)",
+      "from": "\"@input\"",
+      "to": "\"input\""
     }
   ],
 
@@ -317,16 +336,25 @@
     ]
   },
 
+  "script_form_name_replacement": {
+    "description": "JSDoc 헤더의 'SYSTEM FORM NAME' 플레이스홀더 → xfdl 파일명(확장자 제외)으로 치환",
+    "placeholder": "SYSTEM FORM NAME",
+    "value_source": "input filename stem (e.g. VoyageAnalysisAdmForm.xfdl → VoyageAnalysisAdmForm)",
+    "apply_after": "script_text_replacements"
+  },
+
   "conversion_order": [
     "1. layout_cell_patterns.expr_replacements (Cell 라인)",
     "2. layout_cell_patterns.aichanger_marker_removals (Cell 라인)",
-    "3. layout_cell_patterns.property_to_cssclass (Cell 라인)",
-    "4. script_warning_removals (Script 전체, 순서 중요: 경고 주석 먼저 제거)",
-    "5. script_aichanger_markers (Script 전체)",
-    "6. script_uxb_info.get_bind_dataset (Script 전체)",
-    "7. script_fnauth_button_control (Script 전체)",
-    "8. script_text_replacements (Script 전체 - pThis는 마지막에)",
-    "9. async_patterns (Script 함수 단위)"
+    "3. layout_cell_patterns.body_cell_date_format (body 밴드 Cell 라인)",
+    "4. layout_cell_patterns.property_to_cssclass (Cell 라인)",
+    "5. script_warning_removals (Script 전체, 순서 중요: 경고 주석 먼저 제거)",
+    "6. script_aichanger_markers (Script 전체)",
+    "7. script_uxb_info.get_bind_dataset (Script 전체)",
+    "8. script_fnauth_button_control (Script 전체)",
+    "9. script_text_replacements (Script 전체 - pThis는 마지막에)",
+    "10. script_form_name_replacement (Script 전체 - SYSTEM FORM NAME → 파일명)",
+    "11. async_patterns (Script 함수 단위)"
   ],
 
   "notes": [
