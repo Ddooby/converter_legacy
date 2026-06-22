@@ -146,7 +146,7 @@ python -m converter.dao.daoMain patterns
 
 ---
 
-## 02. 변환 대상 DAO 파일 추출 (`targetExtract/daoFile`)
+## 02. DAO 변환 대상  파일 추출 (`targetExtract/daoFile`)
 
 2차 변환 작업 시, **Freezing Source(Business + Common 통합본)** 와 **1차 전환 프로젝트(Git)** 를 비교하여
 **신규로 변환해야 할 DAO 파일 목록을 추출**하는 Python 스크립트입니다.
@@ -175,7 +175,7 @@ python converter/convertList.py
 
 ---
 
-## 03. 변환 파일 검증 (`converter/validator.py`)
+## 03. DAO 변환 파일 검증 (`converter/validator.py`)
 
 자동 변환된 **DAO + Mapper XML 쌍을 사용자가 가공한 뒤**, 코드 상 오류나 DAO ↔ XML 불일치를 잡아내는 검증 유틸입니다.
 Claude API 호출 없이 정적 분석만으로 동작합니다.
@@ -354,7 +354,24 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 
 > 결과 파일은 기본적으로 `converter/nexacro/to-be/` 폴더에 생성됩니다.
 
+### 변환 처리 순서 (converter.py `_convert_script`)
+
+| 순서 | 처리 내용 |
+|------|-----------|
+| 1 | `fnAuthButtonControl` 전용 패턴 (경고 주석 포함 상태에서 매칭) |
+| 2 | 경고 주석 제거 (`변수 확인 필요` 등) |
+| 3 | `[AIChanger]` 마커 치환 (Script 내) |
+| 4 | UXB INFO getBindDataset 마커 치환 |
+| 5 | SVC_LOC URL 변환 (`com.pageCtx` + Servlet → REST URL) |
+| 6 | Dataset getColumn 컬럼명 camelCase 변환 |
+| 7 | Decimal 산술 변환 (`nexacro.round` 내 산술식 → Decimal 체인) |
+| 8 | 텍스트 치환 (com.isEmpty / pThis → this 등) |
+| 9 | 외부 JS 참조 주입 (`sa.*` / `so.*` / `ins.*` 감지 → `take.loadJs`) |
+| 10 | async/await 변환 (`com.*` 호출 함수 전체 래핑) |
+
 ### 주요 변환 규칙 (Script 영역)
+
+#### 텍스트 치환
 
 | AS-IS | TO-BE |
 |-------|-------|
@@ -363,13 +380,64 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 | `.getRowCount()` | `.rowcount` |
 | `== "insert"` / `!= "NORMAL"` | `Dataset.ROWTYPE_INSERT` / `Dataset.ROWTYPE_NORMAL` |
 | `this.close(null)` | `com.fnClose(this)` |
-| `gdsCCDUserMDS` | `gdsUserInfo` (컬럼명 camelCase 포함) |
+| `gdsCCDUserMDS` | `gdsUserInfo` (컬럼명 camelCase 변환 포함) |
+| 따옴표 없는 `Domain.msg~` | `"Domain.msg~"` (쌍따옴표 자동 감싸기) |
 | UXB INFO getBindDataset 마커 | `com.getBindDataset(this, 컴포넌트)` |
 | `[AIChanger]` 마커 (Script) | 실제 함수 호출 (`com.drawDetailGridBkColor` 등) |
 | 경고 주석 (`변수 확인 필요` 등) | 제거 |
-| `fnValidationCheck`, `fnInquiryTrans` | `async function` + 내부 `await` 자동 추가 |
-| `fnSave`, `fnAdd` 등 액션 함수 | `(async () => { ... }).call(this);` 감싸기 |
-| `fnAuthButtonControl` 내 IsExistVar 마커 | `take.nvl(this.parent.param)` 패턴으로 재작성 |
+
+#### SVC_LOC URL 변환
+
+`com.transaction()` 의 URL 인자에서 `com.pageCtx` 를 `functionGubun` 값 기반의 REST URL 로 변환.
+`functionGubun` 이 URL 앞(이전 줄) 또는 URL 뒤(같은 transaction 호출 내 6번째 인자)에 있어도 감지.
+
+| AS-IS | TO-BE |
+|-------|-------|
+| `"SVC_LOC::" + com.pageCtx + "/InternalTcOutServlet"` (functionGubun=onload) | `"SVC_LOC::internalTcOut/onload.do"` |
+| `"SVC_LOC::" + com.pageCtx + "/SalesListServlet"` (functionGubun=ONLOAD_LIST) | `"SVC_LOC::salesList/ONLOAD_LIST.do"` |
+
+변환 규칙: `XxxServlet` → `xxx` (camelCase) + `/functionGubun값.do`
+
+#### Decimal 산술 변환
+
+`nexacro.round()` 내 산술식과 `getColumn` 2개 이상 포함 대입문을 `nexacro.Decimal` 체인으로 변환.
+부동소수점 오차 방지 목적.
+
+| AS-IS | TO-BE |
+|-------|-------|
+| `nexacro.round((a - diff) * b + c)` | `nexacro.round(new nexacro.Decimal(take.nvl(a, 0)).sub(diff).mul(take.nvl(b, 0)).add(take.nvl(c, 0)))` |
+| `nexacro.round(val - getCol1 - getCol2)` | `nexacro.round(new nexacro.Decimal(val).sub(take.nvl(getCol1, 0)).sub(take.nvl(getCol2, 0)))` |
+| `nexacro.round(bal / (getCol1 - getCol2))` | `nexacro.round(new nexacro.Decimal(bal).div(new nexacro.Decimal(take.nvl(getCol1, 0)).sub(take.nvl(getCol2, 0))))` |
+| `diff = getColumn1 + getColumn2` (getColumn 2개↑) | `diff = new nexacro.Decimal(take.nvl(getColumn1, 0)).add(take.nvl(getColumn2, 0))` |
+
+- `getColumn(...)` atom → `take.nvl(..., 0)` 자동 래핑
+- 일반 변수(`diff`, `balance` 등) → 래핑 없이 그대로 전달
+- 우변에 복잡한 식이 오는 경우 재귀적으로 Decimal 체인 생성
+- 이미 `nexacro.Decimal` 이 포함된 식은 변환 스킵
+- 파싱 실패 시 원본 유지 (예외 무시)
+
+#### 외부 JS 참조 주입
+
+스크립트 내 `sa.*` / `so.*` / `ins.*` 호출 감지 시, `//공통 라이브러리 호출` 주석 아래에 `take.loadJs` 라인 자동 삽입.
+이미 삽입된 경우 중복 삽입하지 않음.
+
+| 감지 패턴 | 삽입 내용 |
+|-----------|-----------|
+| `sa.*` 호출 | `take.loadJs(this, "saJsLoad_" + this.name, "/biz/commonJs/sa.js")` |
+| `so.*` 호출 | `take.loadJs(this, "soJsLoad_" + this.name, "/biz/commonJs/so.js")` |
+| `ins.*` 호출 | `take.loadJs(this, "insJsLoad_" + this.name, "/biz/commonJs/ins.js")` |
+
+#### async/await 변환
+
+`com.*` 직접 호출이 있는 함수 → `async` 대상으로 표시.
+해당 함수를 호출하는 함수도 전파(propagation)되어 `async` 처리.
+
+| 패턴 | 변환 내용 |
+|------|-----------|
+| `com.*` 직접 호출 함수 | `(async () => { ... }).call(this)` 로 감싸기 |
+| 다른 async 함수에서 호출되는 함수 | `return (async () => { ... }).call(this)` |
+| `com.*` 함수 호출 라인 | `await com.*()` 자동 추가 |
+| `this.fnXxx()` (async 전파된 함수) | `await this.fnXxx()` 자동 추가 |
 
 ### 주요 변환 규칙 (Layout Cell 영역)
 
@@ -379,6 +447,7 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 | `[AIChanger] drawDetailGridDisableColor` 마커 | `com.drawDetailGridDisableColor(...)` |
 | `[AIChanger] drawDetailGridBkColor` 마커 | `com.drawDetailGridBkColor(...)` |
 | `background="..."` 속성 | `cssclass="..."` 로 변환 또는 병합 |
+| body 밴드 내 `displaytype="date"` 셀 | `calendardateformat="yyyy-MM-dd"` 자동 추가 |
 
 ### 패턴 파일 업데이트 방법
 
@@ -386,7 +455,5 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 2. 수동으로 다듬은 정제본을 `converter/nexacro/to-be/` 에 동일 파일명으로 배치
 3. AS-IS / TO-BE diff를 보고 `nexacro_convert_patterns.json` 갱신
 4. `nexacroMain.py` 재실행으로 자동 변환 결과 검증
-
-> **참고:** SVC_LOC URL 변환(`com.pageCtx` → REST URL)과 Script 헤더 구조 변경은 서블릿-URL 매핑 정보가 필요하므로 수동 처리 항목입니다.
 
 ---
