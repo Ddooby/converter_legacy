@@ -15,6 +15,11 @@ PATTERNS_FILE = Path(__file__).parent / "patterns" / "nexacro_convert_patterns.j
 SCRIPT_START = '<Script type="xscript5.1"><![CDATA['
 SCRIPT_END = "]]></Script>"
 
+_ARITH_OP_RE = re.compile(r'[+\-*/]')
+_ROUND_PAT_RE = re.compile(r'nexacro\.round\(')
+_GETCOL_RE = re.compile(r'\.getColumn\(')
+_OP_TO_METHOD = {'+': 'add', '-': 'sub', '*': 'mul', '/': 'div'}
+
 
 class XfdlConverter:
     def __init__(self, patterns_file: Path = PATTERNS_FILE):
@@ -155,6 +160,7 @@ class XfdlConverter:
         content = self._apply_uxb_info(content)
         content = self._convert_svc_url(content)
         content = self._convert_dataset_get_column(content)
+        content = self._convert_arithmetic_to_decimal(content)
         content = self._apply_text_replacements(content)
         content = self._convert_fn_message_domain(content)
         if form_name:
@@ -201,7 +207,13 @@ class XfdlConverter:
             result.append(content[last_end:m.start()])
             servlet_name = m.group(1)
             preceding = content[:m.start()]
-            gubun_matches = list(re.finditer(r'functionGubun\s*=\s*"?([A-Za-z0-9_]+)"?', preceding))
+            gubun_pat = re.compile(r'functionGubun\s*=\s*"?([A-Za-z0-9_]+)"?')
+            gubun_matches = list(gubun_pat.finditer(preceding))
+            if not gubun_matches:
+                # functionGubun이 URL 뒤(같은 transaction 호출 내)에 있는 경우도 탐색
+                line_end = content.find(";", m.end())
+                following = content[m.end(): line_end if line_end != -1 else m.end() + 200]
+                gubun_matches = list(gubun_pat.finditer(following))
             if gubun_matches:
                 func_gubun = gubun_matches[-1].group(1)
                 path = servlet_name[:-7] if servlet_name.endswith("Servlet") else servlet_name
@@ -414,6 +426,172 @@ class XfdlConverter:
                 call = f"this.{sm.group(1)}("
                 line = line.replace(call, "await " + call, 1)
         return line
+
+    # ──────────────────────────────────────────
+    # Decimal arithmetic conversion
+    # ──────────────────────────────────────────
+
+    def _convert_arithmetic_to_decimal(self, content: str) -> str:
+        """
+        산술 연산을 nexacro.Decimal 체인으로 변환:
+        1) nexacro.round(expr) 내 산술식
+        2) identifier = expr (getColumn 2개 이상 산술식)
+        """
+        content = self._convert_round_args_to_decimal(content)
+        content = self._convert_getcol_assign_to_decimal(content)
+        return content
+
+    def _convert_round_args_to_decimal(self, content: str) -> str:
+        result, last_end = [], 0
+        for m in _ROUND_PAT_RE.finditer(content):
+            arg_start = m.end()
+            first_arg, arg_end = self._extract_first_func_arg(content, arg_start)
+            if not _ARITH_OP_RE.search(first_arg) or 'nexacro.Decimal' in first_arg:
+                continue
+            try:
+                converted = self._arith_to_decimal(first_arg)
+            except Exception:
+                continue
+            if converted == first_arg:
+                continue
+            result.append(content[last_end:arg_start])
+            result.append(converted)
+            last_end = arg_end
+        result.append(content[last_end:])
+        return ''.join(result)
+
+    def _convert_getcol_assign_to_decimal(self, content: str) -> str:
+        lines = content.split('\n')
+        return '\n'.join(self._try_convert_assign_line(ln) for ln in lines)
+
+    def _try_convert_assign_line(self, line: str) -> str:
+        stripped = line.strip()
+        if stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('*'):
+            return line
+        m = re.match(r'^((?:var\s+)?\w+\s*=\s*)(.+?)(\s*;?\s*)$', stripped)
+        if not m:
+            return line
+        rhs = m.group(2)
+        if (
+            len(_GETCOL_RE.findall(rhs)) < 2
+            or not _ARITH_OP_RE.search(rhs)
+            or 'nexacro.Decimal' in rhs
+            or 'nexacro.round(' in rhs
+            or re.search(r'[<>!]|==|&&|\|\|', rhs)
+        ):
+            return line
+        try:
+            converted = self._arith_to_decimal(rhs)
+            if converted != rhs:
+                indent = line[: len(line) - len(line.lstrip())]
+                return f'{indent}{m.group(1)}{converted}{m.group(3)}'
+        except Exception:
+            pass
+        return line
+
+    def _extract_first_func_arg(self, content: str, start: int) -> tuple[str, int]:
+        """함수 호출 '(' 직후 start 위치에서 첫 번째 인자와 종료 위치 반환"""
+        depth, i = 0, start
+        while i < len(content):
+            c = content[i]
+            if c == '(':
+                depth += 1
+            elif c == ')':
+                if depth == 0:
+                    return content[start:i].strip(), i
+                depth -= 1
+            elif c == ',' and depth == 0:
+                return content[start:i].strip(), i
+            i += 1
+        return content[start:].strip(), i
+
+    def _arith_to_decimal(self, expr: str) -> str:
+        """산술식 → nexacro.Decimal 체인 문자열"""
+        tokens = self._tokenize_arith(expr)
+        node, _ = self._parse_add(tokens, 0)
+        return self._emit_chain(node)
+
+    def _tokenize_arith(self, expr: str) -> list[dict]:
+        """괄호 중첩을 추적해 함수 호출(getColumn 등)을 단일 atom으로 처리"""
+        tokens, i = [], 0
+        expr = expr.strip()
+        n = len(expr)
+        while i < n:
+            c = expr[i]
+            if c in ' \t\n\r':
+                i += 1
+            elif c == '(':
+                tokens.append({'t': 'lp'})
+                i += 1
+            elif c == ')':
+                tokens.append({'t': 'rp'})
+                i += 1
+            elif c in '+-*/':
+                tokens.append({'t': 'op', 'v': c})
+                i += 1
+            else:
+                j, depth = i, 0
+                while i < n:
+                    ch = expr[i]
+                    if ch == '(':
+                        depth += 1; i += 1
+                    elif ch == ')':
+                        if depth == 0: break
+                        depth -= 1; i += 1
+                    elif ch in '+-*/' and depth == 0:
+                        break
+                    else:
+                        i += 1
+                val = expr[j:i].strip()
+                if val:
+                    tokens.append({'t': 'atom', 'v': val})
+        return tokens
+
+    def _parse_add(self, toks: list, pos: int) -> tuple[dict, int]:
+        left, pos = self._parse_mul(toks, pos)
+        while pos < len(toks) and toks[pos]['t'] == 'op' and toks[pos]['v'] in '+-':
+            op = toks[pos]['v']; pos += 1
+            right, pos = self._parse_mul(toks, pos)
+            left = {'t': 'bin', 'op': op, 'l': left, 'r': right}
+        return left, pos
+
+    def _parse_mul(self, toks: list, pos: int) -> tuple[dict, int]:
+        left, pos = self._parse_primary(toks, pos)
+        while pos < len(toks) and toks[pos]['t'] == 'op' and toks[pos]['v'] in '*/':
+            op = toks[pos]['v']; pos += 1
+            right, pos = self._parse_primary(toks, pos)
+            left = {'t': 'bin', 'op': op, 'l': left, 'r': right}
+        return left, pos
+
+    def _parse_primary(self, toks: list, pos: int) -> tuple[dict, int]:
+        if pos >= len(toks):
+            raise ValueError("Unexpected end of tokens")
+        tok = toks[pos]
+        if tok['t'] == 'lp':
+            node, pos = self._parse_add(toks, pos + 1)
+            if pos < len(toks) and toks[pos]['t'] == 'rp':
+                pos += 1
+            return node, pos
+        if tok['t'] == 'atom':
+            return {'t': 'atom', 'v': tok['v']}, pos + 1
+        raise ValueError(f"Unexpected token: {tok}")
+
+    def _emit_chain(self, node: dict) -> str:
+        """AST → nexacro.Decimal 체인 (체인의 시작점, new nexacro.Decimal 래핑)"""
+        if node['t'] == 'atom':
+            return f"new nexacro.Decimal({self._nvl_wrap(node['v'])})"
+        method = _OP_TO_METHOD[node['op']]
+        return f"{self._emit_chain(node['l'])}.{method}({self._emit_arg(node['r'])})"
+
+    def _emit_arg(self, node: dict) -> str:
+        """AST → Decimal 메서드 인자 (복잡한 우변은 체인으로 재귀)"""
+        if node['t'] == 'atom':
+            return self._nvl_wrap(node['v'])
+        return self._emit_chain(node)
+
+    def _nvl_wrap(self, value: str) -> str:
+        """getColumn 호출이면 take.nvl(value, 0)으로 감싸기"""
+        return f'take.nvl({value}, 0)' if '.getColumn(' in value else value
 
     # ──────────────────────────────────────────
     # Brace matching

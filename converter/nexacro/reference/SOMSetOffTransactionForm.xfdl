@@ -1,0 +1,3086 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form id="SOMSetOffTransactionForm" onload="Form_onload" ontimer="form_OnTimer" taborder="12" titletext="Mini Setoff Transaction" left="0" top="0" width="1590" height="820" scrollbars="none">
+    <Layouts>
+      <Layout>
+        <Static id="Shape2_00" taborder="111" left="751" top="218" height="59" right="10" cssclass="sta_WF_tdbg"/>
+        <Static id="staTitle" taborder="0" text="Settlement (Receivables, Payables, Advance Received)" verticalAlign="middle" left="10" top="283" width="697" height="24" textAlign="left" cssclass="sta_WF_title02"/>
+        <Static id="Static12" taborder="1" text="General" verticalAlign="middle" left="10" top="38" width="110" height="24" textAlign="left" cssclass="sta_WF_title02"/>
+        <Static id="Shape1" taborder="2" left="10" width="733" height="88" top="66" cssclass="sta_WF_tdbg"/>
+        <Static id="Static18" taborder="3" text="Inquiry Condition" verticalAlign="middle" left="751" top="38" width="141" height="24" textAlign="left" cssclass="sta_WF_title02"/>
+        <Static id="Shape2" taborder="4" left="751" top="68" height="146" right="10" cssclass="sta_WF_tdbg" text=""/>
+        <Static id="Static40" taborder="5" text="GL Date" left="10" top="67" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static16" taborder="6" text="Currency" left="10" top="96" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Grid binddataset="OTCStlSettleDetailDS" selecttype="TRUE" cellsizingtype="col" readonly="false" enable="true" id="gd_SettleDS" onheadclick="gd_SettleDS_OnHeadClick" taborder="7" tabstop="true" useselcolor="true" visible="true" wheelscrollrow="1" left="10" top="311" height="351" formatid="default" takegrid="sort,rowcount" right="10" cssclass="st_detail2_grid" countcomp="staTitle">
+          <Formats>
+            <Format id="default">
+              <Columns>
+                <Column size="20" band="left"/>
+                <Column size="30" band="left"/>
+                <Column size="60" band="left"/>
+                <Column size="80" band="left"/>
+                <Column size="45" band="left"/>
+                <Column size="35" band="left"/>
+                <Column size="60"/>
+                <Column size="35"/>
+                <Column size="38"/>
+                <Column size="100"/>
+                <Column size="100"/>
+                <Column size="100"/>
+                <Column size="115"/>
+                <Column size="115"/>
+                <Column size="115"/>
+                <Column size="110"/>
+                <Column size="110"/>
+                <Column size="110"/>
+                <Column size="150"/>
+                <Column size="175"/>
+              </Columns>
+              <Rows>
+                <Row size="24" band="head"/>
+                <Row size="24" band="head"/>
+                <Row size="24"/>
+              </Rows>
+              <Band id="head">
+                <Cell rowspan="2" displaytype="checkboxcontrol" edittype="checkbox"/>
+                <Cell col="1" rowspan="2" displaytype="text" text="Type"/>
+                <Cell col="2" rowspan="2" displaytype="text" text="GL Accnt"/>
+                <Cell col="3" rowspan="2" displaytype="text" text="GLDate"/>
+                <Cell col="4" rowspan="2" displaytype="text" text="Vsl"/>
+                <Cell col="5" rowspan="2" displaytype="text" text="Voy"/>
+                <Cell col="6" rowspan="2" displaytype="text" text="Account"/>
+                <Cell col="7" rowspan="2" displaytype="text" text="Team"/>
+                <Cell col="8" rowspan="2" displaytype="text" text="Cur"/>
+                <Cell col="9" colspan="3" displaytype="text" text="Open Amount"/>
+                <Cell col="12" colspan="3" displaytype="text" text="Clear Amount"/>
+                <Cell col="15" rowspan="2" displaytype="text" text="Accoun Name"/>
+                <Cell col="16" rowspan="2" displaytype="text" text="GL Acc Name"/>
+                <Cell col="17" rowspan="2" displaytype="text" text="Team Name"/>
+                <Cell col="18" rowspan="2" displaytype="text" text="Erp Docu No"/>
+                <Cell col="19" rowspan="2" displaytype="text" text="Remark"/>
+                <Cell row="1" col="9" displaytype="text" text="LOC"/>
+                <Cell row="1" col="10" displaytype="text" text="USD"/>
+                <Cell row="1" col="11" displaytype="text" text="KRW"/>
+                <Cell row="1" col="12" displaytype="text" text="LOC"/>
+                <Cell row="1" col="13" displaytype="text" text="USD"/>
+                <Cell row="1" col="14" displaytype="text" text="KRW"/>
+              </Band>
+              <Band id="body">
+                <Cell textAlign="center" text="bind:check_item" displaytype="checkboxcontrol" edittype="checkbox"/>
+                <Cell col="1" textAlign="center" text="bind:clct_open_code" displaytype="text"/>
+                <Cell col="2" textAlign="center" text="bind:gl_acc_code" displaytype="text"/>
+                <Cell col="3" text="bind:src_posting_date" displaytype="date" maskeditformat="yyyy-MM-dd" textAlign="center" calendardisplaynulltype="none" calendardateformat="yyyy-MM-dd" calendardisplayinvalidtype="none"/>
+                <Cell col="4" textAlign="center" text="bind:vsl_code" displaytype="text"/>
+                <Cell col="5" textAlign="center" text="bind:voy_no" displaytype="text" expr="com.lpad(voy_no, '0', 4)"/>
+                <Cell col="6" textAlign="center" text="bind:acc_code" displaytype="text"/>
+                <Cell col="7" textAlign="center" text="bind:team_code" displaytype="text"/>
+                <Cell col="8" textAlign="center" text="bind:curcy_code" displaytype="text"/>
+                <Cell col="9" textAlign="right" text="bind:open_loc_amt" displaytype="mask" maskeditformat="#,##0.00"/>
+                <Cell col="10" textAlign="right" text="bind:open_usd_amt" displaytype="mask" maskeditformat="#,##0.00"/>
+                <Cell col="11" textAlign="right" text="bind:open_krw_amt" displaytype="mask" maskeditformat="#,##0.00"/>
+                <Cell col="12" textAlign="right" text="bind:stl_loc_amt" displaytype="mask" maskeditformat="#,##0.00"/>
+                <Cell col="13" textAlign="right" text="bind:stl_usd_amt" displaytype="mask" maskeditformat="#,##0.00"/>
+                <Cell col="14" textAlign="right" text="bind:stl_krw_amt" displaytype="mask" maskeditformat="#,##0.00"/>
+                <Cell col="15" textAlign="left" text="bind:acc_name" displaytype="text"/>
+                <Cell col="16" textAlign="left" text="bind:gl_acc_name" displaytype="text"/>
+                <Cell col="17" textAlign="left" text="bind:team_name" displaytype="text"/>
+                <Cell col="18" textAlign="left" text="bind:stl_erp_slip_no" displaytype="text"/>
+                <Cell col="19" textAlign="left" text="bind:stl_rem" displaytype="text"/>
+              </Band>
+            </Format>
+          </Formats>
+        </Grid>
+        <Static id="Static52" taborder="12" text="Team" left="10" top="125" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static17" taborder="13" text="Loc Rate" left="254" top="96" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Combo binddataset="OTCStlHeadDS" codecolumn="currency_code" datacolumn="currency_code" id="cb_currency" innerdataset="currencyDS" type="filter" taborder="10" tabstop="false" left="114" top="98" width="120" height="24" cssclass="cmb_WF_essential"/>
+        <Button id="btn_close" onclick="fnClose" taborder="109" tabstop="false" text="CLOSE" top="10" width="87" height="24" cssclass="btn_primary,btn_text,ico_close_W" right="10"/>
+        <Button id="btn_save" onclick="fnSave" taborder="108" tabstop="false" text="SAVE" top="10" width="87" height="24" cssclass="btn_primary,btn_text,ico_save_W" right="btn_close:6"/>
+        <Button id="btn_inquiry" onclick="fnSearch" taborder="9" tabstop="false" text="INQUIRY" top="10" width="87" height="24" cssclass="btn_primary,btn_text,ico_search_W" right="btn_save:6"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="me_locRate" taborder="8" left="358" top="98" width="120" height="24" clipmode="excludespace" format="#,###,##0.00000"/>
+        <Static id="Static1" taborder="14" text="~" left="955" top="221" width="12" height="24" cssclass="sta_WF_textC"/>
+        <Static id="Static4" taborder="15" text="GL Date" verticalAlign="middle" left="751" top="219" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Button id="btn_vslCode1" onclick="btn_vslCode1_OnClick" taborder="11" tabstop="false" left="1441" top="100" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_vslCode1" maxlength="4" taborder="48" inputmode="upper" left="1357" top="100" width="80" height="24"/>
+        <Static id="Static35" taborder="16" text="Vsl-Voy" left="1317" top="69" width="263" height="29" cssclass="sta_WF_th_C02"/>
+        <Static id="Static29" taborder="17" text="Creation (AR, AP, GL-DR, GL-CR)           [ GL-DR : 540203, 800101, 830101        GL-CR : 730101, 760101 ]" verticalAlign="middle" left="10" top="670" width="819" height="24" textAlign="left" cssclass="sta_WF_title02"/>
+        <Grid binddataset="OTCStlInvoDetailDS" cellmovingtype="col" readonly="false" enable="true" id="gd_InvoiceDS" oncellposchanged="gd_InvoiceDS_OnCellPosChanged" onrbuttondown="gd_InvoiceDS_OnRButtonDown" scrollpixel="true" taborder="18" tabstop="true" useselcolor="false" visible="true" wheelscrollrow="1" left="10" top="698" formatid="default" selecttype="row" takegrid="sort" right="10" bottom="10" cssclass="st_detail2_grid">
+          <Formats>
+            <Format id="default">
+              <Columns>
+                <Column size="40"/>
+                <Column size="50"/>
+                <Column size="50"/>
+                <Column size="60"/>
+                <Column size="85"/>
+                <Column size="82"/>
+                <Column size="63"/>
+                <Column size="40"/>
+                <Column size="100"/>
+                <Column size="100"/>
+                <Column size="100"/>
+                <Column size="84"/>
+                <Column size="84"/>
+                <Column size="84"/>
+                <Column size="34"/>
+                <Column size="80"/>
+                <Column size="84"/>
+                <Column size="84"/>
+                <Column size="237"/>
+                <Column size="120"/>
+                <Column size="120"/>
+                <Column size="120"/>
+                <Column size="120"/>
+              </Columns>
+              <Rows>
+                <Row size="24" band="head"/>
+                <Row size="24"/>
+              </Rows>
+              <Band id="head">
+                <Cell textAlign="center" displaytype="text" text="Seq"/>
+                <Cell col="1" displaytype="text" text="Vsl"/>
+                <Cell col="2" displaytype="text" text="Voy"/>
+                <Cell col="3" displaytype="text" text="Type"/>
+                <Cell col="4" displaytype="text" expandshow="show" expandsize="20" text="Account"/>
+                <Cell col="5" displaytype="text" expandshow="show" expandsize="20" text="GL Accnt"/>
+                <Cell col="6" displaytype="text" expandshow="show" expandsize="20" text="Team"/>
+                <Cell col="7" displaytype="text" text="Cur"/>
+                <Cell col="8" displaytype="text" text="LOC Amt"/>
+                <Cell col="9" displaytype="text" text="USD Amt"/>
+                <Cell col="10" displaytype="text" text="KRW Amt"/>
+                <Cell col="11" displaytype="text" text="Terms Date"/>
+                <Cell col="12" displaytype="text" expandshow="show" expandsize="20" text="Term"/>
+                <Cell col="13" displaytype="text" text="Due Date"/>
+                <Cell col="14" displaytype="text" text="Hold"/>
+                <Cell col="15" displaytype="text" expandshow="show" expandsize="20" text="Bank"/>
+                <Cell col="16" displaytype="text" text="From Date"/>
+                <Cell col="17" displaytype="text" text="To Date"/>
+                <Cell col="18" textAlign="left" displaytype="text" text="   Remark"/>
+                <Cell col="19" displaytype="text" expandshow="show" expandsize="20" text="Email1"/>
+                <Cell col="20" displaytype="text" expandshow="show" expandsize="20" text="Email2"/>
+                <Cell col="21" displaytype="text" expandshow="show" expandsize="20" text="Email3"/>
+                <Cell col="22" displaytype="text" expandshow="show" expandsize="20" text="Email4"/>
+              </Band>
+              <Band id="body">
+                <Cell textAlign="center" displaytype="text" expr="currow + 1"/>
+                <Cell col="1" textAlign="center" text="bind:vsl_code" displaytype="text" edittype="text" editinputmode="upper" editinputtype="alpha,dot,number"/>
+                <Cell col="2" textAlign="center" text="bind:voy_no" displaytype="mask" edittype="mask" editmaxlength="4" editinputtype="number" maskeditformat="0000" maskedittype="number" editautoselect="true" editinputfilter="alpha,comma,dot,none,sign,space,symbol"/>
+                <Cell col="3" textAlign="left" text="bind:clct_open_code" combocodecol="clct_open_code" combodataset="OpenTypeDS" combodatacol="clct_open_code" displaytype="combotext" edittype="combo"/>
+                <Cell col="4" textAlign="center" text="bind:acc_code" displaytype="text" edittype="text" editinputmode="upper" editinputtype="alpha,dot,number" editmaxlength="6"/>
+                <Cell col="5" textAlign="center" text="bind:gl_acc_code" displaytype="text" edittype="text" editinputmode="upper" editinputtype="alpha,dot,number" editmaxlength="6"/>
+                <Cell col="6" textAlign="center" text="bind:team_code" displaytype="text" edittype="text" editinputmode="upper" editinputtype="alpha,dot,number" editmaxlength="3"/>
+                <Cell col="7" textAlign="center" text="bind:curcy_code" displaytype="text"/>
+                <Cell col="8" textAlign="right" text="bind:stl_loc_amt" displaytype="mask" edittype="mask" editinputtype="number" maskeditformat="#,##0.00"/>
+                <Cell col="9" textAlign="right" text="bind:stl_usd_amt" displaytype="mask" edittype="expr:com.iif((gl_acc_code == &quot;800101&quot; || gl_acc_code == &quot;730101&quot;) &amp;&amp; curcy_code != &quot;USD&quot; , &quot;mask&quot;, &quot;none&quot;)" maskeditformat="#,##0.00"/>
+                <Cell col="10" textAlign="right" text="bind:stl_krw_amt" displaytype="mask" edittype="expr:com.iif((gl_acc_code == &quot;800101&quot; || gl_acc_code == &quot;730101&quot;) &amp;&amp; curcy_code != &quot;KRW&quot; , &quot;mask&quot;, &quot;none&quot;)" maskeditformat="#,##0"/>
+                <Cell col="11" text="bind:terms_date" displaytype="date" edittype="expr:com.iif(clct_open_code == &quot;AP&quot; || clct_open_code == &quot;AR&quot; , &quot;date&quot;, &quot;none&quot;)" maskeditformat="yyyy-MM-dd" textAlign="center" calendardisplaynulltype="none" calendardateformat="yyyy-MM-dd" calendardisplayinvalidtype="none"/>
+                <Cell col="12" textAlign="center" text="bind:pymt_term" displaytype="text" edittype="expr:com.iif(clct_open_code == &quot;AP&quot; || clct_open_code == &quot;AR&quot; , &quot;mask&quot;, &quot;none&quot;)"/>
+                <Cell col="13" text="bind:due_date" displaytype="date" maskeditformat="yyyy-MM-dd" textAlign="center" calendardisplaynulltype="none" calendardateformat="yyyy-MM-dd" calendardisplayinvalidtype="none"/>
+                <Cell col="14" text="bind:pymt_hold_flag" displaytype="checkboxcontrol" edittype="expr:com.iif(clct_open_code == &quot;AP&quot;, &quot;checkbox&quot;, &quot;none&quot;)" textAlign="left"/>
+                <Cell col="15" text="bind:bank_acc_id" displaytype="text" textAlign="left"/>
+                <Cell col="16" text="bind:from_date" displaytype="date" edittype="date" maskeditformat="yyyy-MM-dd" textAlign="left" calendardisplaynulltype="none" calendardateformat="yyyy-MM-dd"/>
+                <Cell col="17" text="bind:to_date" displaytype="date" edittype="date" maskeditformat="yyyy-MM-dd" textAlign="left" calendardisplaynulltype="none" calendardateformat="yyyy-MM-dd"/>
+                <Cell col="18" text="bind:stl_rem" displaytype="text" edittype="normal" textAlign="left"/>
+                <Cell col="19" textAlign="center" text="bind:email_1" displaytype="text" edittype="expr:com.iif(clct_open_code == &quot;AP&quot; &amp;&amp; comp.parent.getAccNat(acc_code) != &quot;KR&quot;, &quot;normal&quot;, &quot;none&quot;)"/>
+                <Cell col="20" textAlign="center" text="bind:email_2" displaytype="text" edittype="expr:com.iif(clct_open_code == &quot;AP&quot; &amp;&amp; comp.parent.getAccNat(acc_code) != &quot;KR&quot;, &quot;normal&quot;, &quot;none&quot;)"/>
+                <Cell col="21" text="bind:email_3" displaytype="text" edittype="expr:com.iif(clct_open_code == &quot;AP&quot; &amp;&amp; comp.parent.getAccNat(acc_code) != &quot;KR&quot;, &quot;normal&quot;, &quot;none&quot;)" textAlign="left"/>
+                <Cell col="22" text="bind:email_4" displaytype="text" edittype="expr:com.iif(clct_open_code == &quot;AP&quot; &amp;&amp; comp.parent.getAccNat(acc_code) != &quot;KR&quot;, &quot;normal&quot;, &quot;none&quot;)" textAlign="left"/>
+              </Band>
+            </Format>
+          </Formats>
+        </Grid>
+        <Edit autoselect="true" binddataset="OTCStlHeadDS" enable="false" id="ed_teamName" maxlength="3" taborder="19" left="114" top="127" width="120" height="24"/>
+        <Static id="Static0" taborder="20" text="Docu No" left="254" top="67" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static2" taborder="22" text="Usd Rate" left="254" top="125" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="me_usdRate" taborder="21" left="358" top="127" width="120" height="24" clipmode="excludespace" format="#,###,##0.00000"/>
+        <Static id="Shape3" taborder="23" left="10" top="158" width="733" height="117" cssclass="sta_WF_tdbg"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="MaskEdit2" displaynulltext="0" taborder="25" left="125" top="191" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="MaskEdit3" displaynulltext="0" taborder="27" left="336" top="191" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit enable="false" id="me_loc_diff_amt" displaynulltext="0" taborder="28" left="547" top="191" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit enable="false" id="me_usd_diff_amt" displaynulltext="0" taborder="29" left="547" top="219" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="MaskEdit6" displaynulltext="0" taborder="26" left="336" top="219" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="MaskEdit7" displaynulltext="0" taborder="24" left="125" top="219" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="MaskEdit8" displaynulltext="0" taborder="31" left="125" top="248" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit binddataset="OTCStlHeadDS" enable="false" id="MaskEdit9" displaynulltext="0" taborder="30" left="336" top="248" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <MaskEdit enable="false" id="me_krw_diff_amt" displaynulltext="0" taborder="32" left="547" top="248" width="180" height="24" clipmode="excludespace" format="#,###,##0.00"/>
+        <Static textAlign="center" id="Static5" taborder="33" text="DR" verticalAlign="middle" left="109" top="159" width="212" height="29" cssclass="sta_WF_th_C02"/>
+        <Static textAlign="center" id="Static7" taborder="34" text="CR" verticalAlign="middle" left="320" top="159" width="212" height="29" cssclass="sta_WF_th_C02"/>
+        <Static textAlign="center" id="Static14" taborder="35" text="Diff" verticalAlign="middle" left="531" top="159" width="212" height="29" cssclass="sta_WF_th_C02"/>
+        <Static id="Static15" taborder="36" text="LOC" left="10" top="188" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static19" taborder="37" text="USD" left="10" top="217" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static20" taborder="38" text="KRW" left="10" top="246" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static10" taborder="59" text="Account" left="751" top="69" width="283" height="29" cssclass="sta_WF_th_C02"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_accntCode1" maxlength="6" taborder="39" left="769" top="100" width="80" height="24" onchanged="ed_accntCode1_onchanged"/>
+        <Button id="btn_accntCode1" onclick="btn_accntCode1_OnClick" taborder="47" tabstop="false" left="853" top="100" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Static id="Static11" taborder="57" text="Team" left="1033" top="69" width="285" height="29" cssclass="sta_WF_th_C02"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_teamCode1" maxlength="3" taborder="43" left="1046" top="100" width="80" height="24" onchanged="ed_teamCode1_onchanged"/>
+        <Button id="btn_teamCode1" onclick="btn_teamCode1_OnClick" taborder="56" tabstop="false" left="1130" top="100" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_voyNo1" maxlength="4" taborder="49" inputmode="upper" left="1469" top="100" width="80" height="24"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_voyNo2" maxlength="4" taborder="51" inputmode="upper" left="1469" top="129" width="80" height="24"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_vslCode2" maxlength="4" taborder="50" inputmode="upper" left="1357" top="129" width="80" height="24"/>
+        <Button id="btn_vslCode2" onclick="btn_vslCode2_OnClick" taborder="60" tabstop="false" left="1441" top="129" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Button id="btn_teamCode2" onclick="btn_teamCode2_OnClick" taborder="62" tabstop="false" left="1130" top="129" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_teamCode2" maxlength="3" taborder="44" left="1046" top="129" width="80" height="24" onchanged="ed_teamCode2_onchanged"/>
+        <Button id="btn_accntCode2" onclick="btn_accntCode2_OnClick" taborder="61" tabstop="false" left="853" top="129" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_accntCode2" maxlength="6" taborder="40" left="769" top="129" width="80" height="24" onchanged="ed_accntCode2_onchanged"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_voyNo3" maxlength="4" taborder="53" inputmode="upper" left="1469" top="158" width="80" height="24"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_vslCode3" maxlength="4" taborder="52" inputmode="upper" left="1357" top="158" width="80" height="24"/>
+        <Button id="btn_vslCode3" onclick="btn_vslCode3_OnClick" taborder="63" tabstop="false" left="1441" top="158" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Button id="btn_teamCode3" onclick="btn_teamCode3_OnClick" taborder="65" tabstop="false" left="1130" top="158" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_teamCode3" maxlength="3" taborder="45" left="1046" top="158" width="80" height="24" onchanged="ed_teamCode3_onchanged"/>
+        <Button id="btn_accntCode3" onclick="btn_accntCode3_OnClick" taborder="64" tabstop="false" left="853" top="158" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_accntCode3" maxlength="6" taborder="41" left="769" top="158" width="80" height="24" onchanged="ed_accntCode3_onchanged"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_voyNo4" maxlength="4" taborder="55" inputmode="upper" left="1469" top="187" width="80" height="24"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_vslCode4" maxlength="4" taborder="54" inputmode="upper" left="1357" top="187" width="80" height="24"/>
+        <Button id="btn_vslCode4" onclick="btn_vslCode4_OnClick" taborder="66" tabstop="false" left="1441" top="187" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Button id="btn_teamCode4" onclick="btn_teamCode4_OnClick" taborder="68" tabstop="false" left="1130" top="187" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_teamCode4" maxlength="3" taborder="46" left="1046" top="187" width="80" height="24" onchanged="ed_teamCode4_onchanged"/>
+        <Button id="btn_accntCode4" onclick="btn_accntCode4_OnClick" taborder="67" tabstop="false" left="853" top="187" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_accntCode4" maxlength="6" taborder="42" left="769" top="187" width="80" height="24" onchanged="ed_accntCode4_onchanged"/>
+        <Static id="Static34" taborder="69" text="GL Acc Code" verticalAlign="middle" left="1071" top="219" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Edit autoselect="true" binddataset="SearchDS" id="ed_glAccCode" maxlength="6" inputtype="number" taborder="58" value="210805" inputmode="upper" left="1175" top="221" width="73" height="24" cssclass="edt_WF_essential"/>
+        <Button id="btn_glAccCode" onclick="btn_glAccCode_OnClick" taborder="70" tabstop="false" left="1252" top="221" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Edit autoselect="true" binddataset="OTCStlHeadDS" enable="false" id="ed_docu_no" taborder="71" left="358" top="69" width="120" height="24"/>
+        <Static id="Static6" taborder="74" text="Created By" left="498" top="125" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static8" taborder="72" text="Cancel" left="498" top="96" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static9" taborder="73" text="Process" left="498" top="67" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Edit autoselect="true" binddataset="OTCStlHeadDS" enable="false" id="ed_cancelFlag" maxlength="3" taborder="75" left="602" top="98" width="120" height="24"/>
+        <Edit autoselect="true" binddataset="OTCStlHeadDS" enable="false" id="ed_createdBy" maxlength="3" taborder="76" left="602" top="127" width="120" height="24"/>
+        <Button id="btn_del" onclick="btn_del_OnClick" taborder="78" tabstop="false" text="DEL" top="670" width="58" height="24" right="10" cssclass="btn_ol_primary,btn_text,btn_text,ico_minus_C"/>
+        <Button id="btn_add" onclick="btn_add_OnClick" taborder="77" tabstop="false" text="ADD" top="670" width="58" height="24" right="btn_del:6" cssclass="btn_ol_primary,btn_text,btn_text,ico_plus_C"/>
+        <Static binddataset="SearchDS" id="st_accntName1" taborder="79" left="881" top="100" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_accntName2" taborder="80" left="881" top="129" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_accntName3" taborder="81" left="881" top="158" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_accntName4" taborder="82" left="881" top="187" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_glAccName" taborder="83" left="1077" top="250" width="200" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_teamName1" taborder="84" left="1158" top="100" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_teamName2" taborder="85" left="1158" top="129" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_teamName3" taborder="86" left="1158" top="158" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Static binddataset="SearchDS" id="st_teamName4" taborder="87" left="1158" top="187" width="140" height="24" textAlign="left" verticalAlign="top"/>
+        <Grid binddataset="PaymentTermAPDS" selecttype="multirow" cellsizingtype="col" readonly="false" enable="true" id="gd_TermAPDS" oncelldblclick="gd_TermAPDS_OnCellDblClick" onheadclick="gd_TermAPDS_OnHeadClick" taborder="88" tabstop="true" useselcolor="true" visible="false" wheelscrollrow="1" left="850" top="434" width="301" height="248" formatid="default" cssclass="st_detail2_grid">
+          <Formats>
+            <Format id="default">
+              <Columns>
+                <Column size="34"/>
+                <Column size="63"/>
+                <Column size="200"/>
+              </Columns>
+              <Rows>
+                <Row size="24" band="head"/>
+                <Row size="24"/>
+              </Rows>
+              <Band id="head">
+                <Cell displaytype="button" edittype="button" text="X"/>
+                <Cell col="1" displaytype="text" text="AP Term"/>
+                <Cell col="2" displaytype="text" text="Desc"/>
+              </Band>
+              <Band id="body">
+                <Cell textAlign="center" displaytype="text" expr="currow + 1"/>
+                <Cell col="1" textAlign="center" text="bind:code" displaytype="text"/>
+                <Cell col="2" text="bind:codename" displaytype="text" textAlign="left"/>
+              </Band>
+            </Format>
+          </Formats>
+        </Grid>
+        <Grid binddataset="PaymentTermARDS" selecttype="multirow" cellsizingtype="col" readonly="false" enable="true" id="gd_TermARDS" oncelldblclick="gd_TermARDS_OnCellDblClick" onheadclick="gd_TermARDS_OnHeadClick" taborder="89" tabstop="true" useselcolor="true" visible="false" wheelscrollrow="1" left="538" top="434" width="301" height="248" formatid="default" cssclass="st_detail2_grid">
+          <Formats>
+            <Format id="default">
+              <Columns>
+                <Column size="34"/>
+                <Column size="63"/>
+                <Column size="200"/>
+              </Columns>
+              <Rows>
+                <Row size="24" band="head"/>
+                <Row size="24"/>
+              </Rows>
+              <Band id="head">
+                <Cell displaytype="button" edittype="button" text="X"/>
+                <Cell col="1" displaytype="text" text="AR Term"/>
+                <Cell col="2" displaytype="text" text="Desc"/>
+              </Band>
+              <Band id="body">
+                <Cell textAlign="center" displaytype="text" expr="currow + 1"/>
+                <Cell col="1" textAlign="center" text="bind:code" displaytype="text"/>
+                <Cell col="2" text="bind:codename" displaytype="text" textAlign="left"/>
+              </Band>
+            </Format>
+          </Formats>
+        </Grid>
+        <Button id="btn_print" onclick="fnPrint" taborder="90" tabstop="false" text="CAPTURE" top="10" width="87" height="24" right="btn_inquiry:6" cssclass="btn_ol_primary"/>
+        <Edit autoselect="true" binddataset="OTCStlHeadDS" enable="false" id="ed_processFlag" maxlength="3" taborder="91" left="602" top="69" width="120" height="24"/>
+        <Button id="btn_curcyDiff" onclick="btn_curcyDiff_OnClick" taborder="92" tabstop="false" text="환차손익 자동생성" top="670" width="120" height="24" right="btn_add:6" cssclass="btn_ol_primary"/>
+        <Static id="Static58" taborder="93" text="Alt.Receiver" top="283" width="80" height="24" cssclass="sta_WF_searchLabel" right="98"/>
+        <Edit enable="false" id="ed_rcv_id" maxlength="30" taborder="95" tabstop="false" top="283" width="60" height="24" right="38"/>
+        <Button enable="false" id="btn_rcv" onclick="btn_mic_OnClick" taborder="94" tabstop="false" top="283" width="24" height="24" cssclass="ico_search,btn_padding" right="10"/>
+        <Static id="Static22" taborder="98" text="Alt.Team" top="283" width="80" height="24" cssclass="sta_WF_searchLabel" right="276"/>
+        <Edit enable="false" id="ed_rcv_team_code" maxlength="30" taborder="96" tabstop="false" top="283" width="60" height="24" right="216"/>
+        <Button enable="false" id="btn_rcv_team" onclick="btn_mic_teamCode_OnClick" taborder="97" tabstop="false" top="283" width="24" height="24" cssclass="ico_search,btn_padding" right="188"/>
+        <Static id="Static23" taborder="100" text="Due Date" verticalAlign="middle" left="751" top="248" width="100" height="28" cssclass="sta_WF_th_L"/>
+        <Static id="Static25" taborder="99" text="~" left="955" top="250" width="12" height="24" cssclass="sta_WF_textC"/>
+        <Static id="Static21" taborder="102" text="통화" verticalAlign="middle" left="1282" top="219" width="70" height="28" cssclass="sta_WF_th_L"/>
+        <Edit textAlign="center" autoselect="true" binddataset="SearchDS" id="ed_curcy_code" maxlength="3" onchanged="ed_curcy_code_OnChanged" taborder="101" inputmode="upper" left="1356" top="221" width="60" height="24"/>
+        <Button id="btn_curcy_code" onclick="btn_curcy_code_OnClick" taborder="103" tabstop="false" left="1420" top="221" width="24" height="24" cssclass="ico_search,btn_padding"/>
+        <Static id="Static26" taborder="105" text="통화구분" verticalAlign="middle" left="1282" top="248" width="70" height="28" cssclass="sta_WF_th_L"/>
+        <Combo binddataset="SearchDS" codecolumn="curcy_type" datacolumn="curcy_type_name" id="cb_curcyType" index="1" innerdataset="CurcyTypeDS" onitemchanged="cb_curcyType_OnChanged" taborder="104" left="1356" top="250" width="65" height="24"/>
+        <Static id="Static27" taborder="106" text="본경GL" verticalAlign="middle" left="1441" top="248" width="80" height="28" cssclass="sta_WF_th_L"/>
+        <CheckBox binddataset="SearchDS" id="ck_GL" onclick="ck_GL_OnClick" taborder="107" value="0" left="1525" top="250" width="55" height="24" truevalue="1" falsevalue="0" textAlign="center"/>
+        <Static textAlign="center" id="Static5_00" taborder="110" verticalAlign="middle" left="10" top="159" width="100" height="29" cssclass="sta_WF_th_C02"/>
+        <Calendar id="me_postingDate" format="####-##-##" taborder="112" left="114" top="69" width="120" height="24" cssclass="cal_WF_essential" clipmode="excludespace" type="normal"/>
+        <Calendar id="me_fromDate" taborder="113" left="855" top="221" width="100" height="24" cssclass="cal_WF_essential"/>
+        <Calendar id="me_toDate" taborder="114" left="967" top="221" width="100" height="24" cssclass="cal_WF_essential"/>
+        <Calendar id="me_fromDueDate" taborder="115" left="855" top="250" width="100" height="24"/>
+        <Calendar id="me_toDueDate" taborder="116" left="967" top="250" width="100" height="24"/>
+      </Layout>
+    </Layouts>
+    <Objects>
+      <Dataset id="CCDAprvReqMDS">
+        <ColumnInfo>
+          <Column id="aprv_req_id" size="11" type="STRING"/>
+          <Column id="src_table_name" size="100" type="STRING"/>
+          <Column id="content_name" size="100" type="STRING"/>
+          <Column id="form_name" size="40" type="STRING"/>
+          <Column id="return_flag" size="2" type="STRING"/>
+          <Column id="aprv_kind_code" size="2" type="STRING"/>
+          <Column id="aprv_grp" size="40" type="STRING"/>
+          <Column id="access_list" size="2" type="STRING"/>
+          <Column id="access_grp" size="40" type="STRING"/>
+          <Column id="filing_position" size="16" type="STRING"/>
+          <Column id="filing_flag" size="1" type="STRING"/>
+          <Column id="rpt_name" size="50" type="STRING"/>
+          <Column id="remark" size="200" type="STRING"/>
+          <Column id="ext1" size="60" type="STRING"/>
+          <Column id="ext2" size="60" type="STRING"/>
+          <Column id="ext3" size="60" type="STRING"/>
+          <Column id="ext4" size="60" type="STRING"/>
+          <Column id="sys_cre_date" size="20" type="DATE"/>
+          <Column id="sys_cre_user_id" size="20" type="STRING"/>
+          <Column id="sys_upd_date" size="20" type="DATE"/>
+          <Column id="sys_upd_user_id" size="20" type="STRING"/>
+          <Column id="aprv_req_key" size="30" type="STRING"/>
+          <Column id="src_key_value" size="30" type="STRING"/>
+          <Column id="invo_no" size="256" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="CommonCodeDS">
+        <ColumnInfo>
+          <Column id="code" size="256" type="STRING"/>
+          <Column id="codeName" size="256" type="STRING"/>
+          <Column id="abbr" size="256" type="STRING"/>
+          <Column id="extVar1" size="256" type="STRING"/>
+          <Column id="extVar2" size="256" type="STRING"/>
+          <Column id="extVar3" size="256" type="STRING"/>
+          <Column id="extVar4" size="256" type="STRING"/>
+          <Column id="extVar5" size="256" type="STRING"/>
+          <Column id="extVar6" size="256" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="SlipAccMultiSearchDS">
+        <ColumnInfo>
+          <Column id="abbr" size="256" type="STRING"/>
+          <Column id="code" size="256" type="STRING"/>
+          <Column id="codename" size="256" type="STRING"/>
+          <Column id="extVar1" size="256" type="STRING"/>
+          <Column id="extVar2" size="256" type="STRING"/>
+          <Column id="extVar3" size="256" type="STRING"/>
+          <Column id="extVar4" size="256" type="STRING"/>
+          <Column id="extVar5" size="256" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="OTCStlHeadDS" oncolumnchanged="OTCStlHeadDS_OnColumnChanged">
+        <ColumnInfo>
+          <Column id="stl_no" size="10" type="STRING"/>
+          <Column id="posting_date" size="20" type="DATE"/>
+          <Column id="team_code" size="6" type="STRING"/>
+          <Column id="curcy_code" size="3" type="STRING"/>
+          <Column id="exc_rate_type" size="30" type="STRING"/>
+          <Column id="exc_date" size="20" type="DATE"/>
+          <Column id="loc_exc_rate" size="12" type="BIGDECIMAL"/>
+          <Column id="usd_exc_rate" size="12" type="BIGDECIMAL"/>
+          <Column id="usd_loc_rate" size="12" type="BIGDECIMAL"/>
+          <Column id="loc_dr_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="loc_cr_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="usd_dr_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="usd_cr_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="krw_dr_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="krw_cr_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="process_sts_flag" size="255" type="STRING"/>
+          <Column id="cancel_flag" size="255" type="STRING"/>
+          <Column id="sys_cre_user_id" size="255" type="STRING"/>
+          <Column id="process_sts_name" size="256" type="STRING"/>
+          <Column id="team_name" size="255" type="STRING"/>
+          <Column id="sys_cre_user_name" size="255" type="STRING"/>
+          <Column id="alt_rcv_id" size="256" type="STRING"/>
+          <Column id="alt_rcv_team_code" size="256" type="STRING"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="alt_rcv_id"/>
+            <Col id="alt_rcv_team_code"/>
+            <Col id="cancel_flag"/>
+            <Col id="curcy_code"/>
+            <Col id="exc_date"/>
+            <Col id="exc_rate_type"/>
+            <Col id="krw_cr_amt"/>
+            <Col id="krw_dr_amt"/>
+            <Col id="loc_cr_amt"/>
+            <Col id="loc_dr_amt"/>
+            <Col id="loc_exc_rate"/>
+            <Col id="posting_date"/>
+            <Col id="process_sts_flag"/>
+            <Col id="process_sts_name"/>
+            <Col id="stl_no"/>
+            <Col id="sys_cre_user_id"/>
+            <Col id="sys_cre_user_name"/>
+            <Col id="team_code"/>
+            <Col id="team_name"/>
+            <Col id="usd_cr_amt"/>
+            <Col id="usd_dr_amt"/>
+            <Col id="usd_exc_rate"/>
+            <Col id="usd_loc_rate"/>
+          </Row>
+        </Rows>
+      </Dataset>
+      <Dataset id="OTCStlSettleDetailDS" oncolumnchanged="OTCStlSettleDetailDS_OnColumnChanged">
+        <ColumnInfo>
+          <Column id="stl_no" size="10" prop="default" type="STRING"/>
+          <Column id="stl_seq" size="3" prop="default" type="STRING"/>
+          <Column id="clct_open_code" size="10" prop="default" type="STRING"/>
+          <Column id="trsact_code" size="10" prop="default" type="STRING"/>
+          <Column id="erp_trsact_code" size="10" prop="default" type="STRING"/>
+          <Column id="stl_erp_slip_no" size="10" prop="default" type="STRING"/>
+          <Column id="src_posting_date" size="20" prop="default" type="DATE"/>
+          <Column id="vsl_code" size="4" prop="default" type="STRING"/>
+          <Column id="voy_no" size="3" prop="default" type="STRING"/>
+          <Column id="acc_code" size="6" prop="default" type="STRING"/>
+          <Column id="gl_acc_code" size="6" prop="default" type="STRING"/>
+          <Column id="curcy_code" size="3" prop="default" type="STRING"/>
+          <Column id="loc_exc_rate" size="12" prop="default" type="BIGDECIMAL"/>
+          <Column id="usd_exc_rate" size="12" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_comparison_rate" size="12" prop="default" type="BIGDECIMAL"/>
+          <Column id="team_code" size="3" prop="default" type="STRING"/>
+          <Column id="stl_rem" size="100" prop="default" type="STRING"/>
+          <Column id="open_loc_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="open_usd_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="open_krw_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_loc_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_usd_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_krw_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="terms_date" size="20" prop="default" type="DATE"/>
+          <Column id="pymt_term" size="10" prop="default" type="STRING"/>
+          <Column id="due_date" size="20" prop="default" type="DATE"/>
+          <Column id="pymt_hold_flag" size="1" prop="default" type="STRING"/>
+          <Column id="pymt_meth" size="10" prop="default" type="STRING"/>
+          <Column id="bank_acc_id" size="256" prop="default" type="STRING"/>
+          <Column id="bank_acc_desc" size="256" prop="default" type="STRING"/>
+          <Column id="from_date" size="20" prop="default" type="DATE"/>
+          <Column id="to_date" size="20" prop="default" type="DATE"/>
+          <Column id="team_name" size="255" prop="default" type="STRING"/>
+          <Column id="acc_name" size="256" prop="default" type="STRING"/>
+          <Column id="gl_acc_name" size="256" prop="default" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="OTCStlInvoDetailDS" cancolumnchange="OTCStlInvoDetailDS_CanColumnChange" oncolumnchanged="OTCStlInvoDetailDS_OnColumnChanged">
+        <ColumnInfo>
+          <Column id="stl_no" size="10" prop="default" type="STRING"/>
+          <Column id="stl_seq" size="3" prop="default" type="STRING"/>
+          <Column id="clct_open_code" size="10" prop="default" type="STRING"/>
+          <Column id="trsact_code" size="10" prop="default" type="STRING"/>
+          <Column id="erp_trsact_code" size="10" prop="default" type="STRING"/>
+          <Column id="stl_erp_slip_no" size="10" prop="default" type="STRING"/>
+          <Column id="src_posting_date" size="20" prop="default" type="DATE"/>
+          <Column id="vsl_code" size="4" prop="default" type="STRING"/>
+          <Column id="voy_no" size="3" prop="default" type="STRING"/>
+          <Column id="acc_code" size="6" prop="default" type="STRING"/>
+          <Column id="gl_acc_code" size="6" prop="default" type="STRING"/>
+          <Column id="curcy_code" size="3" prop="default" type="STRING"/>
+          <Column id="loc_exc_rate" size="12" prop="default" type="BIGDECIMAL"/>
+          <Column id="usd_exc_rate" size="12" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_comparison_rate" size="12" prop="default" type="BIGDECIMAL"/>
+          <Column id="team_code" size="3" prop="default" type="STRING"/>
+          <Column id="stl_rem" size="100" prop="default" type="STRING"/>
+          <Column id="open_loc_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="open_usd_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="open_krw_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_loc_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_usd_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="stl_krw_amt" size="15" prop="default" type="BIGDECIMAL"/>
+          <Column id="terms_date" size="20" prop="default" type="DATE"/>
+          <Column id="pymt_term" size="10" prop="default" type="STRING"/>
+          <Column id="due_date" size="20" prop="default" type="DATE"/>
+          <Column id="pymt_hold_flag" size="1" prop="default" type="STRING"/>
+          <Column id="pymt_meth" size="10" prop="default" type="STRING"/>
+          <Column id="bank_acc_id" size="256" prop="default" type="STRING"/>
+          <Column id="bank_acc_desc" size="256" prop="default" type="STRING"/>
+          <Column id="from_date" size="20" prop="default" type="DATE"/>
+          <Column id="to_date" size="20" prop="default" type="DATE"/>
+          <Column id="team_name" size="255" prop="default" type="STRING"/>
+          <Column id="acc_name" size="256" prop="default" type="STRING"/>
+          <Column id="gl_acc_name" size="256" prop="default" type="STRING"/>
+          <Column id="email_1" size="256" prop="default" type="STRING"/>
+          <Column id="email_2" size="256" prop="default" type="STRING"/>
+          <Column id="email_3" size="256" prop="default" type="STRING"/>
+          <Column id="email_4" size="256" prop="default" type="STRING"/>
+          <Column id="court_flag" size="256" prop="default" type="STRING"/>
+          <Column id="court_admit_no" size="256" prop="default" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="SearchDS" oncolumnchanged="SearchDS_OnColumnChanged">
+        <ColumnInfo>
+          <Column id="team_code1" size="3" prop="default" type="STRING"/>
+          <Column id="team_code2" size="3" prop="default" type="STRING"/>
+          <Column id="team_code3" size="3" prop="default" type="STRING"/>
+          <Column id="team_code4" size="3" prop="default" type="STRING"/>
+          <Column id="team_name1" size="30" prop="default" type="STRING"/>
+          <Column id="team_name2" size="30" prop="default" type="STRING"/>
+          <Column id="team_name3" size="30" prop="default" type="STRING"/>
+          <Column id="team_name4" size="30" prop="default" type="STRING"/>
+          <Column id="accnt_code1" size="6" prop="default" type="STRING"/>
+          <Column id="accnt_code2" size="6" prop="default" type="STRING"/>
+          <Column id="accnt_code3" size="6" prop="default" type="STRING"/>
+          <Column id="accnt_code4" size="6" prop="default" type="STRING"/>
+          <Column id="accnt_name1" size="30" prop="default" type="STRING"/>
+          <Column id="accnt_name2" size="30" prop="default" type="STRING"/>
+          <Column id="accnt_name3" size="30" prop="default" type="STRING"/>
+          <Column id="accnt_name4" size="30" prop="default" type="STRING"/>
+          <Column id="vsl_code1" size="4" prop="default" type="STRING"/>
+          <Column id="vsl_code2" size="4" prop="default" type="STRING"/>
+          <Column id="vsl_code3" size="4" prop="default" type="STRING"/>
+          <Column id="vsl_code4" size="4" prop="default" type="STRING"/>
+          <Column id="voy_no1" size="3" prop="default" type="STRING"/>
+          <Column id="voy_no2" size="3" prop="default" type="STRING"/>
+          <Column id="voy_no3" size="3" prop="default" type="STRING"/>
+          <Column id="voy_no4" size="3" prop="default" type="STRING"/>
+          <Column id="from_date" size="20" prop="default" type="STRING"/>
+          <Column id="to_date" size="20" prop="default" type="STRING"/>
+          <Column id="gl_acc_code" size="256" prop="default" type="STRING"/>
+          <Column id="gl_acc_name" size="256" prop="default" type="STRING"/>
+          <Column id="from_due_date" size="256" prop="default" type="STRING"/>
+          <Column id="to_due_date" size="256" prop="default" type="STRING"/>
+          <Column id="curcy_type" size="256" prop="default" type="STRING"/>
+          <Column id="curcy_code1" size="256" prop="default" type="STRING"/>
+          <Column id="bongyeong_gl" size="256" prop="default" type="STRING"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="accnt_code1"/>
+            <Col id="accnt_code2"/>
+            <Col id="accnt_code3"/>
+            <Col id="accnt_code4"/>
+            <Col id="accnt_name1"/>
+            <Col id="accnt_name2"/>
+            <Col id="accnt_name3"/>
+            <Col id="accnt_name4"/>
+            <Col id="bongyeong_gl"/>
+            <Col id="curcy_code1"/>
+            <Col id="curcy_type"/>
+            <Col id="from_date"/>
+            <Col id="from_due_date"/>
+            <Col id="gl_acc_code"/>
+            <Col id="gl_acc_name"/>
+            <Col id="team_code1"/>
+            <Col id="team_code2"/>
+            <Col id="team_code3"/>
+            <Col id="team_code4"/>
+            <Col id="team_name1"/>
+            <Col id="team_name2"/>
+            <Col id="team_name3"/>
+            <Col id="team_name4"/>
+            <Col id="to_date"/>
+            <Col id="to_due_date"/>
+            <Col id="voy_no1"/>
+            <Col id="voy_no2"/>
+            <Col id="voy_no3"/>
+            <Col id="voy_no4"/>
+            <Col id="vsl_code1"/>
+            <Col id="vsl_code2"/>
+            <Col id="vsl_code3"/>
+            <Col id="vsl_code4"/>
+          </Row>
+        </Rows>
+      </Dataset>
+      <Dataset id="currencyDS">
+        <ColumnInfo>
+          <Column id="currency_code" size="256" type="STRING"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="currency_code"/>
+          </Row>
+        </Rows>
+      </Dataset>
+      <Dataset id="PaymentTermAPDS">
+        <ColumnInfo>
+          <Column id="code" size="256" type="STRING"/>
+          <Column id="codename" size="256" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="PaymentTermARDS">
+        <ColumnInfo>
+          <Column id="code" size="256" type="STRING"/>
+          <Column id="codename" size="256" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="OpenTypeDS">
+        <ColumnInfo>
+          <Column id="clct_open_code" size="2" type="STRING"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="clct_open_code">AP</Col>
+          </Row>
+          <Row>
+            <Col id="clct_open_code">AR</Col>
+          </Row>
+          <Row>
+            <Col id="clct_open_code">GLDR</Col>
+          </Row>
+          <Row>
+            <Col id="clct_open_code">GLCR</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+      <Dataset id="TempRateDS">
+        <ColumnInfo>
+          <Column id="loc_rate" size="256" type="BIGDECIMAL"/>
+          <Column id="usd_rate" size="256" type="BIGDECIMAL"/>
+          <Column id="loc_usd_rate" size="256" type="BIGDECIMAL"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="ProcessStsFlagDS">
+        <ColumnInfo>
+          <Column id="com_code_value" size="256" type="STRING"/>
+          <Column id="com_code_name" size="256" type="STRING"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="com_code_name"/>
+            <Col id="com_code_value"/>
+          </Row>
+        </Rows>
+      </Dataset>
+      <Dataset id="DueDateDS"/>
+      <Dataset id="OTCStlSettleDetailSaveDS" oncolumnchanged="OTCStlSettleDetailDS_OnColumnChanged">
+        <ColumnInfo>
+          <Column id="stl_no" size="10" type="STRING"/>
+          <Column id="stl_seq" size="3" type="STRING"/>
+          <Column id="clct_open_code" size="10" type="STRING"/>
+          <Column id="trsact_code" size="10" type="STRING"/>
+          <Column id="erp_trsact_code" size="10" type="STRING"/>
+          <Column id="stl_erp_slip_no" size="10" type="STRING"/>
+          <Column id="src_posting_date" size="20" type="DATE"/>
+          <Column id="vsl_code" size="4" type="STRING"/>
+          <Column id="voy_no" size="3" type="STRING"/>
+          <Column id="acc_code" size="6" type="STRING"/>
+          <Column id="gl_acc_code" size="6" type="STRING"/>
+          <Column id="curcy_code" size="3" type="STRING"/>
+          <Column id="loc_exc_rate" size="12" type="BIGDECIMAL"/>
+          <Column id="usd_exc_rate" size="12" type="BIGDECIMAL"/>
+          <Column id="stl_comparison_rate" size="12" type="BIGDECIMAL"/>
+          <Column id="team_code" size="3" type="STRING"/>
+          <Column id="stl_rem" size="100" type="STRING"/>
+          <Column id="open_loc_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="open_usd_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="open_krw_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="stl_loc_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="stl_usd_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="stl_krw_amt" size="15" type="BIGDECIMAL"/>
+          <Column id="terms_date" size="20" type="DATE"/>
+          <Column id="pymt_term" size="10" type="STRING"/>
+          <Column id="due_date" size="20" type="DATE"/>
+          <Column id="pymt_hold_flag" size="1" type="STRING"/>
+          <Column id="pymt_meth" size="10" type="STRING"/>
+          <Column id="bank_acc_id" size="256" type="STRING"/>
+          <Column id="bank_acc_desc" size="256" type="STRING"/>
+          <Column id="from_date" size="20" type="DATE"/>
+          <Column id="to_date" size="20" type="DATE"/>
+          <Column id="team_name" size="255" type="STRING"/>
+          <Column id="acc_name" size="256" type="STRING"/>
+          <Column id="gl_acc_name" size="256" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="SCBPerfMDS" cancolumnchange="OTCStlInvoDetailDS_CanColumnChange" oncolumnchanged="OTCStlInvoDetailDS_OnColumnChanged">
+        <ColumnInfo>
+          <Column id="vsl_code" size="4" prop="default" type="STRING"/>
+          <Column id="voy_no" size="3" prop="default" type="STRING"/>
+          <Column id="team_code" size="3" prop="default" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+      <Dataset id="CurcyTypeDS">
+        <ColumnInfo>
+          <Column id="curcy_type" size="1" prop="default" type="STRING"/>
+          <Column id="curcy_type_name" size="256" prop="default" type="STRING"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="curcy_type"/>
+            <Col id="curcy_type_name"/>
+          </Row>
+          <Row>
+            <Col id="curcy_type">K</Col>
+            <Col id="curcy_type_name">원화</Col>
+          </Row>
+          <Row>
+            <Col id="curcy_type">U</Col>
+            <Col id="curcy_type_name">외화</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+      <Dataset id="ApCountInfoDS">
+        <ColumnInfo>
+          <Column id="tot_ap_cnt" size="256" prop="default" type="STRING"/>
+          <Column id="pymt_hold_cnt" size="256" prop="default" type="STRING"/>
+          <Column id="non_pymt_hold_cnt" size="256" prop="default" type="STRING"/>
+          <Column id="tot_curcy_cnt" size="256" prop="default" type="STRING"/>
+        </ColumnInfo>
+      </Dataset>
+    </Objects>
+    <Bind>
+      <BindItem id="cb_currency_value" compid="cb_currency" propid="value" datasetid="OTCStlHeadDS" columnid="curcy_code"/>
+      <BindItem id="me_locRate_value" compid="me_locRate" propid="value" datasetid="OTCStlHeadDS" columnid="loc_exc_rate"/>
+      <BindItem id="ed_vslCode1_value" compid="ed_vslCode1" propid="value" datasetid="SearchDS" columnid="vsl_code1"/>
+      <BindItem id="ed_teamName_value" compid="ed_teamName" propid="value" datasetid="OTCStlHeadDS" columnid="team_name"/>
+      <BindItem id="me_usdRate_value" compid="me_usdRate" propid="value" datasetid="OTCStlHeadDS" columnid="usd_exc_rate"/>
+      <BindItem id="MaskEdit2_value" compid="MaskEdit2" propid="value" datasetid="OTCStlHeadDS" columnid="loc_dr_amt"/>
+      <BindItem id="MaskEdit3_value" compid="MaskEdit3" propid="value" datasetid="OTCStlHeadDS" columnid="loc_cr_amt"/>
+      <BindItem id="MaskEdit6_value" compid="MaskEdit6" propid="value" datasetid="OTCStlHeadDS" columnid="usd_cr_amt"/>
+      <BindItem id="MaskEdit7_value" compid="MaskEdit7" propid="value" datasetid="OTCStlHeadDS" columnid="usd_dr_amt"/>
+      <BindItem id="MaskEdit8_value" compid="MaskEdit8" propid="value" datasetid="OTCStlHeadDS" columnid="krw_dr_amt"/>
+      <BindItem id="MaskEdit9_value" compid="MaskEdit9" propid="value" datasetid="OTCStlHeadDS" columnid="krw_cr_amt"/>
+      <BindItem id="ed_accntCode1_value" compid="ed_accntCode1" propid="value" datasetid="SearchDS" columnid="accnt_code1"/>
+      <BindItem id="ed_teamCode1_value" compid="ed_teamCode1" propid="value" datasetid="SearchDS" columnid="team_code1"/>
+      <BindItem id="ed_voyNo1_value" compid="ed_voyNo1" propid="value" datasetid="SearchDS" columnid="voy_no1"/>
+      <BindItem id="ed_voyNo2_value" compid="ed_voyNo2" propid="value" datasetid="SearchDS" columnid="voy_no2"/>
+      <BindItem id="ed_vslCode2_value" compid="ed_vslCode2" propid="value" datasetid="SearchDS" columnid="vsl_code2"/>
+      <BindItem id="ed_teamCode2_value" compid="ed_teamCode2" propid="value" datasetid="SearchDS" columnid="team_code2"/>
+      <BindItem id="ed_accntCode2_value" compid="ed_accntCode2" propid="value" datasetid="SearchDS" columnid="accnt_code2"/>
+      <BindItem id="ed_voyNo3_value" compid="ed_voyNo3" propid="value" datasetid="SearchDS" columnid="voy_no3"/>
+      <BindItem id="ed_vslCode3_value" compid="ed_vslCode3" propid="value" datasetid="SearchDS" columnid="vsl_code3"/>
+      <BindItem id="ed_teamCode3_value" compid="ed_teamCode3" propid="value" datasetid="SearchDS" columnid="team_code3"/>
+      <BindItem id="ed_accntCode3_value" compid="ed_accntCode3" propid="value" datasetid="SearchDS" columnid="accnt_code3"/>
+      <BindItem id="ed_voyNo4_value" compid="ed_voyNo4" propid="value" datasetid="SearchDS" columnid="voy_no4"/>
+      <BindItem id="ed_vslCode4_value" compid="ed_vslCode4" propid="value" datasetid="SearchDS" columnid="vsl_code4"/>
+      <BindItem id="ed_teamCode4_value" compid="ed_teamCode4" propid="value" datasetid="SearchDS" columnid="team_code4"/>
+      <BindItem id="ed_accntCode4_value" compid="ed_accntCode4" propid="value" datasetid="SearchDS" columnid="accnt_code4"/>
+      <BindItem id="ed_glAccCode_value" compid="ed_glAccCode" propid="value" datasetid="SearchDS" columnid="gl_acc_code"/>
+      <BindItem id="ed_docu_no_value" compid="ed_docu_no" propid="value" datasetid="OTCStlHeadDS" columnid="stl_no"/>
+      <BindItem id="ed_cancelFlag_value" compid="ed_cancelFlag" propid="value" datasetid="OTCStlHeadDS" columnid="cancel_flag"/>
+      <BindItem id="ed_createdBy_value" compid="ed_createdBy" propid="value" datasetid="OTCStlHeadDS" columnid="sys_cre_user_name"/>
+      <BindItem id="st_accntName1_text" compid="st_accntName1" propid="text" datasetid="SearchDS" columnid="accnt_name1"/>
+      <BindItem id="st_accntName2_text" compid="st_accntName2" propid="text" datasetid="SearchDS" columnid="accnt_name2"/>
+      <BindItem id="st_accntName3_text" compid="st_accntName3" propid="text" datasetid="SearchDS" columnid="accnt_name3"/>
+      <BindItem id="st_accntName4_text" compid="st_accntName4" propid="text" datasetid="SearchDS" columnid="accnt_name4"/>
+      <BindItem id="st_glAccName_text" compid="st_glAccName" propid="text" datasetid="SearchDS" columnid="gl_acc_name"/>
+      <BindItem id="st_teamName1_text" compid="st_teamName1" propid="text" datasetid="SearchDS" columnid="team_name1"/>
+      <BindItem id="st_teamName2_text" compid="st_teamName2" propid="text" datasetid="SearchDS" columnid="team_name2"/>
+      <BindItem id="st_teamName3_text" compid="st_teamName3" propid="text" datasetid="SearchDS" columnid="team_name3"/>
+      <BindItem id="st_teamName4_text" compid="st_teamName4" propid="text" datasetid="SearchDS" columnid="team_name4"/>
+      <BindItem id="ed_processFlag_value" compid="ed_processFlag" propid="value" datasetid="OTCStlHeadDS" columnid="process_sts_name"/>
+      <BindItem id="ed_curcy_code_value" compid="ed_curcy_code" propid="value" datasetid="SearchDS" columnid="curcy_code1"/>
+      <BindItem id="cb_curcyType_value" compid="cb_curcyType" propid="value" datasetid="SearchDS" columnid="curcy_type"/>
+      <BindItem id="ck_GL_value" compid="ck_GL" propid="value" datasetid="SearchDS" columnid="bongyeong_gl"/>
+      <BindItem id="item0" compid="me_postingDate" propid="value" datasetid="OTCStlHeadDS" columnid="posting_date"/>
+      <BindItem id="item1" compid="me_fromDate" propid="value" datasetid="SearchDS" columnid="from_date"/>
+      <BindItem id="item2" compid="me_toDate" propid="value" datasetid="SearchDS" columnid="to_date"/>
+      <BindItem id="item3" compid="me_fromDueDate" propid="value" datasetid="SearchDS" columnid="from_due_date"/>
+      <BindItem id="item4" compid="me_toDueDate" propid="value" datasetid="SearchDS" columnid="to_due_date"/>
+    </Bind>
+    <Script type="xscript5.1"><![CDATA[/**
+ *  SOMSetOffTransactionForm
+ *
+ *  @MenuPath    Finance > 미결관리 > 채권채무상계 > 상세
+ *  @FileName    SOMSetOffTransactionForm.xfdl
+ *  @Creator     UXB
+ *  @CreateDate  2025.09.01
+ *  @Version     1.0
+ *  @Desction    설명
+ *
+ ************************* 소스 수정 이력 ********************************
+ *    Date          Modifier            Description
+ **********************************************************************
+ *  2025.09.01    	AICHanger          	자동변환
+ *  2025.12.19   	정철환          	수동변환
+ **********************************************************************
+ */
+//공통 라이브러리 호출
+
+/*********************************************************
+ * 1.1 FORM 변수 선언 영역
+ ********************************************************/
+this.f_usdExcRate = "";
+this.somToday = "";   //오늘 일자 yyyymmdd
+this.currencyCol = "",this.glAccName = "";
+
+this.locExcRate = new nexacro.Decimal(0),this.usdLocExcRate = new nexacro.Decimal(0);
+
+/*********************************************************
+ * 1.2 FORM EVENT 영역(onload등)
+ ********************************************************/
+//Form_onload 최초 로드시 발생되는 이벤트 (필수)
+this.Form_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+{
+    if (take.formOnLoad(this))
+    {
+        this.fnInit();
+    }
+};
+
+this.form_OnTimer = function(obj:nexacro.Form, e:nexacro.TimerEventInfo) {
+    if(e.timerid == common_oz.G_OzTimerID) {
+        com.ApprovalFileSearch(this);
+    } else {
+        this.killTimer(0);
+    }
+};
+
+/****************************************************************************************
+ * 2 필수 FUNCTION 영역 (fnInit, fnSearch, fnSave, fnAdd, fnDel, fnExcel, fnPrint)
+****************************************************************************************/
+this.fnInit = function()
+{
+	com.drawGridDisableColor(this);
+
+	this.currencyDS.clearData();
+	this.PaymentTermAPDS.clearData();
+	this.PaymentTermARDS.clearData();
+
+    var param = "functionGubun=SETOFF_ONLOAD";
+    com.syncTransaction(this, "init", "SVC_LOC::brokerageIncomeSettlement/SETOFF_ONLOAD.do", "", "currencyDS=currencyDS PaymentTermAPDS=PaymentTermAPDS PaymentTermARDS=PaymentTermARDS", param, "fnOnLoadCallback");
+};
+
+this.fnSearch = function()
+{
+	(async () => {
+		// OTCStlHeadDS 체크
+		var postingDate = com.dateFormatString(this.OTCStlHeadDS.getColumn(0, "posting_date"));
+		// GL date 체크
+		//if (postingDate == null) {
+		if (com.isEmpty(postingDate)) { // upgrade
+			await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "GL Date"));
+			this.me_postingDate.setFocus();
+			return false;
+		}
+		if (!com.isValidDate(this.me_postingDate)) {
+			this.me_postingDate.setFocus();
+			return false;
+		}
+		if (nexacro.toNumber(com.left(postingDate, 8)) > nexacro.toNumber(this.somToday)) {
+			await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0056", "input", "GL Date"));
+			this.me_postingDate.setFocus();
+			return false;
+		}
+		//  curcy_code 체크
+		//if (OTCStlHeadDS.getColumn(0, "curcy_code") == null) {
+		if( com.isEmpty(this.OTCStlHeadDS.getColumn(0, "curcy_code"))) {    // upgrade
+			await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Currency"));
+			this.cb_currency.setFocus();
+			return false;
+		}
+		// SearchDS 체크
+		/*
+		// ACCOUNT 필수 조회항목에서 제외 (20131106)  - hijang
+		//if (ed_accntCode1.Text == "") {
+		if(g_isEmpty(ed_accntCode1.text)) { // upgrade
+			g_fnMessageOpenForm("E", Replace("Domain.msg.common.VAL_0001", "input",  "Account"));
+			ed_accntCode1.SetFocus();
+			return;
+		}
+		*/
+		//if (me_fromDate.Text == "") {
+		if(com.isEmpty(this.me_fromDate.value)) { // upgrade
+			await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0044", "input", "GL Date (From)"));
+			this.me_fromDate.setFocus();
+			return;
+		}
+		//if (me_toDate.Text == "") {
+		if(com.isEmpty(this.me_toDate.value)) { // upgrade
+			await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0044", "input", "GL Date (To)"));
+			this.me_toDate.setFocus();
+			return;
+		}
+		if (!com.isValidDate(this.me_fromDate)) {
+			this.me_fromDate.setFocus();
+			return false;
+		}
+		if (!com.isValidDate(this.me_toDate)) {
+			this.me_toDate.setFocus();
+			return false;
+		}
+		if (nexacro.toNumber(com.dateFormatString(this.me_fromDate.value)) > nexacro.toNumber(com.dateFormatString(this.me_toDate.value))) {
+			await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0045");
+			this.me_fromDate.setFocus();
+			return;
+		}
+		//120726 GYJ
+		if (nexacro.toNumber(com.dateFormatString(this.me_fromDueDate.value)) > nexacro.toNumber(com.dateFormatString(this.me_toDueDate.value))) {
+			await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0045");
+			this.me_fromDueDate.setFocus();
+			return;
+		}
+		//본경 선택 시 필수가 아님 170822 GYJ
+		if(this.ck_GL.value != "1"){
+			//if (ed_glAccCode.Text == "") {
+			if(com.isEmpty(this.ed_glAccCode.value)) { // upgrade
+				await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "GL Account"));
+				this.ed_glAccCode.setFocus();
+				return;
+			}
+		}
+		//120726 GYJ
+		if (!com.isValidDate(this.me_fromDueDate)) {
+			this.me_fromDueDate.setFocus();
+			return false;
+		}
+		if (!com.isValidDate(this.me_toDueDate)) {
+			this.me_toDueDate.setFocus();
+			return false;
+		}
+		var arrAccntCode = "", arrTeamCode = "", arrVslCode = "", arrVoyNo = "", arrVslVoy = "", arrGlAccCode = "";
+		/*
+		if ( ed_accntCode1.Text != "" ) arrAccntCode = "'" + ed_accntCode1.Value + "',";
+		if ( ed_accntCode2.Text != "" ) arrAccntCode = arrAccntCode + "'" + ed_accntCode2.Value + "',";
+		if ( ed_accntCode3.Text != "" ) arrAccntCode = arrAccntCode + "'" + ed_accntCode3.Value + "',";
+		if ( ed_accntCode4.Text != "" ) arrAccntCode = arrAccntCode + "'" + ed_accntCode4.Value + "',";
+		if ( arrAccntCode != "" ) arrAccntCode = left(arrAccntCode, length(arrAccntCode) - 1);
+		if ( ed_teamCode1.Text != "" ) arrTeamCode = "'" + ed_teamCode1.Value + "',";
+		if ( ed_teamCode2.Text != "" ) arrTeamCode = arrTeamCode + "'" + ed_teamCode2.Value + "',";
+		if ( ed_teamCode3.Text != "" ) arrTeamCode = arrTeamCode + "'" + ed_teamCode3.Value + "',";
+		if ( ed_teamCode4.Text != "" ) arrTeamCode = arrTeamCode + "'" + ed_teamCode4.Value + "',";
+		if ( arrTeamCode != "" ) arrTeamCode = left(arrTeamCode, length(arrTeamCode) - 1);
+		*/
+		// upgrade
+		if ( !com.isEmpty(this.ed_accntCode1.value) ) arrAccntCode = "'" + this.ed_accntCode1.value + "',";
+		if ( !com.isEmpty(this.ed_accntCode2.value) ) arrAccntCode += "'" + this.ed_accntCode2.value + "',";
+		if ( !com.isEmpty(this.ed_accntCode3.value) ) arrAccntCode += "'" + this.ed_accntCode3.value + "',";
+		if ( !com.isEmpty(this.ed_accntCode4.value) ) arrAccntCode += "'" + this.ed_accntCode4.value + "',";
+		if ( !com.isEmpty(arrAccntCode) ) arrAccntCode = com.left(arrAccntCode, com.length(arrAccntCode) - 1);
+		if ( !com.isEmpty(this.ed_teamCode1.value) ) arrTeamCode = "'" + this.ed_teamCode1.value + "',";
+		if ( !com.isEmpty(this.ed_teamCode2.value) ) arrTeamCode += "'" + this.ed_teamCode2.value + "',";
+		if ( !com.isEmpty(this.ed_teamCode3.value) ) arrTeamCode += "'" + this.ed_teamCode3.value + "',";
+		if ( !com.isEmpty(this.ed_teamCode4.value) ) arrTeamCode += "'" + this.ed_teamCode4.value + "',";
+		if ( !com.isEmpty(arrTeamCode) ) arrTeamCode = com.left(arrTeamCode, com.length(arrTeamCode) - 1);
+		for(var row = 0; row < this.SlipAccMultiSearchDS.rowcount; row++) {
+			if(row >= 10) {
+				await com.fnMessageOpenForm(this, "I", "계정을 10개 이내로 선택해 주세요");
+				return;
+			}
+			arrGlAccCode += "'" + this.SlipAccMultiSearchDS.getColumn(row, "code") + "',";
+		}
+		//if ( arrGlAccCode != "" ) arrGlAccCode = left(arrGlAccCode, length(arrGlAccCode) - 1);
+		if ( !com.isEmpty(arrGlAccCode) ) arrGlAccCode = com.left(arrGlAccCode, com.length(arrGlAccCode) - 1);    // upgrade
+		
+		var vslVoyInqType1 = false;
+		var vslVoyInqType2 = false;
+		var vslVoyInqType3 = false;
+		
+		//if ( ed_vslCode1.Text != "" && ed_voyNo1.Text != "" ) {
+		if( !com.isEmpty(this.ed_vslCode1.value) && !com.isEmpty(this.ed_voyNo1.value) ) {        // upgrade
+			arrVslVoy += "('" + this.ed_vslCode1.value + "'," + this.ed_voyNo1.value + "),";
+			vslVoyInqType1 = true;
+		//} else if ( ed_vslCode1.Text != "" && ed_voyNo1.Text == "" ) {
+		} else if( !com.isEmpty(this.ed_vslCode1.value) && com.isEmpty(this.ed_voyNo1.value) ) {        // upgrade
+			arrVslCode += "'" + this.ed_vslCode1.value + "',";
+			vslVoyInqType2 = true;
+		//} else if ( ed_vslCode1.Text == "" && ed_voyNo1.Text != "" ) {
+		} else if( com.isEmpty(this.ed_vslCode1.value) && !com.isEmpty(this.ed_voyNo1.value) ) {        // upgrade
+			arrVoyNo += this.ed_voyNo1.value + ",";
+			vslVoyInqType3 = true;
+		}
+		//if ( ed_vslCode2.Text != "" && ed_voyNo2.Text != "" ) {
+		if( !com.isEmpty(this.ed_vslCode2.value) && !com.isEmpty(this.ed_voyNo2.value) ) {        // upgrade
+			arrVslVoy += "('" + this.ed_vslCode2.value + "'," + this.ed_voyNo2.value + "),";
+			vslVoyInqType1 = true;
+		//} else if ( ed_vslCode2.Text != "" && ed_voyNo2.Text == "" ) {
+		} else if( !com.isEmpty(this.ed_vslCode2.value) && com.isEmpty(this.ed_voyNo2.value) ) {        // upgrade
+			arrVslCode += "'" + this.ed_vslCode2.value + "',";
+			vslVoyInqType2 = true;
+		//} else if ( ed_vslCode2.Text == "" && ed_voyNo2.Text != "" ) {
+		} else if( com.isEmpty(this.ed_vslCode2.value) && !com.isEmpty(this.ed_voyNo2.value) ) {        // upgrade
+			arrVoyNo += this.ed_voyNo2.value + ",";
+			vslVoyInqType3 = true;
+		}
+		//if ( ed_vslCode3.Text != "" && ed_voyNo3.Text != "" ) {
+		if( !com.isEmpty(this.ed_vslCode3.value) && !com.isEmpty(this.ed_voyNo3.value) ) {        // upgrade
+			arrVslVoy += "('" + this.ed_vslCode3.value + "'," + this.ed_voyNo3.value + "),";
+			vslVoyInqType1 = true;
+		//} else if ( ed_vslCode3.Text != "" && ed_voyNo3.Text == "" ) {
+		} else if( !com.isEmpty(this.ed_vslCode3.value) && com.isEmpty(this.ed_voyNo3.value) ) {        // upgrade
+			arrVslCode += "'" + this.ed_vslCode3.value + "',";
+			vslVoyInqType2 = true;
+		//} else if ( ed_vslCode3.Text == "" && ed_voyNo3.Text != "" ) {
+		} else if( com.isEmpty(this.ed_vslCode3.value) && !com.isEmpty(this.ed_voyNo3.value) ) {        // upgrade
+			arrVoyNo += this.ed_voyNo3.value + ",";
+			vslVoyInqType3 = true;
+		}
+		//if ( ed_vslCode4.Text != "" && ed_voyNo4.Text != "" ) {
+		if( !com.isEmpty(this.ed_vslCode4.value) && !com.isEmpty(this.ed_voyNo4.value) ) {        // upgrade
+			arrVslVoy += "('" + this.ed_vslCode4.value + "'," + this.ed_voyNo4.value + "),";
+			vslVoyInqType1 = true;
+		//} else if ( ed_vslCode4.Text != "" && ed_voyNo4.Text == "" ) {
+		} else if( !com.isEmpty(this.ed_vslCode4.value) && com.isEmpty(this.ed_voyNo4.value) ) {        // upgrade
+			arrVslCode += "'" + this.ed_vslCode4.value + "',";
+			vslVoyInqType2 = true;
+		//} else if ( ed_vslCode4.Text == "" && ed_voyNo4.Text != "" ) {
+		} else if( com.isEmpty(this.ed_vslCode4.value) && !com.isEmpty(this.ed_voyNo4.value) ) {        // upgrade
+			arrVoyNo += this.ed_voyNo4.value + ",";
+			vslVoyInqType3 = true;
+		}
+		/*
+		if ( arrVslVoy != "" ) arrVslVoy = left(arrVslVoy, length(arrVslVoy) - 1);
+		if ( arrVslCode != "" ) arrVslCode = left(arrVslCode, length(arrVslCode) - 1);
+		if ( arrVoyNo != "" ) arrVoyNo = left(arrVoyNo, length(arrVoyNo) - 1);
+		*/
+		// upgrade
+		if ( !com.isEmpty(arrVslVoy) ) arrVslVoy = com.left(arrVslVoy, com.length(arrVslVoy) - 1);
+		if ( !com.isEmpty(arrVslCode) ) arrVslCode = com.left(arrVslCode, com.length(arrVslCode) - 1);
+		if ( !com.isEmpty(arrVoyNo) ) arrVoyNo = com.left(arrVoyNo, com.length(arrVoyNo) - 1);
+		if ((vslVoyInqType1 == true && ( vslVoyInqType2 == true || vslVoyInqType3 == true )) ||
+		   (vslVoyInqType2 == true && ( vslVoyInqType1 == true || vslVoyInqType3 == true )) ||
+		   (vslVoyInqType3 == true && ( vslVoyInqType1 == true || vslVoyInqType2 == true )) ) {
+		   await com.fnMessageOpenForm(this, "I", "(Vsl-Voy 조회 Type) 동일한 패턴으로만 Vsl-Voy를 조회해 주세요");
+		   return;
+		}
+		var param  = "";
+			param += "functionGubun=SETOFF_OpenInquiry";
+			param += " accntCodeS=" + nexacro.wrapQuote(take.nvl(arrAccntCode));
+			param += " teamCodeS=" + nexacro.wrapQuote(take.nvl(arrTeamCode));
+			param += " glAccCodeS=" + nexacro.wrapQuote(take.nvl(arrGlAccCode));
+			param += " onlyVslCodeS=" + nexacro.wrapQuote(take.nvl(arrVslCode));
+			param += " onlyVoyNoS=" + nexacro.wrapQuote(take.nvl(arrVoyNo));
+			param += " vslVoyS=" + nexacro.wrapQuote(take.nvl(arrVslVoy));
+			param += " fromDate=" + nexacro.wrapQuote(take.nvl(com.left(com.dateFormatString(this.me_fromDate.value), 8)));
+			param += " toDate=" + nexacro.wrapQuote(take.nvl(com.left(com.dateFormatString(this.me_toDate.value), 8)));
+			param += " curcyCode=" + nexacro.wrapQuote(take.nvl(this.OTCStlHeadDS.getColumn(0, "curcy_code")));
+			//120726 GYJ
+			param += " fromDueDate=" + nexacro.wrapQuote(take.nvl(com.left(com.dateFormatString(this.me_fromDueDate.value), 8)));
+			param += " toDueDate=" + nexacro.wrapQuote(take.nvl(com.left(com.dateFormatString(this.me_toDueDate.value), 8)));
+			//170819 GYJ
+			param += " curcyCode1=" + nexacro.wrapQuote(take.nvl(this.ed_curcy_code.value));
+			param += " curcyType=" + nexacro.wrapQuote(take.nvl(this.cb_curcyType.value));
+			param += " bongyeongGL=" + nexacro.wrapQuote(take.nvl(this.ck_GL.value));
+
+		this.OTCStlSettleDetailDS.clearData();
+		com.aSyncTransaction(this, "INQURIY", "SVC_LOC::brokerageIncomeSettlement/SETOFF_OpenInquiry.do", "", "OTCStlSettleDetailDS=OTCStlSettleDetailDS", param, "fnInquiryCallback");
+	}).call(this);
+};
+
+this.fnSave = function()
+{
+	take.setWaitCall(this, this.fnSaveProc);
+};
+
+this.fnSaveProc = function()
+{	
+	(async() => {
+		if (!await this.fnValidationCheck()) return;
+		this.fnPymtSetting();
+		// hijang - 20111130
+		this.OTCStlHeadDS.setColumn(0, "alt_rcv_id", this.ed_rcv_id.value);
+		this.OTCStlHeadDS.setColumn(0, "alt_rcv_team_code", this.ed_rcv_team_code.value);
+		//alert("반영된 alt_rcv_team_code 값 : " + OTCStlHeadDS.GetColumn(0, "alt_rcv_team_code" ) );
+		//alert("반영된 alt_rcv_id 값: " + OTCStlHeadDS.GetColumn(0, "alt_rcv_id" ) );
+		// 예수금계정 자동 HOLD_FLAG = 'Y' 자동 세팅 (hijang 20200508)
+		for(var i=0; i < this.OTCStlInvoDetailDS.rowcount; i++)
+		{
+			if( this.OTCStlInvoDetailDS.getColumn(i, "clct_open_code") == "AP" ) {     // AP 일때
+				if( this.OTCStlInvoDetailDS.getColumn(i, "gl_acc_code") == "210409" || this.OTCStlInvoDetailDS.getColumn(i, "gl_acc_code") == "210802"
+				 || this.OTCStlInvoDetailDS.getColumn(i, "gl_acc_code") == "210803" || this.OTCStlInvoDetailDS.getColumn(i, "gl_acc_code") == "210899" )
+				{
+					this.OTCStlInvoDetailDS.setColumn(i, "pymt_hold_flag", "1");
+				}
+			}
+		}
+
+		var param = "functionGubun=SETOFF_SAVE";
+		this.OTCStlSettleDetailDS.filter("check_item=='1'");
+		this.OTCStlSettleDetailSaveDS.copyData(this.OTCStlSettleDetailDS, true);
+		//RYU Filter된 것만 넘어가는지 확인.
+		//g_Sync_Transaction("save", "SVC_LOC::" + pageCtx + "/BrokerageIncomeSettlementServlet", "OTCStlHeadDS=OTCStlHeadDS:A OTCStlSettleDetailSaveDS=OTCStlSettleDetailSaveDS:A OTCStlInvoDetailDS=OTCStlInvoDetailDS:A", "OTCStlHeadDS=OTCStlHeadDS", param, "fnSaveCallback");
+		com.syncTransaction(this, "save", "SVC_LOC::brokerageIncomeSettlement/SETOFF_SAVE.do", "OTCStlHeadDS=OTCStlHeadDS:A OTCStlSettleDetailSaveDS=OTCStlSettleDetailSaveDS:A OTCStlInvoDetailDS=OTCStlInvoDetailDS", "OTCStlHeadDS=OTCStlHeadDS", param, "fnSaveCallback");
+	}).call(this);
+    
+};
+
+this.fnClose = function()
+{
+	com.fnClose(this);
+};
+
+this.fnPrint = function()
+{
+    //PrintScreen(false, "Top" , "Left" );
+    take.formPrint(this, "L");	// L:가로, P:세로
+};
+
+/*********************************************************
+ * 3 각 COMPONENT 별 EVENT 영역
+ ********************************************************/
+ // TODO: MultiCommonCodePopupForOTCSettleForm.xfdl 확인필요
+this.btn_glAccCode_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+	(async () => {
+		var param  = "windowTitle=" + nexacro.wrapQuote(take.nvl("GL Account"));
+			param += " kind=unSettleAccCode";
+			param += " strSeletedCodeDS=SlipAccMultiSearchDS";
+		await com.Dialog(this, 'biz::common/MultiCommonCodePopupForOTCSettleForm.xfdl',param, 660, 450, "resizable=false", -1, -1);
+
+		var count = this.SlipAccMultiSearchDS.rowcount;
+		var accName = this.SlipAccMultiSearchDS.getColumn(0, "codename");
+		var accCode = this.SlipAccMultiSearchDS.getColumn(0, "code");
+		this.SearchDS.set_enableevent(false);
+		if(count == 0) {
+			this.SearchDS.setColumn(0, "gl_acc_code", "");
+			this.SearchDS.setColumn(0, "gl_acc_name", "");
+		} else {
+			this.SearchDS.setColumn(0, "gl_acc_code", accCode);
+			if(count > 1) {
+				accName = accName + " 외 " + (count - 1 ) + " 건";
+			}
+			this.SearchDS.setColumn(0, "gl_acc_name", accName);
+		}
+		this.SearchDS.set_enableevent(true);
+	}).call(this);
+};
+
+this.btn_del_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+	(async () => {
+		this.OTCStlInvoDetailDS.deleteRow(this.OTCStlInvoDetailDS.rowposition);
+		await this.fnSetDrCrAmt();
+		await this.fnSetDiffAmt();
+	}).call(this);
+};
+
+this.btn_add_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    var row = this.OTCStlInvoDetailDS.addRow();
+    this.OTCStlInvoDetailDS.setColumn(row, "curcy_code", this.OTCStlHeadDS.getColumn(0, "curcy_code"));
+    this.OTCStlInvoDetailDS.setColumn(row, "team_code", this.OTCStlHeadDS.getColumn(0, "team_code"));
+
+    var fRow = this.OTCStlSettleDetailDS.findRow("check_item", 1);
+    if (fRow >= 0) {
+        this.OTCStlInvoDetailDS.setColumn(row, "vsl_code", this.OTCStlSettleDetailDS.getColumn(fRow, "vsl_code"));
+        this.OTCStlInvoDetailDS.setColumn(row, "voy_no", com.lpad(this.OTCStlSettleDetailDS.getColumn(fRow, "voy_no"), '0', 4));
+        this.OTCStlInvoDetailDS.setColumn(row, "acc_code", this.OTCStlSettleDetailDS.getColumn(fRow, "acc_code"));
+    } else {
+		this.OTCStlInvoDetailDS.setColumn(row, "voy_no", "0000");
+	}
+    com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 1, row);
+};
+
+this.gd_InvoiceDS_OnRButtonDown = function(obj:nexacro.Grid, e:nexacro.GridMouseEventInfo)
+{
+    (async () => {
+        var cursorRowPos = this.OTCStlInvoDetailDS.rowposition;
+        //var cursorCellPos = obj.ClickedCell;
+        var cursorCellPos = obj.getCellPos();
+        if (e.cell == 4 && cursorCellPos == 4 ) {
+            await com.GridCommonCodePopup(this, 'g_Common', obj, cursorRowPos, cursorCellPos, "accountCode", "", "accountCode Search");
+            com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, cursorCellPos+1, cursorRowPos);
+        } else if(e.cell == 5 && cursorCellPos == 5) {
+            await com.GridCommonCodePopup(this, 'g_Common', obj, cursorRowPos, cursorCellPos, "unSettleAccCode", "", "unSettleAccCode Search");
+            com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, cursorCellPos+1, cursorRowPos);
+        } else if(e.cell == 6 && cursorCellPos == 6) {
+            await com.GridCommonCodePopup(this, 'g_Common', obj, cursorRowPos, cursorCellPos, "activeTeamCode", "", "teamCode Search");
+            com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, cursorCellPos+1, cursorRowPos);
+        } else if(e.cell == 12 && cursorCellPos == 12) {
+            //if (OTCStlInvoDetailDS.GetColumn(cursorRowPos, "clct_open_code") == null)    {
+            if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "clct_open_code"))) {    // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Type"));
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, cursorCellPos, cursorRowPos);
+                return false;
+            }
+            if (this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "clct_open_code") == "AP") {
+                this.gd_TermAPDS.set_visible(true);
+            } else if (this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "clct_open_code") == "AR") {
+                this.gd_TermARDS.set_visible(true);
+            }
+        } else if(e.cell == 15 && cursorCellPos == 15) {
+            var accCode = this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "acc_code");
+            //if (accCode == null || accCode == "" )    {
+            if(com.isEmpty(accCode)) { // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Account"));
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, 4, cursorRowPos);
+                return false;
+            }
+            if (this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "clct_open_code") != "AP") {
+                await com.fnMessageOpenForm(this, "E", "AP 발생의 경우만 선택가능합니다.");
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, 3, cursorRowPos);
+                return false;
+            }
+            var param = "";
+                param += "parm_acc_code=" + nexacro.wrapQuote(take.nvl(accCode));
+                param += " parm_curcy_code=" + nexacro.wrapQuote(take.nvl(this.currencyCol));
+            var arrArg = await com.Dialog(this, 'biz::da/daInvoice/BankAccountByCurcyListForm.xfdl', param, 660, 300);
+            if (arrArg.length == 0 || arrArg == null)  return false;
+            //if(com.length(take.getTrim(this.result)) == 0 || arrArg == null)  return false;        // upgrade
+            this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "bank_acc_id", arrArg[0]);
+            this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "bank_acc_desc", arrArg[1]);
+            com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, cursorCellPos+1, cursorRowPos);
+        } else if(e.cell == 19 && cursorCellPos == 19) {
+            var result = new Array();
+            var param = "";
+            var acc_code = this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "acc_code");
+            //alert("acc_code : " + acc_code );
+            //if (acc_code == null || acc_code == "" )    {
+            if(com.isEmpty(acc_code)) { // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Account"));
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, 4, cursorRowPos);
+                return false;
+            }
+            // 1110223  hijang - 국외거래처인 경우만 email입력 가능하게 함
+            var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+            if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+            if (arrArg[3] == "KR") {
+                //alert("국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+                return false;
+            }
+            param += "functionGubun=AgentEmailList";
+            param += " account_code=" + nexacro.wrapQuote(take.nvl(acc_code));
+            param += " account_name=" + nexacro.wrapQuote("");
+            result = await com.Dialog(this, 'biz::da/prepaymentSendInvoice/AgentEmailForm.xfdl', param, "660", "456");
+            if (result == 0 || com.length(take.getTrim(result)) == 0) return; // upgrade 박진석
+            //if (result[0] != null) {
+            if (!com.isEmpty(result[0])) {     // upgrade
+                this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "email_1", result[1]);
+            }
+        } else if(e.cell == 20 && cursorCellPos == 20) {
+            var result = new Array();
+            var param = "";
+            var acc_code = this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "acc_code");
+            //if (acc_code == null || acc_code == "" )    {
+            if (com.isEmpty(acc_code)) { // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Account"));
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, 4, cursorRowPos);
+                return false;
+            }
+            //100618 GYJ 국외거래처인 경우만 email입력 가능하게 함
+            var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+            if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+            if (arrArg[3] == "KR") {
+                //alert("국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+                return false;
+            }
+            param += "functionGubun=AgentEmailList";
+            param += " account_code=" + nexacro.wrapQuote(take.nvl(acc_code));
+            param += " account_name=" + nexacro.wrapQuote("");
+            result = await com.Dialog(this, 'biz::da/prepaymentSendInvoice/AgentEmailForm.xfdl', param, "660", "456");
+            if (result == 0 || com.length(take.getTrim(result)) == 0) return; // upgrade 박진석
+            //if (result[0] != null) {
+            if (!com.isEmpty(result[0])) {     // upgrade
+                this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "email_2", result[1]);
+            }
+        //110411 GYJ email 3,4 추가
+        }else if(e.cell == 21 && cursorCellPos == 21) {
+            var result = new Array();
+            var param = "";
+            var acc_code = this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "acc_code");
+            //if (acc_code == null || acc_code == "" )    {
+            if(com.isEmpty(acc_code)) { // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Account"));
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, 4, cursorRowPos);
+                return false;
+            }
+            //100618 GYJ 국외거래처인 경우만 email입력 가능하게 함
+            var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+            if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+            if (arrArg[3] == "KR") {
+                //alert("국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+                return false;
+            }
+            param += "functionGubun=AgentEmailList";
+            param += " account_code=" + nexacro.wrapQuote(take.nvl(acc_code));
+            param += " account_name=" + nexacro.wrapQuote("");
+            result = await com.Dialog(this, 'biz::da/prepaymentSendInvoice/AgentEmailForm.xfdl', param, "660", "456");
+            if (result == 0 || com.length(take.getTrim(result)) == 0) return; // upgrade 박진석
+            //if (result[0] != null) {
+            if (!com.isEmpty(result[0])) {     // upgrade
+                this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "email_3", result[1]);
+            }
+        } else if(e.cell == 22 && cursorCellPos == 22) {
+            var result = new Array();
+            var param = "";
+            var acc_code = this.OTCStlInvoDetailDS.getColumn(cursorRowPos, "acc_code");
+            //if (acc_code == null || acc_code == "" )    {
+            if(com.isEmpty(acc_code)) { // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Account"));
+                com.setGridPositionXY(obj, this.OTCStlInvoDetailDS, 4, cursorRowPos);
+                return false;
+            }
+            //100618 GYJ 국외거래처인 경우만 email입력 가능하게 함
+            var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+            if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+            if (arrArg[3] == "KR") {
+                //alert("국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+                return false;
+            }
+            param += "functionGubun=AgentEmailList";
+            param += " account_code=" + nexacro.wrapQuote(take.nvl(acc_code));
+            param += " account_name=" + nexacro.wrapQuote("");
+            result = await com.Dialog(this, 'biz::da/prepaymentSendInvoice/AgentEmailForm.xfdl', param, "660", "456");
+            if (result == 0 || com.length(take.getTrim(result)) == 0) return; // upgrade 박진석
+            //if (result[0] != null) {
+            if ( !com.isEmpty(result[0]) ) {     // upgrade
+                this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "email_4", result[1]);
+            }
+        }
+        /*
+        // 법원허가번호 팝업창 띄우기
+        else if (nCell == 23 && cursorCellPos == 23) {
+                var team_code = OTCStlInvoDetailDS.GetColumn(cursorRowPos, "team_code");
+                var due_date = OTCStlInvoDetailDS.GetColumn(cursorRowPos, "due_date");
+                if( !g_isEmpty(team_code) ) {
+                    // due date, posting_date 추가
+                    var issue_id_param = g_GetCourtPermitNoPopup3(team_code, due_date, me_postingDate.Value);
+                    // CLOSE, X표시 이외의 경우,,
+                    if( issue_id_param != null ){
+                        if( issue_id_param[1] == 'C' ){  // cancel 버튼 클릭
+                            OTCStlInvoDetailDS.SetColumn(cursorRowPos, "court_admit_no", "");
+                            OTCStlInvoDetailDS.SetColumn(cursorRowPos, "court_flag", "");
+                        }
+                        if( !g_isEmpty(issue_id_param[0]) ){    // 법원허가번호 클릭
+                            OTCStlInvoDetailDS.SetColumn(cursorRowPos, "court_admit_no", issue_id_param[0]);
+                            OTCStlInvoDetailDS.SetColumn(cursorRowPos, "court_flag", issue_id_param[1]);
+                        }
+                    }
+                }else{
+                    g_fnMessageOpenForm("E", Replace("Domain.msg.common.VAL_0001", "input",  "Team Code"));
+                    g_setGridPositionXY(obj, OTCStlInvoDetailDS, 6, cursorRowPos);
+                    return;
+                }
+        }
+        */
+    }).call(this);
+};
+
+this.OTCStlHeadDS_OnColumnChanged = function(obj:nexacro.NormalDataset, e:nexacro.DSColChangeEventInfo)
+{
+	(async () => {
+		if(e.columnid == "curcy_code") {
+			this.currencyCol = e.newvalue;
+			this.OTCStlSettleDetailDS.clearData(); // 이종화폐이면 Settle 검색되는 내역이 바뀌므로 모두 지우고 새로 조회케 함
+			this.OTCStlInvoDetailDS.clearData();
+			await this.fnGetExcRate();
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		} else if (e.columnid == "posting_date") {
+			await this.fnGetExcRate();
+			this.OTCStlInvoDetailDS.set_enableevent(false);
+			for (var row = 0; row < this.OTCStlInvoDetailDS.rowcount; row++) {
+				var stl_loc_amt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row, "stl_loc_amt"), 0));
+				this.OTCStlInvoDetailDS.setColumn(row, "stl_usd_amt", nexacro.round(stl_loc_amt.mul(this.usdLocExcRate), 2));
+				this.OTCStlInvoDetailDS.setColumn(row, "stl_krw_amt", Math.trunc(stl_loc_amt.mul(this.locExcRate)));
+			}
+			this.OTCStlInvoDetailDS.set_enableevent(true);
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		}
+	}).call(this);
+};
+
+this.OTCStlSettleDetailDS_OnColumnChanged = function(obj:nexacro.NormalDataset, e:nexacro.DSColChangeEventInfo)
+{
+	(async () => {
+		if (e.columnid == "check_item") {
+			this.OTCStlSettleDetailDS.set_enableevent(false);
+			if(e.newvalue == "1") {
+				this.OTCStlSettleDetailDS.setColumn(e.row, "stl_loc_amt", nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(e.row, "open_loc_amt"))));
+				this.OTCStlSettleDetailDS.setColumn(e.row, "stl_usd_amt", nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(e.row, "open_usd_amt"))));
+				this.OTCStlSettleDetailDS.setColumn(e.row, "stl_krw_amt", nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(e.row, "open_krw_amt"))));
+			} else if(e.newvalue == "0") {
+				this.OTCStlSettleDetailDS.setColumn(e.row, "stl_loc_amt", 0);
+				this.OTCStlSettleDetailDS.setColumn(e.row, "stl_usd_amt", 0);
+				this.OTCStlSettleDetailDS.setColumn(e.row, "stl_krw_amt", 0);
+			}
+			this.OTCStlSettleDetailDS.set_enableevent(true);
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		} else if (e.columnid == "stl_loc_amt" || e.columnid == "stl_usd_amt" || e.columnid == "stl_krw_amt" ) {
+			this.OTCStlSettleDetailDS.set_enableevent(false);
+			await this.fnSetStlComparisonRate(e.row);
+			await this.fnSetSettleAmt(e.row);
+			this.OTCStlSettleDetailDS.set_enableevent(true);
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		}
+	}).call(this);
+};
+
+this.OTCStlInvoDetailDS_OnColumnChanged = function(obj:nexacro.NormalDataset, e:nexacro.DSColChangeEventInfo)
+{
+	(async () => {
+		//------------------------------------------------------------------------------------------------------------------------
+		// 일반관리비 은행수수료('630601') -> 고정비 은행수수료('540203') 으로 계정 변경 관련 (20160906 HIJANG)
+		//------------------------------------------------------------------------------------------------------------------------
+		if(e.columnid == "vsl_code" ) {
+			if( e.newvalue != "0000" && e.newvalue != "000" && e.newvalue != "00" && e.newvalue != "0" ) {
+				if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(e.row, "gl_acc_code")) ) {
+					if( this.OTCStlInvoDetailDS.getColumn(e.row, "gl_acc_code") == "540203" ) {    // 고정비 은행수수료
+						if( nexacro.toNumber(this.OTCStlInvoDetailDS.getColumn(e.row, "voy_no")) != 0 ) {
+							// 해당 VSL-VOY 항차의 CB 상의 '영업팀' 가져오기 !!
+							var cb_team_code = await com.fnGetVoyNoSalesTeamCode(this, take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code")), take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "voy_no")));
+							//alert("cb_team_code : " + cb_team_code);
+							// VSL-VOY 의 CB 영업팀값 으로 세팅
+							this.OTCStlInvoDetailDS.setColumn(e.row, "team_code", cb_team_code);
+						} else {
+							await com.fnMessageOpenForm(this, "E", "은행수수료(540203) 계정은 '0' 항차를 입력하실 수 없습니다.\n확인 바랍니다.");
+							this.OTCStlInvoDetailDS.setColumn(e.row, "gl_acc_code","");
+							this.OTCStlInvoDetailDS.setColumn(e.row, "team_code","");
+							com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 1, e.row);
+							return false;
+						}
+					}
+				}
+			} else {
+				// 기존 입력값 Clear..
+				this.OTCStlInvoDetailDS.setColumn(e.row, "voy_no", "");
+				this.OTCStlInvoDetailDS.setColumn(e.row, "gl_acc_code", "");
+				this.OTCStlInvoDetailDS.setColumn(e.row, "team_code", "");
+			}
+		}
+		if(e.columnid == "voy_no" ) {
+			if( e.newvalue != "0" ) {
+				if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(e.row, "gl_acc_code")) ) {
+					if( this.OTCStlInvoDetailDS.getColumn(e.row, "gl_acc_code") == "540203" ) {    // 고정비 은행수수료
+						if( ( this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "0000" && this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "000"
+							&& this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "00" && this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "0" ) ) {
+							// 해당 VSL-VOY 항차의 CB 상의 '영업팀' 가져오기 !!
+							var cb_team_code = await com.fnGetVoyNoSalesTeamCode(this, take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code")), take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "voy_no")));
+							//alert("cb_team_code : " + cb_team_code);
+							// VSL-VOY 의 CB 영업팀값 으로 세팅
+							this.OTCStlInvoDetailDS.setColumn(e.row, "team_code", cb_team_code);
+						} else {
+							await com.fnMessageOpenForm(this, "E", "은행수수료(540203) 계정은 '0000' 선박을 입력하실 수 없습니다.\n확인 바랍니다.");
+							this.OTCStlInvoDetailDS.setColumn(e.row, "gl_acc_code","");
+							this.OTCStlInvoDetailDS.setColumn(e.row, "team_code","");
+							com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 1, e.row);
+							return false;
+						}
+					}
+				}
+			} else {
+				// 기존 입력값 Clear..
+				this.OTCStlInvoDetailDS.setColumn(e.row, "gl_acc_code", "");
+				this.OTCStlInvoDetailDS.setColumn(e.row, "team_code", "");
+			}
+		}
+		//------------------------------------------------------------------------------------------------------------------------
+		if(e.columnid == "clct_open_code") {
+			this.OTCStlInvoDetailDS.set_enableevent(false);
+			this.OTCStlInvoDetailDS.setColumn(e.row, "terms_date", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "pymt_term", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "due_date", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "pymt_hold_flag", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "bank_acc_id", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "bank_acc_desc", "");
+			// hijang
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_1", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_2", "");
+			//110411 GYJ
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_3", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_4", "");
+			//130524 GYJ
+			this.OTCStlInvoDetailDS.setColumn(e.row, "acc_code", "");
+			this.OTCStlInvoDetailDS.set_enableevent(true);
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		} else if(e.columnid == "acc_code") {
+			this.OTCStlInvoDetailDS.set_enableevent(false);
+			this.OTCStlInvoDetailDS.setColumn(e.row, "bank_acc_id", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "bank_acc_desc", "");
+			// hijang
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_1", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_2", "");
+			//110411 GYJ
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_3", "");
+			this.OTCStlInvoDetailDS.setColumn(e.row, "email_4", "");
+			this.OTCStlInvoDetailDS.set_enableevent(true);
+		} else if(e.columnid == "gl_acc_code") {
+			var creType = this.OTCStlInvoDetailDS.getColumn(e.row, "clct_open_code");
+			//if ( creType == null || creType == "") return false;
+			if ( com.isEmpty(creType) ) return false;         // upgrade
+			//if ((creType == "GLDR" && (varNewValue != "630601" && varNewValue != "800101" && varNewValue != "830101")) ||
+			if ((creType == "GLDR" && (e.newvalue != "540203" && e.newvalue != "800101" && e.newvalue != "830101")) ||    // 630601 제거 -> 540203 추가 (HIJANG 20160906)
+				(creType == "GLCR" && (e.newvalue != "730101" && e.newvalue != "760101"))) {
+				await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0022");
+				this.OTCStlInvoDetailDS.set_enableevent(false);
+				this.OTCStlInvoDetailDS.setColumn(e.row, "gl_acc_code", "");
+				this.OTCStlInvoDetailDS.set_enableevent(true);
+				return false;
+			}
+			if((e.oldvalue == "800101" || e.oldvalue == "730101") && (e.newvalue != "800101" && e.newvalue != "730101")) {
+				var locAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "stl_loc_amt"), 0));
+				// Usd, Krw 금액을 자동 재계산함
+				await this.OTCStlInvoDetailDS_OnColumnChanged(obj, { row: e.row , columnid: "stl_loc_amt", newvalue: locAmt} );
+			}
+			//------------------------------------------------------------------------------------------------------------------------
+			// 일반관리비 은행수수료('630601') -> 고정비 은행수수료('540203') 으로 계정 변경 관련 (20160906 HIJANG)
+			//------------------------------------------------------------------------------------------------------------------------
+			// 540203 계정 선택/입력 시,, 반드시 '순수영업팀' 이어야만 한다. !!
+			if( e.newvalue == "540203" ) {     // 고정비 은행수수료(540203)
+				// 0000 선박 또는 0000 항차 아닐경우..?
+				if ( (( this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "0000" && this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "000"
+						&& this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "00" && this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code") != "0" )
+					 && nexacro.toNumber(this.OTCStlInvoDetailDS.getColumn(e.row, "voy_no")) != 0 ) ) {
+					// 해당 VSL-VOY 항차의 CB 상의 '영업팀' 가져오기 !!
+					var cb_team_code = await com.fnGetVoyNoSalesTeamCode(this, take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "vsl_code")), take.nvl(this.OTCStlInvoDetailDS.getColumn(e.row, "voy_no")));
+					//alert("cb_team_code : " + cb_team_code);
+					// VSL-VOY 의 CB 영업팀값 으로 세팅
+					this.OTCStlInvoDetailDS.setColumn(e.row, "team_code", cb_team_code);
+				} else {
+					await com.fnMessageOpenForm(this, "E", "은행수수료(540203) 계정은 '0000' 선박/항차를 입력하실 수 없습니다.\n확인 바랍니다.");
+					this.OTCStlInvoDetailDS.setColumn(e.row, "gl_acc_code","");
+					this.OTCStlInvoDetailDS.setColumn(e.row, "team_code","");
+					com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, e.row);
+					return false;
+				}
+				if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(e.row, "team_code")) ) {
+					// 순수영업팀 여부 체크한다..!!
+					var enable_flag = await com.isSalesTeamCodeCheck(this, this.OTCStlInvoDetailDS.getColumn(e.row, "team_code"));
+					//alert("enable_flag : " +enable_flag);
+					if( enable_flag == "N" ) {  // 비영업팀
+						await com.fnMessageOpenForm(this, "E", "은행수수료(540203) 계정은 영업팀만 선택하실 수 있습니다.\n확인 바랍니다.");
+						this.OTCStlInvoDetailDS.setColumn(e.row, "team_code","");     // 팀코드 clear
+						com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 5, e.row);
+						return false;
+					}
+				}
+			}
+		} else if(e.columnid == "stl_loc_amt") {
+			this.OTCStlInvoDetailDS.set_enableevent(false);
+			if(this.OTCStlInvoDetailDS.getColumn(e.row, "curcy_code") == "USD") {
+				//OTCStlInvoDetailDS.SetColumn(nRow, "stl_usd_amt", toNumber(varNewValue));
+				this.OTCStlInvoDetailDS.setColumn(e.row, "stl_usd_amt", new nexacro.Decimal(com.replace(take.nvl(e.newvalue, 0),",","")));    // upgrade
+			} else {
+				//OTCStlInvoDetailDS.SetColumn(nRow, "stl_usd_amt", round(toNumber(varNewValue) * usdLocExcRate, 2));
+				this.OTCStlInvoDetailDS.setColumn(e.row, "stl_usd_amt", nexacro.round(new nexacro.Decimal(com.replace(take.nvl(e.newvalue, 0),",","")).mul(this.usdLocExcRate), 2));    // upgrade
+			}
+			if(this.OTCStlInvoDetailDS.getColumn(e.row, "curcy_code") == "KRW") {
+				//OTCStlInvoDetailDS.SetColumn(nRow, "stl_krw_amt", toNumber(varNewValue));
+				this.OTCStlInvoDetailDS.setColumn(e.row, "stl_krw_amt", new nexacro.Decimal(com.replace(take.nvl(e.newvalue, 0),",","")));    // upgrade
+			} else {
+				//OTCStlInvoDetailDS.SetColumn(nRow, "stl_krw_amt", Truncate(toNumber(varNewValue) * locExcRate));
+				this.OTCStlInvoDetailDS.setColumn(e.row, "stl_krw_amt", Math.trunc(new nexacro.Decimal(com.replace(take.nvl(e.newvalue, 0),",","")).mul(this.locExcRate))); // upgrade
+			}
+			this.OTCStlInvoDetailDS.set_enableevent(true);
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		} else if(e.columnid == "stl_usd_amt" || e.columnid == "stl_krw_amt" ) {
+			await this.fnSetDrCrAmt();
+			await this.fnSetDiffAmt();
+		} else if(e.columnid == "terms_date" ) {
+			await this.fnGetDueDate(e.row);
+		} else if(e.columnid == "pymt_term" ) {
+			await this.fnGetDueDate(e.row);
+		} else if(e.columnid == "due_date" ) {
+			/*
+			// 법원허가번호 clear..
+			OTCStlInvoDetailDS.SetColumn(nRow, "court_admit_no", "");
+			OTCStlInvoDetailDS.SetColumn(nRow, "court_flag", "");
+			*/
+		}
+		//------------------------------------------------------------------------------------------------------------------------
+		// 일반관리비 은행수수료('630601') -> 고정비 은행수수료('540203') 으로 계정 변경 관련 (20160906 HIJANG)
+		//------------------------------------------------------------------------------------------------------------------------
+		// 540203 계정 선택/입력 시,, 반드시 '순수영업팀' 이어야만 한다. !!
+		if(e.columnid == "team_code" ) {
+			var glAccCode = this.OTCStlInvoDetailDS.getColumn(e.row, "gl_acc_code");
+			//alert("glAccCode : " + glAccCode);
+			if( glAccCode == "540203" ) {
+				if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(e.row, "team_code")) ){
+					var enable_flag = await com.isSalesTeamCodeCheck(this, this.OTCStlInvoDetailDS.getColumn(e.row, "team_code"));
+					//alert("enable_flag : " +enable_flag);
+					if( enable_flag == "N"){  // 비영업팀
+						await com.fnMessageOpenForm(this, "E", "은행수수료(540203) 계정은 영업팀만 선택하실 수 있습니다.\n확인 바랍니다.");
+						this.OTCStlInvoDetailDS.setColumn(e.row, "team_code","");     // 팀코드  clear
+						//g_setGridPositionXY(gd_InvoiceDS, OTCStlInvoDetailDS, 6, nRow);
+						return false;
+					}
+				}
+			}
+		}
+	}).call(this);
+};
+
+this.gd_InvoiceDS_OnCellPosChanged = function(obj:nexacro.Grid, e:nexacro.GridSelectEventInfo)
+{
+    if (e.oldcell == 4) {
+        com.commCodeInquiryForGrid(this, "accountCode", obj, "acc_code", "" , e.oldrow, e.oldcell);
+    } else if (e.oldcell == 5) {
+        com.commCodeInquiryForGrid(this, "unSettleAccCode", obj, "gl_acc_code", "" , e.oldrow, e.oldcell);
+    } else if (e.oldcell == 6) {
+        com.commCodeInquiryForGrid(this, "activeTeamCode", obj, "team_code", "" , e.oldrow, e.oldcell);
+    }
+};
+
+this.OTCStlInvoDetailDS_CanColumnChange = function(obj:nexacro.NormalDataset, e:nexacro.DSColChangeEventInfo)
+{
+    (async () => {
+        if(e.columnid == "pymt_term")
+        {
+            if(!com.isEmpty(com.replace(e.newvalue,"-","")))
+            { // upgrade
+                var openCode = this.OTCStlInvoDetailDS.getColumn(e.row, "clct_open_code");
+                if (com.isEmpty(openCode))
+                { // upgrade
+                    await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Type"));
+                    this.OTCStlInvoDetailDS.set_enableevent(false);
+					this.OTCStlInvoDetailDS.setColumn(e.row, "pymt_term", null);
+					this.OTCStlInvoDetailDS.set_enableevent(true);
+					return false;
+                }
+                if(openCode == "AP" && this.PaymentTermAPDS.findRow("code", e.newvalue) == -1)
+                {
+                    await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0007", "code", "Payment Term(AP)"));
+                    this.OTCStlInvoDetailDS.set_enableevent(false);
+					this.OTCStlInvoDetailDS.setColumn(e.row, "pymt_term", null);
+					this.OTCStlInvoDetailDS.set_enableevent(true);
+					return false;
+                } else if(openCode == "AR" && this.PaymentTermARDS.findRow("code", e.newvalue) == -1) {
+                    await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0007", "code", "Payment Term(AR)"));
+                    this.OTCStlInvoDetailDS.set_enableevent(false);
+					this.OTCStlInvoDetailDS.setColumn(e.row, "pymt_term", null);
+					this.OTCStlInvoDetailDS.set_enableevent(true);
+					return false;
+                }
+            }
+        }
+        //중복 거래처 check (130523 GYJ)
+        if(e.columnid == "acc_code")
+        {
+			var openCode = this.OTCStlInvoDetailDS.getColumn(e.row, "clct_open_code");
+            if (openCode == "AP" || openCode == "AR")
+            {
+                var arrArg = await com.getAllCommCode(this, "accountCodeAll", e.newvalue, null);
+				if(arrArg[0]=="" || arrArg[0]==null) {
+					this.OTCStlInvoDetailDS.set_enableevent(false);
+					this.OTCStlInvoDetailDS.setColumn(e.row, "acc_code", e.oldvalue);
+					this.OTCStlInvoDetailDS.set_enableevent(true);
+					return false;
+				}
+                var acc_dupFlag = arrArg[9];
+                var activeFlag = arrArg[5];
+                //Active인데 dupe flag = 'y' 인 경우 error
+                if (activeFlag == 'ACTIVE')
+                {
+                    if (acc_dupFlag == 'Y')
+                    {
+                        com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, e.row);
+                        var result = await com.fnMessageOpenForm(this, "C", "중복으로 사용이 제한된 거래처로 아래의 거래처를 사용 하시기 바랍니다."
+                                    +"\n\n("+arrArg[10]+") "+arrArg[11]
+                                    +"\n\n 해당 거래처를 사용 하시겠습니까.?");
+                        if (result == 'YES')
+                        {
+                            this.OTCStlInvoDetailDS.setColumn(e.row,"acc_code",arrArg[10]);
+                            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, e.row);
+                        }else{
+                            this.OTCStlInvoDetailDS.setColumn(e.row,"acc_code","");
+                            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, e.row);
+                        }
+                        return false;
+                    }
+                } else {
+					//Inactive인 경우 정산이든 발생이든 전표 발생 불가.
+					await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0075");
+					com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, e.row);
+					return false;
+                }
+            }
+        }
+    }).call(this);
+};
+
+this.gd_SettleDS_OnHeadClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo)
+{
+    if(e.cell == 0)
+    {
+        //그리드 해드에 있는 체크박스를 클릭 했을때 (All check 하기)
+        com.gridAllCheckboxControl(obj, "check_item", e.cell);
+    }
+};
+
+this.SearchDS_OnColumnChanged = function(obj:nexacro.NormalDataset, e:nexacro.DSColChangeEventInfo)
+{
+    (async () => {
+		/*
+        if (e.columnid == "accnt_code1") {
+            await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode1, this.st_accntName1);
+        } else if (e.columnid == "accnt_code2") {
+            await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode2, this.st_accntName2, null, "Y");
+        } else if (e.columnid == "accnt_code3") {
+            await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode3, this.st_accntName3, null, "Y");
+        } else if (e.columnid == "accnt_code4") {
+            await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode4, this.st_accntName4, null, "Y");
+        } else if (e.columnid == "team_code1") {
+            await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode1, this.st_teamName1, null, "Y");
+        } else if (e.columnid == "team_code2") {
+            await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode2, this.st_teamName2, null, "Y");
+        } else if (e.columnid == "team_code3") {
+            await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode3, this.st_teamName3, null, "Y");
+        } else if (e.columnid == "team_code4") {
+            await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode4, this.st_teamName4, null, "Y");
+        } else 
+		*/
+		if (e.columnid == "gl_acc_code") {
+            this.SlipAccMultiSearchDS.clearData();
+            //if(varNewValue != "") {
+            if(!com.isEmpty(e.newvalue)) { // upgrade
+                var rtnFlag = await com.commCodeInquiry(this, "unSettleAccCode", this.ed_glAccCode, this.st_glAccName, null, "Y");
+                if (rtnFlag == 1) {
+                    var row = this.SlipAccMultiSearchDS.addRow();
+                    this.SlipAccMultiSearchDS.setColumn(row, "code", e.newvalue);
+                    this.SlipAccMultiSearchDS.setColumn(row, "codename", this.st_glAccName.text);
+                }
+            } else {
+                this.SearchDS.setColumn(0, "gl_acc_name", "");
+            }
+        } else if (e.columnid == "from_date") {
+            if (!com.isValidDate(this.me_fromDate)) this.me_fromDate.setFocus();
+        } else if (e.columnid == "to_date") {
+            if (! com.isValidDate(this.me_toDate)) this.me_toDate.setFocus();
+        //120726 GYJ
+        } else if (e.columnid == "me_fromDueDate") {
+            if (! com.isValidDate(this.me_fromDueDate)) this.me_fromDueDate.setFocus();
+        } else if (e.columnid == "me_toDueDate") {
+            if (! com.isValidDate(this.me_toDueDate)) this.me_toDueDate.setFocus();
+        }
+    }).call(this);
+};
+
+this.btn_accntCode1_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+	(async () => {
+		await com.CommonCodePopup(this, "settleAccountCode", "Settle Account Code", this.ed_accntCode1, this.st_accntName1, false, "Y");
+	}).call(this);
+};
+
+this.btn_accntCode2_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "settleAccountCode", "Settle Account Code", this.ed_accntCode2, this.st_accntName2, false, "Y");
+};
+
+this.btn_accntCode3_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "settleAccountCode", "Settle Account Code", this.ed_accntCode3, this.st_accntName3, false, "Y");
+};
+
+this.btn_accntCode4_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "settleAccountCode", "Settle Account Code", this.ed_accntCode4, this.st_accntName4, false, "Y");
+};
+
+this.btn_teamCode1_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "activeTeamCode", "Team Code", this.ed_teamCode1, this.st_teamName1, false, "Y");
+};
+
+this.btn_teamCode2_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "activeTeamCode", "Team Code", this.ed_teamCode2, this.st_teamName2, false, "Y");
+};
+
+this.btn_teamCode3_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "activeTeamCode", "Team Code", this.ed_teamCode3, this.st_teamName3, false, "Y");
+};
+
+this.btn_teamCode4_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "activeTeamCode", "Team Code", this.ed_teamCode4, this.st_teamName4, false, "Y");
+};
+
+this.btn_vslCode1_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "vesselCode", "Vessel Code", this.ed_vslCode1, "", false, "Y");
+};
+
+this.btn_vslCode2_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "vesselCode", "Vessel Code", this.ed_vslCode2, "", false, "Y");
+};
+
+this.btn_vslCode3_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "vesselCode", "Vessel Code", this.ed_vslCode3, "", false, "Y");
+};
+
+this.btn_vslCode4_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "vesselCode", "Vessel Code", this.ed_vslCode4, "", false, "Y");
+};
+
+this.gd_TermARDS_OnCellDblClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo)
+{
+    var code = this.PaymentTermARDS.getColumn(this.PaymentTermARDS.rowposition, "code");
+    var cursorRowPos = this.OTCStlInvoDetailDS.rowposition;
+    this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "pymt_term", code);
+    com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, this.gd_InvoiceDS.getCellPos() + 1, cursorRowPos);
+    this.gd_TermARDS.set_visible(false);
+};
+
+this.gd_TermAPDS_OnCellDblClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo)
+{
+    var code = this.PaymentTermAPDS.getColumn(this.PaymentTermAPDS.rowposition, "code");
+    var cursorRowPos = this.OTCStlInvoDetailDS.rowposition;
+    this.OTCStlInvoDetailDS.setColumn(cursorRowPos, "pymt_term", code);
+    com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, this.gd_InvoiceDS.getCellPos() + 1, cursorRowPos);
+    this.gd_TermAPDS.set_visible(false);
+};
+
+this.gd_TermARDS_OnHeadClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo)
+{
+    if(e.cell == 0) {
+        //그리드 Head 버튼 클릭시 안보이게 설정
+        this.gd_TermARDS.set_visible(false);
+    }
+};
+
+this.gd_TermAPDS_OnHeadClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo)
+{
+    if(e.cell == 0) {
+        //그리드 Head 버튼 클릭시 안보이게 설정
+        this.gd_TermAPDS.set_visible(false);
+    }
+};
+
+this.btn_curcyDiff_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+	(async () => {
+		// 기존 환차손익 삭제
+		for (var nRow = this.OTCStlInvoDetailDS.rowcount - 1; nRow >= 0; nRow--) {
+			var glAccCode = this.OTCStlInvoDetailDS.getColumn(nRow, "gl_acc_code");
+			if (glAccCode == "730101" || glAccCode == "800101") {
+				this.OTCStlInvoDetailDS.deleteRow(nRow);
+			}
+		}
+		await this.fnSetDrCrAmt();
+		await this.fnSetDiffAmt();
+		
+		//---------------------------------------------------------------------------------------
+		// [ 계산 오류 해결 ] - hijang ( 20110926 )
+		// 여러line에 대해서 정산처리 할때,,
+		// diff_amt 값에 이상한 dummy 데이터가 붙는 현상 발생함 ( ex. -0.0000005 )
+		// -> Mi-platform 버그가 아닌지..
+		// 하여튼, 이 문제를 해결하기 위해서 round 처리하여 문제 해결함.
+		//  ( 현재 데이터는 소수점 2자리가 max 이므로,, 강제로 2자리에서 Truncate 하였음 )
+		//---------------------------------------------------------------------------------------
+		/*
+		this.me_loc_diff_amt.set_value(Math.trunc(new nexacro.Decimal(take.nvl(this.me_loc_diff_amt.value)), 2));
+		this.me_usd_diff_amt.set_value(Math.trunc(new nexacro.Decimal(take.nvl(this.me_usd_diff_amt.value)), 2));
+		this.me_krw_diff_amt.set_value(Math.trunc(new nexacro.Decimal(take.nvl(this.me_krw_diff_amt.value)), 3));
+		*/
+		this.me_loc_diff_amt.set_value(nexacro.floor(new nexacro.Decimal(take.nvl(this.me_loc_diff_amt.value)), 3));
+		this.me_usd_diff_amt.set_value(nexacro.floor(new nexacro.Decimal(take.nvl(this.me_usd_diff_amt.value)), 3));
+		this.me_krw_diff_amt.set_value(nexacro.floor(new nexacro.Decimal(take.nvl(this.me_krw_diff_amt.value)), 4));
+		
+		var locDiff = this.me_loc_diff_amt.value;
+		var usdDiff = this.me_usd_diff_amt.value;
+		var krwDiff = this.me_krw_diff_amt.value;
+		if( nexacro.toNumber(usdDiff) == 0 && nexacro.toNumber(krwDiff) == 0 ) return;
+		
+		var curcyCnt = this.OTCStlSettleDetailDS.getCaseCount("check_item == 1 && curcy_code != '" + this.currencyCol + "'");
+		if( curcyCnt == 0 ) {   // Master와 동일한 화폐만으로 발생, 정산이 이뤄진 경우 Loc 금액의 Balance 체크
+			if(nexacro.toNumber(locDiff) != 0) {
+				await com.fnMessageOpenForm(this, "I", "LOC 금액이 0 이어야 환차손익 생성이 가능합니다.");
+				return false;
+			}
+		}
+		if(this.currencyCol == "USD" && nexacro.toNumber(usdDiff) != 0) {
+			await com.fnMessageOpenForm(this, "I", "USD 금액이 0 이어야 환차손익 생성이 가능합니다.");
+			return false;
+		} else if(this.currencyCol == "KRW" && nexacro.toNumber(krwDiff) != 0) {
+			await com.fnMessageOpenForm(this, "I", "KRW 금액이 0 이어야 환차손익 생성이 가능합니다.");
+			return false;
+		}
+		var fRow = this.OTCStlSettleDetailDS.findRow("check_item", 1);
+		var addRow = 0;
+		this.OTCStlInvoDetailDS.set_enableevent(false);
+		if( nexacro.toNumber(usdDiff) * nexacro.toNumber(krwDiff) >= 0 ) {  //두 값의 Sign이 같거나 하나가 0 인경우
+			addRow = this.OTCStlInvoDetailDS.addRow();
+			this.OTCStlInvoDetailDS.setColumn(addRow, "curcy_code", this.OTCStlHeadDS.getColumn(0, "curcy_code"));
+			this.OTCStlInvoDetailDS.setColumn(addRow, "team_code", this.OTCStlHeadDS.getColumn(0, "team_code"));
+			this.OTCStlInvoDetailDS.setColumn(addRow, "stl_loc_amt", 0);
+			if(fRow >= 0) {
+				this.OTCStlInvoDetailDS.setColumn(addRow, "vsl_code", this.OTCStlSettleDetailDS.getColumn(fRow, "vsl_code"));
+				this.OTCStlInvoDetailDS.setColumn(addRow, "voy_no", this.OTCStlSettleDetailDS.getColumn(fRow, "voy_no"));
+				this.OTCStlInvoDetailDS.setColumn(addRow, "acc_code", this.OTCStlSettleDetailDS.getColumn(fRow, "acc_code"));
+			}
+			if( nexacro.toNumber(usdDiff) <= 0 && nexacro.toNumber(krwDiff) <= 0 ) {
+				this.OTCStlInvoDetailDS.setColumn(addRow, "clct_open_code", "GLDR");
+				this.OTCStlInvoDetailDS.setColumn(addRow, "gl_acc_code", "800101");
+			} else {
+				this.OTCStlInvoDetailDS.setColumn(addRow, "clct_open_code", "GLCR");
+				this.OTCStlInvoDetailDS.setColumn(addRow, "gl_acc_code", "730101");
+			}
+			this.OTCStlInvoDetailDS.setColumn(addRow, "stl_usd_amt", Math.abs(nexacro.toNumber(usdDiff)));
+			this.OTCStlInvoDetailDS.setColumn(addRow, "stl_krw_amt", Math.abs(nexacro.toNumber(krwDiff)));
+		} else {  // 두 값의 Sign이 다른 경우
+			if (nexacro.toNumber(usdDiff) < 0 || nexacro.toNumber(krwDiff) < 0) {
+				addRow = this.OTCStlInvoDetailDS.addRow();
+				this.OTCStlInvoDetailDS.setColumn(addRow, "curcy_code", this.OTCStlHeadDS.getColumn(0, "curcy_code"));
+				this.OTCStlInvoDetailDS.setColumn(addRow, "team_code", this.OTCStlHeadDS.getColumn(0, "team_code"));
+				this.OTCStlInvoDetailDS.setColumn(addRow, "stl_loc_amt", 0);
+				if(fRow >= 0) {
+					this.OTCStlInvoDetailDS.setColumn(addRow, "vsl_code", this.OTCStlSettleDetailDS.getColumn(fRow, "vsl_code"));
+					this.OTCStlInvoDetailDS.setColumn(addRow, "voy_no", this.OTCStlSettleDetailDS.getColumn(fRow, "voy_no"));
+					this.OTCStlInvoDetailDS.setColumn(addRow, "acc_code", this.OTCStlSettleDetailDS.getColumn(fRow, "acc_code"));
+				}
+				this.OTCStlInvoDetailDS.setColumn(addRow, "clct_open_code", "GLDR");
+				this.OTCStlInvoDetailDS.setColumn(addRow, "gl_acc_code", "800101");
+				if(nexacro.toNumber(usdDiff) < 0) {
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_usd_amt", Math.abs(nexacro.toNumber(usdDiff)));
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_krw_amt", 0);
+				}
+				if(nexacro.toNumber(krwDiff) < 0) {
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_usd_amt", 0);
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_krw_amt", Math.abs(nexacro.toNumber(krwDiff)));
+				}
+			}
+			if (nexacro.toNumber(usdDiff) > 0 || nexacro.toNumber(krwDiff) > 0) {
+				addRow = this.OTCStlInvoDetailDS.addRow();
+				this.OTCStlInvoDetailDS.setColumn(addRow, "curcy_code", this.OTCStlHeadDS.getColumn(0, "curcy_code"));
+				this.OTCStlInvoDetailDS.setColumn(addRow, "team_code", this.OTCStlHeadDS.getColumn(0, "team_code"));
+				this.OTCStlInvoDetailDS.setColumn(addRow, "stl_loc_amt", 0);
+				if(fRow >= 0) {
+					this.OTCStlInvoDetailDS.setColumn(addRow, "vsl_code", this.OTCStlSettleDetailDS.getColumn(fRow, "vsl_code"));
+					this.OTCStlInvoDetailDS.setColumn(addRow, "voy_no", this.OTCStlSettleDetailDS.getColumn(fRow, "voy_no"));
+					this.OTCStlInvoDetailDS.setColumn(addRow, "acc_code", this.OTCStlSettleDetailDS.getColumn(fRow, "acc_code"));
+				}
+				this.OTCStlInvoDetailDS.setColumn(addRow, "clct_open_code", "GLCR");
+				this.OTCStlInvoDetailDS.setColumn(addRow, "gl_acc_code", "730101");
+				if(nexacro.toNumber(usdDiff) > 0) {
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_usd_amt", nexacro.toNumber(usdDiff));
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_krw_amt", 0);
+				}
+				if(nexacro.toNumber(krwDiff) > 0) {
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_usd_amt", 0);
+					this.OTCStlInvoDetailDS.setColumn(addRow, "stl_krw_amt", nexacro.toNumber(krwDiff));
+				}
+			}
+		}
+		this.OTCStlInvoDetailDS.set_enableevent(true);
+		await this.fnSetDrCrAmt();
+		await this.fnSetDiffAmt();
+	}).call(this);
+};
+
+this.btn_mic_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo) {
+    (async () => {
+        var param = "windowTitle=" + nexacro.wrapQuote("UserCode");
+            param += " kind=userCode";
+            param += " strSeletedCodeDS=MICMultiSearchDS";
+            param += " conditionValue="+nexacro.wrapQuote(take.nvl(this.ed_rcv_id.value));
+            param += " conditionType="+nexacro.wrapQuote("NAME");
+        var arrArg = await com.Dialog(this, 'biz::common/CommonCodePopupForm.xfdl', param, "660", "560", "Autosize=false");
+        if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+        //if(arrArg[0] != null && arrArg[1] != null) {
+        if (!com.isEmpty(arrArg[0]) && !com.isEmpty(arrArg[1])) {     // upgrade
+            this.ed_rcv_id.set_value(arrArg[0]);
+            //this.st_username.set_text(arrArg[1]);
+            //st_username.Text = arrArg[0];
+        } else {
+            this.ed_rcv_id.setFocus();
+        }
+    }).call(this);
+};
+
+this.btn_mic_teamCode_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+	(async () => {
+		var arrArg = await com.CommonCodePopupGet(this, "activeTeamCode", "Team Code", "");
+		if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+		this.ed_rcv_team_code.set_value(arrArg[0]);
+		//OTCStlHeadDS.SetColumn(gd_additionalAccount.CurrentRow, "ed_rcv_team_code", arrArg[0]);
+	}).call(this);
+};
+
+//세부 화폐조건 추가 170818 GYJ
+this.btn_curcy_code_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo)
+{
+    com.CommonCodePopup(this, "curcyCode", "Currency Code", this.ed_curcy_code, "");
+};
+
+this.ed_curcy_code_OnChanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+    com.commCodeInquiry(this, "curcyCode", this.ed_curcy_code, "");
+};
+
+this.ck_GL_OnClick = function(obj:nexacro.CheckBox, e:nexacro.ClickEventInfo)
+{
+    if(obj.value == "1") {
+        this.SearchDS.setColumn(0,"gl_acc_code","");
+        this.ed_glAccCode.set_enable(false);
+        this.btn_glAccCode.set_enable(false);
+    } else {
+        this.ed_glAccCode.set_enable(true);
+        this.btn_glAccCode.set_enable(true);
+    }
+};
+
+//170825 GYJ
+this.cb_curcyType_OnChanged = function(obj:nexacro.Combo, e:nexacro.ItemChangeEventInfo)
+{
+    if(e.postvalue == "K") {
+        this.ed_curcy_code.set_value("KRW");
+    } else {
+        this.ed_curcy_code.set_value("");
+    }
+};
+
+/*********************************************************
+ * 4 사용자 FUNCTION 영역
+ ********************************************************/
+
+this.fnValidationCheck = async function()
+{
+	var postingDate = com.dateFormatString(this.OTCStlHeadDS.getColumn(0, "posting_date"));
+	//if (postingDate == null) {
+	if (com.isEmpty(postingDate)) { // upgrade
+		await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "GL Date"));
+		this.me_postingDate.setFocus();
+		return false;
+	}
+	if (!com.isValidDate(this.me_postingDate)) {
+		this.me_postingDate.setFocus();
+		return false;
+	}
+	if (com.left(postingDate, 8) > this.somToday) {
+		await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0056", "input", "GL Date"));
+		this.me_postingDate.setFocus();
+		return false;
+	}
+	//ryu 2009.11.30
+	if (await com.monthCloseCheck(this, 'SOMO', postingDate) == false) {
+		this.me_postingDate.setFocus();
+		return false;
+	}
+	//if (OTCStlHeadDS.getColumn(0, "curcy_code") == null) {
+	if (com.isEmpty(this.OTCStlHeadDS.getColumn(0, "curcy_code"))) {    // upgrade
+		await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Currency"));
+		this.cb_currency.setFocus();
+		return false;
+	}
+	if (this.OTCStlSettleDetailDS.findRow("check_item", 1) == -1 ) {
+		await com.fnMessageOpenForm(this, "E", "Domain.msg.UCG_2001.VAL_0017");
+		return false;
+	}
+	// SettleDS
+	if (!await this.fnSettleDSCheck()) return false;
+	// InvoiceDS
+	if (!await this.fnInvoiceDSCheck()) return false;
+	//---------------------------------------------------------------------------------------
+	// [ 계산 오류 해결 ] - hijang ( 20110926 )
+	// 여러line에 대해서 정산처리 할때,,
+	// diff_amt 값에 이상한 dummy 데이터가 붙는 현상 발생함 ( ex. -0.0000005 )
+	// -> Mi-platform 버그가 아닌지..
+	// 하여튼, 이 문제를 해결하기 위해서 round 처리하여 문제 해결함.
+	//  ( 현재 데이터는 소수점 2자리가 max 이므로,, 강제로 2자리에서 끊어버림.. )
+	//---------------------------------------------------------------------------------------
+	/*
+	this.me_loc_diff_amt.set_value(Math.trunc(new nexacro.Decimal(take.nvl(this.me_loc_diff_amt.value)), 2));
+	this.me_usd_diff_amt.set_value(Math.trunc(new nexacro.Decimal(take.nvl(this.me_usd_diff_amt.value)), 2));
+	this.me_krw_diff_amt.set_value(Math.trunc(new nexacro.Decimal(take.nvl(this.me_krw_diff_amt.value)), 2));
+	*/
+	this.me_loc_diff_amt.set_value(nexacro.floor(new nexacro.Decimal(take.nvl(this.me_loc_diff_amt.value)), 3));
+	this.me_usd_diff_amt.set_value(nexacro.floor(new nexacro.Decimal(take.nvl(this.me_usd_diff_amt.value)), 3));
+	this.me_krw_diff_amt.set_value(nexacro.floor(new nexacro.Decimal(take.nvl(this.me_krw_diff_amt.value)), 3));
+	
+	var curcyCnt = this.OTCStlSettleDetailDS.getCaseCount("check_item == 1 && curcy_code != '" + this.currencyCol + "'");
+	if(curcyCnt == 0) {   // Master와 동일한 화폐만으로 발생, 정산이 이뤄진 경우 Loc 금액의 diff도 체크
+		if(nexacro.toNumber(this.me_loc_diff_amt.value) != 0) {
+			await com.fnMessageOpenForm(this, "E", "차변, 대변의 Diff 금액은 0 이어야 합니다.");
+			return false;
+		}
+	}
+	if(nexacro.toNumber(take.nvl(this.me_usd_diff_amt.value)) != 0 || nexacro.toNumber(take.nvl(this.me_krw_diff_amt.value)) != 0) {
+		await com.fnMessageOpenForm(this, "E", "차변, 대변의 Diff 금액(USD, KRW)은 0 이어야 합니다. \n[환차손익 자동생성]으로 Diff를 조정해 주세요.");
+		return false;
+	}
+	/*
+	if((currencyCol == "KRW" && toNumber(me_krw_diff_amt.Value) != 0 ) ||
+	(currencyCol == "USD" && toNumber(me_usd_diff_amt.Value) != 0 ) ||
+	(currencyCol != "KRW" && currencyCol != "USD" && toNumber(me_loc_diff_amt.Value) != 0 )) {
+		g_fnMessageOpenForm("E", "Domain.msg.UCG_1800.VAL_0004");
+		return false;
+	}
+	*/      //RYU 2010.04.12
+	// 110425 GYJ- 국외거래처인 경우만 email입력 가능하게 함
+	for (var nRow = 0; nRow < this.OTCStlInvoDetailDS.rowcount; nRow++) {
+		if(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AP" ) {
+			/*
+			// payment hold 체크시 ?
+			// -> '법원허가번호' 등록여부체크 & 한도체크 는 할 필요없다. ( 20140502 - hijang )
+			if( OTCStlInvoDetailDS.Getcolumn(nRow,"pymt_hold_flag") <> 1 ) {    // 미체크시( null or 0 )
+				// 1) AP 5000만원 이상일때, 법원허가번호 등록여부 체크 (20140307) hijang
+				if( OTCStlInvoDetailDS.Getcolumn(nRow,"stl_krw_amt") >= 50000000 ){
+					if( g_isEmpty(OTCStlInvoDetailDS.Getcolumn(nRow,"court_admit_no")) ){
+						g_fnMessageOpenForm("E", "송금액이 5천만 원 이상일 경우 반드시 해당 송금에 대한\n법원/포괄허가번호를 지정해야 합니다.\n법원/포괄허가가 불가피하게 늦어지는 경우에는 임시번호를 생성하여 \n지정해야 합니다.\n");
+						//g_setGridPositionXY(gd_InvoiceDS, OTCStlInvoDetailDS, 23, nRow);
+						g_setGridPosition(gd_InvoiceDS, nRow, 'court_admit_no');
+						return false;
+					}
+				}
+				// 2) 해당 법원/포괄허가번호의 한도금액 체크.. (20140502) hijang
+				if( !g_isEmpty(OTCStlInvoDetailDS.Getcolumn(nRow,"court_admit_no")) ){
+					var ret_value = g_GetCourtPermitBudgetLimitCheck2(OTCStlInvoDetailDS.Getcolumn(nRow,"court_admit_no"),
+														OTCStlInvoDetailDS.Getcolumn(nRow,"stl_krw_amt"),
+														OTCStlInvoDetailDS.Getcolumn(nRow,"court_flag"));
+					if( substr(ret_value,0,4) == "FAIL"){
+							g_fnMessageOpenForm("E", replace(replace("Domain.msg.common.VAL_0128","input",OTCStlInvoDetailDS.Getcolumn(nRow,"court_admit_no")), "amt",substr(ret_value,4)) );
+							g_setGridPosition(gd_InvoiceDS, nRow, 'court_admit_no');
+							return;
+					}
+				}
+			}
+			*/
+			// 3) 계좌번호 필수입력 - hijang (20140418)
+			//    단, gl_date 가 2014.05.01 이후에만 체크,,
+			if( postingDate >= "20140501" ) {
+				if( this.OTCStlInvoDetailDS.getColumn(nRow,"pymt_hold_flag") != 1 ) {    // 미체크시( null or 0 )
+					if(com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow,"bank_acc_id"))) {
+						await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Bank Account"));
+						com.setGridPosition(this.gd_InvoiceDS, nRow, 'bank_acc_id');
+						return false;
+					} else {
+						// 송금 제한 국가 - 체크로직 ( HIJANG 20160621 )
+						var enable_flag = await com.EnableAccoutNumberCheck(this, this.OTCStlInvoDetailDS.getColumn(nRow,"bank_acc_id"));
+						//alert("enable_flag : " + enable_flag );
+						if( enable_flag == "N") {        // 송금제한국가
+							await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0137");
+							return false;
+						} else if( enable_flag == "P") {    // 제한적 송금가능국가
+							var rtnVal = await com.fnMessageOpenWideForm(this, "C", "Domain.msg.common.VAL_0138");
+							if( rtnVal == "CANCEL" ) {
+								return false;
+							}
+						} else if( enable_flag == "E") {    // 국가코드없음
+							await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0139");
+							return false;
+						}
+					}
+				}
+			}
+		}
+		//------------------------------------------------------------------------------------------------------------------------
+		// 일반관리비 은행수수료('630601') -> 고정비 은행수수료('540203') 으로 계정 변경 관련 (20160906 HIJANG)
+		//------------------------------------------------------------------------------------------------------------------------
+		if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "gl_acc_code"))) {    // upgrade
+			var glAccCode = this.OTCStlInvoDetailDS.getColumn(nRow, "gl_acc_code");
+			//alert("glAccCode : " + glAccCode);
+			if( glAccCode == "540203" ) {
+				if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "team_code")) ) {
+					var enable_flag = await com.isSalesTeamCodeCheck(this, this.OTCStlInvoDetailDS.getColumn(nRow, "team_code"));
+					//alert("enable_flag : " +enable_flag);
+					if( enable_flag == "N") {  // 비영업팀
+						await com.fnMessageOpenForm(this, "E", "은행수수료(540203) 계정은 영업팀만 선택하실 수 있습니다.\n확인 바랍니다.");
+						this.OTCStlInvoDetailDS.setColumn(nRow, "team_code","");     // 팀코드  clear
+						com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 6, nRow);
+						return false;
+					}
+				}
+			}
+		}
+		//if(OTCStlInvoDetailDS.GetColumn(nRow,"email_1") != null && OTCStlInvoDetailDS.GetColumn(nRow,"email_1") != "") {
+		if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "email_1"))) {    // upgrade
+			var acc_code = this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code");
+			var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+			if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; //  upgrade 박진석
+			if (arrArg[3] == "KR") {
+				await com.fnMessageOpenForm(this, "E","국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+				com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 19, nRow);
+				return false;
+			}
+		}
+		//if(trim(OTCStlInvoDetailDS.GetColumn(nRow,"email_2")) != null && trim(OTCStlInvoDetailDS.GetColumn(nRow,"email_2")) != "") {
+		if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "email_2"))) {    // upgrade
+			this.acc_code = this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code");
+			var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+			if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; //  upgrade 박진석
+			if (arrArg[3] == "KR") {
+				await com.fnMessageOpenForm(this, "E","국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+				com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 20, nRow);
+				return false;
+			}
+		}
+		//if(trim(OTCStlInvoDetailDS.GetColumn(nRow,"email_3")) != null && trim(OTCStlInvoDetailDS.GetColumn(nRow,"email_3")) != "") {
+		if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "email_3"))) {    // upgrade
+			var acc_code = this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code");
+			var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+			if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; //  upgrade 박진석
+			if (arrArg[3] == "KR") {
+				await com.fnMessageOpenForm(this, "E","국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+				com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 21, nRow);
+				return false;
+			}
+		}
+		//if(trim(OTCStlInvoDetailDS.GetColumn(nRow,"email_4")) != null && trim(OTCStlInvoDetailDS.GetColumn(nRow,"email_4")) != "") {
+		if( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "email_4"))) {    // upgrade
+			var acc_code = this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code");
+			var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+			if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; //  upgrade 박진석
+			if (arrArg[3] == "KR") {
+				await com.fnMessageOpenForm(this, "E","국내거래처는 e-mail 주소를 입력하 실 수 없습니다.");
+				com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 22, nRow);
+				return false;
+			}
+		}
+		//AP, AR이 하나라도 발생하는데 중복 거래처면 error 130522 GYJ
+		if (this.OTCStlInvoDetailDS.getColumn(nRow,"clct_open_code") == 'AP' || this.OTCStlInvoDetailDS.getColumn(nRow,"clct_open_code") == 'AR') {
+			var arrArg = await com.getAllCommCode(this, "accountCodeAll", this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code"), null);
+			var acc_dupFlag = arrArg[9];
+			var activeFlag = arrArg[5];
+			//Active인데 dupe flag = 'y' 인 경우 error
+			if (activeFlag == 'ACTIVE') {
+				if (acc_dupFlag == 'Y') {
+					var result = await com.fnMessageOpenForm(this, "C", "중복으로 사용이 제한된 거래처로 아래의 거래처를 사용 하시기 바랍니다."
+										+"\n\n("+arrArg[10]+") "+arrArg[11]
+										+"\n\n 해당 거래처를 사용 하시겠습니까.?");
+					if (result == 'YES') {
+						this.OTCStlInvoDetailDS.setColumn(nRow, "acc_code", arrArg[10]);
+						com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, nRow);
+					} else {
+						this.OTCStlInvoDetailDS.setColumn(nRow, "acc_code", "");
+						com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, nRow);
+					}
+					return false;
+				}
+			} else {
+				//Inactive인 경우 정산이든 발생이든 전표 발생 불가.
+				await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0075");
+				com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, nRow);
+				return false;
+			}
+		}
+		//140818 GYJ (-)미결 발생 불가
+		if(this.OTCStlInvoDetailDS.getColumn(nRow,"clct_open_code") == 'AP' ||
+			this.OTCStlInvoDetailDS.getColumn(nRow,"clct_open_code") == 'AR') {
+			if(nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow,"stl_loc_amt"))) < 0) {
+				await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0087", "input", "Loc Amount"));
+				com.setGridPosition(this.gd_InvoiceDS, nRow, 'stl_loc_amt');
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
+this.fnSettleDSCheck = async function()
+{
+    var colIndex = 0;
+    if (this.currencyCol == "KRW") {
+        colIndex = 14;
+    } else if (this.currencyCol == "USD") {
+        colIndex = 13;
+    } else {
+        colIndex = 12;
+    }
+    for(var nRow = 0; nRow < this.OTCStlSettleDetailDS.rowcount; nRow++) {
+        nRow = this.OTCStlSettleDetailDS.findRow("check_item", 1, nRow);
+        if (nRow == -1) break;
+        if (nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_loc_amt"))) == 0 ||
+            nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_usd_amt"))) == 0 ||
+            nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_krw_amt"))) == 0 ) {
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0013", "Item", "Clear Amount"));
+            com.setGridPositionXY(this.gd_SettleDS, this.OTCStlSettleDetailDS, colIndex, nRow);
+            return false;
+        }
+        if (nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_usd_amt"))) < 0  &&
+            (nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_usd_amt"))) != nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_usd_amt"))))) {
+            await com.fnMessageOpenForm(this, "E", "minus(-) 금액은 부분 정산이 불가합니다.");
+            com.setGridPositionXY(this.gd_SettleDS, this.OTCStlSettleDetailDS, colIndex, nRow);
+            return false;
+        }
+        if (nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_usd_amt"))) > nexacro.toNumber(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_usd_amt")))) {
+            await com.fnMessageOpenForm(this, "E", "Domain.msg.UCG_2100.VAL_0043");
+            com.setGridPositionXY(this.gd_SettleDS, this.OTCStlSettleDetailDS, colIndex, nRow);
+            return false;
+        }
+        if (nexacro.toNumber(com.dateFormatString(this.OTCStlSettleDetailDS.getColumn(nRow, "src_posting_date"))) > nexacro.toNumber(com.dateFormatString(this.OTCStlHeadDS.getColumn(0, "posting_date")))) {
+            await com.fnMessageOpenForm(this, "E", "Domain.msg.UCG_2100.VAL_0054");
+            this.me_postingDate.setFocus();
+            return false;
+        }
+        //해외대리점 계약서 존재여부 CHECK 200813 GYJ (정산 대상이 “대리점선급금(110917)” 계정일 때 한정)
+        /*
+        if( OTCStlSettleDetailDS.GetColumn(nRow, "gl_acc_code") == '110917'){
+            var a = g_getForeignAgentCntr(OTCStlSettleDetailDS.GetColumn(nRow, "acc_code"));
+            if( a == 0 ){
+                g_fnMessageOpenForm("E", "대리계약서 미체결 대리점으로, 발란스 일괄 정산 불가");
+                g_setGridPositionXY(gd_SettleDS, OTCStlSettleDetailDS, colIndex, nRow);
+                return false;
+            }
+        }
+        */        //TOBE
+    }
+    return true;
+};
+
+this.fnInvoiceDSCheck = async function()
+{
+    var vslCode = "";
+    var voyNo = null;
+    var glAccCode = "";
+    for (var nRow = 0; nRow < this.OTCStlInvoDetailDS.rowcount; nRow++) {
+        vslCode = this.OTCStlInvoDetailDS.getColumn(nRow, "vsl_code");
+        voyNo = this.OTCStlInvoDetailDS.getColumn(nRow, "voy_no");
+        glAccCode = this.OTCStlInvoDetailDS.getColumn(nRow, "gl_acc_code");
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "vsl_code") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "vsl_code")) == "") {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "vsl_code"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Vsl Code"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 1, nRow);
+            return false;
+        }
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "voy_no") == null) {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "voy_no"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Voy No"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 2, nRow);
+            return false;
+        }
+        if (com.isValidVslVoy(this, vslCode, voyNo) == false ) {
+            await com.fnMessageOpenForm(this, "E", "Domain.msg.UCG_1200.VAL_0095");
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 1, nRow);
+            return false;
+        }
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "clct_open_code") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "clct_open_code")) == "") {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Type"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS,3, nRow);
+            return false;
+        }
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "acc_code") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "acc_code")) == "") {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Account"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, nRow);
+            return false;
+        }
+        // Add 하면서 Account를 자동 세팅하면서 gd_InvoiceDS_OnCellPosChanged 가 실행 안되므로 한번더 체크해줌
+        if(com.validateCommCode(this, "accountCode", this.OTCStlInvoDetailDS.getColumn(nRow, "acc_code")) == false) {
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_5200.VAL_0002", "input", "Account"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 4, nRow);
+            return false;
+        }
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "gl_acc_code") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "gl_acc_code")) == "") {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "gl_acc_code"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "GL Accnt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 5, nRow);
+            return false;
+        }
+        // RYU : AP는 egl_account_v.attribute30 = 'L' 이고 AR은 'A' 이나 부채(L)계정이어도 AR에서 관리하는 예외 항목도 있다함 (FCM에 문의 필요)
+        //       아래로직의 계정 시작 문자 1, 2로 비교하는것은 100% 정확한 것은 아니나 우리가 할려는 것은 이정도로로 cover가 됨.
+        if ((this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AP" && com.left(glAccCode, 1) != "2") ||
+                   (this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AR" && com.left(glAccCode, 1) != "1") ||
+                   //(OTCStlInvoDetailDS.GetColumn(nRow, "clct_open_code") == "GLDR" && (glAccCode != "630601" && glAccCode != "800101" && glAccCode != "830101")) ||
+                   (this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "GLDR" && (glAccCode != "540203" && glAccCode != "800101" && glAccCode != "830101")) ||        // 630601 제거 -> 540203 추가 (HIJANG 20160906)
+                   (this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "GLCR" && (glAccCode != "730101" && glAccCode != "760101")))  {
+            await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0022");
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 5, nRow);
+            return false;
+        }
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "team_code") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "team_code")) == "") {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "team_code"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Team"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 6, nRow);
+            return false;
+        }
+        //if (OTCStlInvoDetailDS.GetColumn(nRow, "curcy_code") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "curcy_code")) == "") {
+        if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "curcy_code"))) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Currency"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 7, nRow);
+            return false;
+        }
+        if ((glAccCode != "730101" && glAccCode != "800101") &&
+                 //(OTCStlInvoDetailDS.GetColumn(nRow, "stl_loc_amt") == null || OTCStlInvoDetailDS.GetColumn(nRow, "stl_loc_amt") == 0)) {
+                 (com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_loc_amt")) || this.OTCStlInvoDetailDS.getColumn(nRow, "stl_loc_amt") == 0)) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input",  "LOC Amt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 8, nRow);
+            return false;
+        }
+        if (com.left(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code"), 2) == "GL" &&
+                   nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_loc_amt"))) < 0) {
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_1800.VAL_0012", "item", "LOC Amt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 8, nRow);
+            return false;
+        }
+        if (com.left(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code"), 2) == "GL" &&
+                   nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_usd_amt"))) < 0) {
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_1800.VAL_0012", "item", "USD Amt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 9, nRow);
+            return false;
+        }
+        if (com.left(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code"), 2) == "GL" &&
+                   nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_krw_amt"))) < 0) {
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_1800.VAL_0012", "item", "KRW Amt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 10, nRow);
+            return false;
+        }
+        if ((glAccCode == "760101" || glAccCode == "830101") &&
+                   (nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_loc_amt"))) > 100)) {
+            //g_fnMessageOpenForm("E", "잡이익, 잡손실은 100$ 이하여야 합니다.");
+            await com.fnMessageOpenForm(this, "E", "잡이익, 잡손실은 (LOC_AMT) 100 이하여야 합니다.");
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 8, nRow);
+            return false;
+        }
+        if ((glAccCode != "730101" && glAccCode != "800101") &&
+                   //(OTCStlInvoDetailDS.GetColumn(nRow, "stl_usd_amt") == null || OTCStlInvoDetailDS.GetColumn(nRow, "stl_usd_amt") == 0)) {
+                   (com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_usd_amt")) || this.OTCStlInvoDetailDS.getColumn(nRow, "stl_usd_amt") == 0)) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "USD Amt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 9, nRow);
+            return false;
+        }
+        if ((glAccCode != "730101" && glAccCode != "800101") &&
+                   //(OTCStlInvoDetailDS.GetColumn(nRow, "stl_krw_amt") == null || OTCStlInvoDetailDS.GetColumn(nRow, "stl_krw_amt") == 0)) {
+                   (com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_krw_amt")) || this.OTCStlInvoDetailDS.getColumn(nRow, "stl_krw_amt") == 0)) {    // upgrade
+            await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "KRW Amt"));
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 10, nRow);
+            return false;
+        }
+        if(this.currencyCol == "USD" &&
+                    nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_loc_amt"))) != nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_usd_amt")))) {
+            await com.fnMessageOpenForm(this, "E", "LOC, USD 금액은 같아야 합니다.");
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 8, nRow);
+            return false;
+        }
+        if(this.currencyCol == "KRW" &&
+           nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_loc_amt"))) != nexacro.toNumber(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "stl_krw_amt")))) {
+            await com.fnMessageOpenForm(this, "E", "LOC, KRW 금액은 같아야 합니다.");
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 8, nRow);
+            return false;
+        }
+        if (this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AP" ||
+            this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AR") { // AP, AR에 대해서만 terms_date ~ due_date 까지 필수 체크
+            //if (OTCStlInvoDetailDS.GetColumn(nRow, "terms_date") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "terms_date")) == "") {
+            if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "terms_date"))) {    // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Terms Date"));
+                com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 11, nRow);
+                return false;
+            }
+            //if (OTCStlInvoDetailDS.GetColumn(nRow, "pymt_term") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "pymt_term")) == "") {
+            if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "pymt_term"))) {    // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Term"));
+                com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 12, nRow);
+                return false;
+            }
+            //if (OTCStlInvoDetailDS.GetColumn(nRow, "due_date") == null || Trim(OTCStlInvoDetailDS.GetColumn(nRow, "due_date")) == "") {
+            if( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "due_date"))) {    // upgrade
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Due Date"));
+                com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 13, nRow);
+                return false;
+            }
+            if (com.left(this.OTCStlInvoDetailDS.getColumn(nRow, "due_date"), 8) < this.somToday) {
+                await com.fnMessageOpenForm(this, "E", "Domain.msg.UCG_1700.VAL_0045");
+                com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 11, nRow);
+                return false;
+            }
+            if(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AP" &&
+                this.PaymentTermAPDS.findRow("code", this.OTCStlInvoDetailDS.getColumn(nRow, "pymt_term")) == -1) {
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0007", "code", "Payment Term(AP)"));
+                return false;
+            }
+            if(this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AR" &&
+                this.PaymentTermARDS.findRow("code", this.OTCStlInvoDetailDS.getColumn(nRow, "pymt_term")) == -1) {
+                await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.UCG_2100.VAL_0007", "code", "Payment Term(AR)"));
+                return false;
+            }
+        }
+        //if( (OTCStlInvoDetailDS.GetColumn(nRow, "from_date") != null && OTCStlInvoDetailDS.GetColumn(nRow, "to_date") != null ) &&
+        if( ( !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "from_date")) && !com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "to_date")) ) &&
+                   (nexacro.toNumber(this.OTCStlInvoDetailDS.getColumn(nRow, "from_date")) > nexacro.toNumber(this.OTCStlInvoDetailDS.getColumn(nRow, "to_date"))) ) {
+            await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0045");
+            com.setGridPositionXY(this.gd_InvoiceDS, this.OTCStlInvoDetailDS, 16, nRow);
+            return false;
+        }
+    }
+    return true;
+};
+
+this.fnPymtSetting = function()
+{
+    // 현업 확인 필요..  RYU
+    for (var nRow = 0; nRow < this.OTCStlInvoDetailDS.rowcount; nRow++) {
+        if (this.OTCStlInvoDetailDS.getColumn(nRow, "clct_open_code") == "AP") {
+            this.OTCStlInvoDetailDS.setColumn(nRow, "pymt_meth", "CHECK");
+        } else {
+            this.OTCStlInvoDetailDS.setColumn(nRow, "pymt_meth", "");
+        }
+    }
+};
+
+this.fnPreReceiptAccYn = async function()
+{
+    var gl_acc_code ="";
+    var src_posting_date = "";
+    for(var nRow=0; nRow<this.OTCStlSettleDetailDS.rowcount; nRow++)
+    {
+        gl_acc_code = this.OTCStlSettleDetailDS.getColumn(nRow, "gl_acc_code");
+        src_posting_date = com.dateFormatString(this.OTCStlSettleDetailDS.getColumn(nRow, "src_posting_date"));
+        if( gl_acc_code == "210701" ) {
+            //법정관리로 인한 중간마감 때문에 선수금 정산 가능토록 임시 수정함 130620
+            if (com.substr(src_posting_date,0,6) == '201306') {
+                src_posting_date = '20130618';
+            } else {
+                src_posting_date = src_posting_date;
+            }
+            //--------------------------------------------------------------------------
+            // 1) 마감 여부 체크,,
+            if (await com.isMonthCloseCheck('SOMO', src_posting_date) == false) {
+                return true;    // 선수금 이면서,, 마감된건,,
+            } else {
+                return false;
+            }
+        }
+    }
+    return false;
+};
+
+this.fnRequestTransaction = function()
+{
+	//this.CCDAprvReqMDS.clearData();
+	//this.OTCStlHeadDS.clearData();
+
+    var param = "functionGubun='SETOFF_Request'";
+        param += " stl_no=" + nexacro.wrapQuote(take.nvl(this.OTCStlHeadDS.getColumn(0, "stl_no")));
+    com.syncTransaction(this, "save", "SVC_LOC::brokerageIncomeSettlement/SETOFF_Request.do", "", "CCDAprvReqMDS=CCDAprvReqMDS OTCStlHeadDS=OTCStlHeadDS", param, "fnRequestCallback");
+};
+
+/*
+function OZToPDF(){
+    var stlNo = OTCStlHeadDS.GetColumn(0, "stl_no");
+    var empName = gdsCCDUserMDS.GetColumn(0, "user_name");
+    var fileName = CCDAprvReqMDS.GetColumn(0, "aprv_req_key");
+    var param = "STL_NO=" + "'" + stlNo + "'" + G_OzSplit;
+        param += "EMP_NM=" + empName;
+    //var str = OZCreat2Ex("/som/operSa/2000/OTC034.ozr", "OTC034", param, fileName, "pdf");
+    var str = OZCreat2Ex("/som/operSa/2000/OTC034_V1.ozr", "OTC034_V1", param, fileName, "pdf");
+    EXOZViewer300.CreateReport(str);
+    SetTimer(G_OzTimerID, G_OzTimeout);
+    OTCStlHeadDS.ClearData();
+    OTCStlHeadDS.AddRow();
+    OTCStlHeadDS.FireEvent = false;
+    OTCStlHeadDS.SetColumn(0, "team_name", gdsCCDUserMDS.GetColumn(0,"team_name"));
+    OTCStlHeadDS.SetColumn(0, "team_code", gdsCCDUserMDS.GetColumn(0,"team_code"));
+    var sysToday = som_today('h');
+    // 9시 이전 이면 이전날짜 default
+    if(toNumber(substr(sysToday, 8, 2)) >= 9) {
+        sysToday = left(sysToday, 8);
+    } else {
+        sysToday = addDate(left(sysToday, 8), -1);
+    }
+    OTCStlHeadDS.SetColumn(0, "posting_date", sysToday);
+    OTCStlHeadDS.FireEvent = true;
+    OTCStlHeadDS.SetColumn(0, "curcy_code", "USD");
+    fnSetDiffAmt();
+}
+*/
+this.OZToPDF = function()
+{
+	(async () => {
+		var stlNo = this.OTCStlHeadDS.getColumn(0, "stl_no");
+		var empName = nexacro.getApplication().gdsUserInfo.getColumn(0, "userNm");
+		var fileName = this.CCDAprvReqMDS.getColumn(0, "aprv_req_key");
+		var param = "STL_NO=" + "'" + stlNo + "'" + common_oz.G_OzSplit;
+			param += "EMP_NM=" + empName;
+		//AP 존재 여부 체크 (hijang 20200306)
+		var apCnt;
+			apCnt = await this.getAPCount(stlNo);
+		//alert("apCnt : " + apCnt );
+		// 지급증빙지 로직 추가 (hijang 20200306)
+		var childParm ="";
+		if( apCnt > 0 )
+		{
+			/*
+			childParm += "viewer.childcount=1\n";
+			childParm += "print.alldocument=true\n";
+			childParm += "global.concatpage=true\n";
+			childParm += "child1.connection.servlet=http://" + G_OzServer + "/oz/server\n";
+			childParm += "child1.connection.reportname=som/EGL/EGLSOMO_V2.ozr\n";
+			childParm += "child1.odi.odinames=EGLSOMO_V2\n";
+			childParm += "child1.odi.EGLSOMO_V2.pcount=2\n";
+			childParm += "child1.odi.EGLSOMO_V2.args1=INVO_NO=" + "'" +  stlNo + "'" +  "\n";
+			childParm += "child1.odi.EGLSOMO_V2.args2=ALIAS=" + G_OzSID + "\n";
+			*/
+			//OZ UPGRADE 210201 GYJ
+			childParm += "&oz_param_key=viewer.childcount&oz_param_value=1";
+			childParm += "&oz_param_key=print.alldocument&oz_param_value=true";
+			childParm += "&oz_param_key=global.concatpage&oz_param_value=true";
+			childParm += "&oz_param_key=child1.connection.servlet&oz_param_value=http://" + common_oz.G_OzServer + "/oz/server";
+			childParm += "&oz_param_key=child1.connection.reportname&oz_param_value=som/EGL/EGLSOMO_V2.ozr";
+			childParm += "&oz_param_key=child1.odi.odinames&oz_param_value=EGLSOMO_V2";
+			childParm += "&oz_param_key=child1.odi.EGLSOMO_V2.pcount&oz_param_value=2";
+			childParm += "&oz_param_key=child1.odi.EGLSOMO_V2.args1&oz_param_value=INVO_NO=" + "'" +  stlNo + "'";
+			childParm += "&oz_param_key=child1.odi.EGLSOMO_V2.args2&oz_param_value=ALIAS=" + common_oz.G_OzSID;
+		}
+
+		//var str = OZCreat2Ex_addChild("/som/operSa/2000/OTC034_V1.ozr", "OTC034_V1", param, fileName, "pdf", childParm);
+		var str = com.OZCreat3ExAddChild("/som/operSa/2000/OTC034_V1.ozr", "OTC034_V1", param, fileName, "pdf", childParm);        //OZ UPGRADE 210201 GYJ
+		// EXOZViewer300.CreateReport(str);
+		com.createReportOZ(this, str, null);        //OZ UPGRADE 210201 GYJ
+		this.setTimer(common_oz.G_OzTimerID, common_oz.G_OzTimeout);
+
+		this.OTCStlHeadDS.clearData();
+		this.OTCStlHeadDS.addRow();
+		this.OTCStlHeadDS.set_enableevent(false);
+		this.OTCStlHeadDS.setColumn(0, "team_name", nexacro.getApplication().gdsUserInfo.getColumn(0,"teamName"));
+		this.OTCStlHeadDS.setColumn(0, "team_code", nexacro.getApplication().gdsUserInfo.getColumn(0,"teamCode"));
+		var sysToday = com.somToday(this, 'h');
+		// 9시 이전 이면 이전날짜 default
+		if(nexacro.toNumber(com.substr(sysToday, 8, 2)) >= 9) {
+			sysToday = com.left(sysToday, 8);
+		} else {
+			sysToday = take.getAddDays(com.left(sysToday, 8), -1);
+		}
+		this.OTCStlHeadDS.setColumn(0, "posting_date", sysToday);
+		this.OTCStlHeadDS.set_enableevent(true);
+		this.OTCStlHeadDS.setColumn(0, "curcy_code", "USD");
+		await this.fnSetDiffAmt();
+	}).call(this);
+};
+
+this.fnSetPropBkColorAndEdit = function()
+{
+    this.gd_SettleDS.set_enableredraw(false);
+    for(var row = 0; row < this.OTCStlSettleDetailDS.rowcount; row++) {
+        if (this.currencyCol == "USD") {
+            this.gd_SettleDS.setCellProperty('body',12,"cssclass","expr:com.drawDetailGridDisableColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',13,"cssclass","expr:com.drawDetailGridBkColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',14,"cssclass","expr:com.drawDetailGridDisableColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',12,"edittype","none");
+            this.gd_SettleDS.setCellProperty('body',13,"editfilter","number");  
+			this.gd_SettleDS.setCellProperty('body',13,"edittype","mask");
+            this.gd_SettleDS.setCellProperty('body',14,"edittype","none");
+        } else if (this.currencyCol == "KRW") {
+            this.gd_SettleDS.setCellProperty('body',12,"cssclass","expr:com.drawDetailGridDisableColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',13,"cssclass","expr:com.drawDetailGridDisableColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',14,"cssclass","expr:com.drawDetailGridBkColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',12,"edittype","none");
+            this.gd_SettleDS.setCellProperty('body',13,"edittype","none");
+            this.gd_SettleDS.setCellProperty('body',14,"editfilter","number");  
+			this.gd_SettleDS.setCellProperty('body',14,"edittype","mask");
+        } else {
+            this.gd_SettleDS.setCellProperty('body',12,"cssclass","expr:com.drawDetailGridBkColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',13,"cssclass","expr:com.drawDetailGridDisableColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',14,"cssclass","expr:dom.drawDetailGridDisableColor(currow, '2');");
+            this.gd_SettleDS.setCellProperty('body',12,"editfilter","number");  
+			this.gd_SettleDS.setCellProperty('body',12,"edittype","mask");
+            this.gd_SettleDS.setCellProperty('body',13,"edittype","none");
+            this.gd_SettleDS.setCellProperty('body',14,"edittype","none");
+        }
+    }
+    this.gd_SettleDS.set_enableredraw(true);
+};
+
+this.fnSetDiffAmt = async function()
+{
+	var meLocDiffAmt = new nexacro.Decimal(0), meUsdDiffAmt = new nexacro.Decimal(0), meKrwDiffAmt = new nexacro.Decimal(0);
+	
+	var locDrAmt = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "loc_dr_amt")));
+	var locCrAmt = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "loc_cr_amt")));
+	locDrAmt.subDecimal(locCrAmt)
+    this.me_loc_diff_amt.set_value(locDrAmt);
+	
+	//120402 GYJ round하지 않으면 .99999 같은 값이 들어가서 Diff금액이 제대로 계산이 안됨.
+	var usdDrAmt = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "usd_dr_amt")));
+	var usdCrAmt = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "usd_cr_amt")));
+	usdDrAmt.subDecimal(usdCrAmt);
+	this.me_usd_diff_amt.set_value(nexacro.round(usdDrAmt, 2));
+	
+    var krwDrAmt = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "krw_dr_amt")));
+	var krwCrAmt = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "krw_cr_amt")));
+	krwDrAmt.subDecimal(krwCrAmt)
+    this.me_krw_diff_amt.set_value(krwDrAmt);
+};
+
+this.fnSetDrCrAmt = async function()
+{
+    //var locCrAmt = 0, krwCrAmt = 0, usdCrAmt = 0, locDrAmt = 0, usdDrAmt = 0, krwDrAmt = 0;
+	var locCrAmt = new nexacro.Decimal(0), krwCrAmt = new nexacro.Decimal(0), usdCrAmt = new nexacro.Decimal(0);
+	var locDrAmt = new nexacro.Decimal(0), usdDrAmt = new nexacro.Decimal(0), krwDrAmt = new nexacro.Decimal(0);
+    for (var row = 0; row < this.OTCStlSettleDetailDS.rowcount; row++)
+    {
+        row = this.OTCStlSettleDetailDS.findRow("check_item", 1, row);
+        if (row == -1) break;
+        if (this.OTCStlSettleDetailDS.getColumn(row, "clct_open_code") == "CR") {  // Credit (AR정산)
+			var stlLocAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(row, "stl_loc_amt"), 0));
+			var stlUsdAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(row, "stl_usd_amt"), 0));
+			var stlKrwAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(row, "stl_krw_amt"), 0));
+			
+			locCrAmt.addDecimal(stlLocAmt);
+			usdCrAmt.addDecimal(stlUsdAmt);
+			krwCrAmt.addDecimal(stlKrwAmt);
+        } else if (this.OTCStlSettleDetailDS.getColumn(row, "clct_open_code") == "DR" ||
+            this.OTCStlSettleDetailDS.getColumn(row, "clct_open_code") == "AV" ) {  //  Debit (AP정산, 선수금)
+			var stlLocAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(row, "stl_loc_amt"), 0));
+			var stlUsdAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(row, "stl_usd_amt"), 0));
+			var stlKrwAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(row, "stl_krw_amt"), 0));
+			locDrAmt.addDecimal(stlLocAmt);
+			usdDrAmt.addDecimal(stlUsdAmt);
+			krwDrAmt.addDecimal(stlKrwAmt);
+        }
+    }
+
+    for (var row2 = 0; row2 < this.OTCStlInvoDetailDS.rowcount; row2++)
+    {
+        if (this.OTCStlInvoDetailDS.getColumn(row2, "clct_open_code") == "AP" ||
+            this.OTCStlInvoDetailDS.getColumn(row2, "clct_open_code") == "GLCR") {  //  AP, GLCR
+			var stlLocAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row2, "stl_loc_amt"), 0));
+			var stlUsdAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row2, "stl_usd_amt"), 0));
+			var stlKrwAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row2, "stl_krw_amt"), 0));
+			locCrAmt.addDecimal(stlLocAmt);
+			usdCrAmt.addDecimal(stlUsdAmt);
+			krwCrAmt.addDecimal(stlKrwAmt);
+			
+        } else if (this.OTCStlInvoDetailDS.getColumn(row2, "clct_open_code") == "AR" ||
+            this.OTCStlInvoDetailDS.getColumn(row2, "clct_open_code") == "GLDR" ) {  // AR, GLDR
+			var stlLocAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row2, "stl_loc_amt"), 0));
+			var stlUsdAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row2, "stl_usd_amt"), 0));
+			var stlKrwAmt = new nexacro.Decimal(take.nvl(this.OTCStlInvoDetailDS.getColumn(row2, "stl_krw_amt"), 0));
+			locDrAmt.addDecimal(stlLocAmt);
+			usdDrAmt.addDecimal(stlUsdAmt);
+			krwDrAmt.addDecimal(stlKrwAmt);
+        }
+    }
+	
+    this.OTCStlHeadDS.setColumn(0, "loc_dr_amt", locDrAmt);
+    this.OTCStlHeadDS.setColumn(0, "usd_dr_amt", usdDrAmt);
+    this.OTCStlHeadDS.setColumn(0, "krw_dr_amt", krwDrAmt);
+    this.OTCStlHeadDS.setColumn(0, "loc_cr_amt", locCrAmt);
+    this.OTCStlHeadDS.setColumn(0, "usd_cr_amt", usdCrAmt);
+    this.OTCStlHeadDS.setColumn(0, "krw_cr_amt", krwCrAmt);
+};
+
+this.fnSetStlComparisonRate = async function(nRow)
+{
+    var openAmt = new nexacro.Decimal(0), stlAmt = new nexacro.Decimal(0), stl_comparison_rate = new nexacro.Decimal(0);
+    if (this.currencyCol == "USD") {
+        openAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_usd_amt"), 0));
+        stlAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_usd_amt"), 0));
+    } else if (this.currencyCol == "KRW") {
+        openAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_krw_amt"), 0));
+        stlAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_krw_amt"), 0));
+    } else {
+        openAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_loc_amt"), 0));
+        stlAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_loc_amt"), 0));
+    }
+	
+    if (openAmt == new nexacro.Decimal(0)) {
+        stl_comparison_rate = new nexacro.Decimal(0);
+    } else {
+        stl_comparison_rate = nexacro.round(stlAmt.div(openAmt), 15);
+    }
+	
+    this.OTCStlSettleDetailDS.setColumn(nRow, "stl_comparison_rate", stl_comparison_rate);
+};
+
+this.fnSetSettleAmt = async function(nRow)
+{
+    var compRate = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_comparison_rate"), 0));
+	
+	var openLocAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_loc_amt"), 0));
+	var openKrwAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_krw_amt"), 0));
+	var openUsdAmt = new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "open_usd_amt"), 0));
+    if (this.currencyCol == "USD") {
+		this.OTCStlSettleDetailDS.setColumn(nRow, "stl_loc_amt", nexacro.round(openLocAmt.mul(compRate), 2));
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_krw_amt", Math.trunc(openKrwAmt.mul(compRate), 0));
+    } else if (this.currencyCol == "KRW") {
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_loc_amt", Math.trunc(openLocAmt.mul(compRate), 0));
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_usd_amt", nexacro.round(openUsdAmt.mul(compRate), 2));
+    } else {
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_usd_amt", nexacro.round(openUsdAmt.mul(compRate), 2));
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_krw_amt", Math.trunc(openKrwAmt.mul(compRate), 0));
+    }
+	
+    //Loc amt 재설정
+    if(this.OTCStlSettleDetailDS.getColumn(nRow, "curcy_code") == "USD") {
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_loc_amt", new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_usd_amt"), 0)));
+    } else if(this.OTCStlSettleDetailDS.getColumn(nRow, "curcy_code") == "KRW") {
+        this.OTCStlSettleDetailDS.setColumn(nRow, "stl_loc_amt", new nexacro.Decimal(take.nvl(this.OTCStlSettleDetailDS.getColumn(nRow, "stl_krw_amt"), 0)));
+    }
+};
+
+this.fnGetExcRate = async function()
+{
+    var param = "";
+        param += "functionGubun=RATE";
+        param += " currency_code=" + nexacro.wrapQuote(take.nvl(this.OTCStlHeadDS.getColumn(0, "curcy_code")));
+        param += " me_posting_date=" + nexacro.wrapQuote(take.nvl(com.left(com.dateFormatString(this.OTCStlHeadDS.getColumn(0, "posting_date").date), 8)));
+        param += " exc_type_code=" + nexacro.wrapQuote("TTA");
+    com.syncTransaction(this, "RATE", "SVC_LOC::invoiceNew/RATE.do", "", "TempRateDS=TempRateDS", param, "fnGetExcRateCallback");
+};
+
+this.fnGetDueDate = async function(nRow)
+{
+    //if ( OTCStlInvoDetailDS.GetColumn(nRow, "terms_date") == null ||
+    //      OTCStlInvoDetailDS.GetColumn(nRow, "pymt_term") == null )  return false;
+    // upgrade
+    if ( com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "terms_date"))
+         || com.isEmpty(this.OTCStlInvoDetailDS.getColumn(nRow, "pymt_term")) )  return false;
+	
+    var param = "";
+        param += "functionGubun=DUEDATE";
+        param += " posting_date=" + nexacro.wrapQuote(take.nvl(com.dateFormatString(this.OTCStlInvoDetailDS.getColumn(nRow, "terms_date"))));
+        param += " pymt_term="    + nexacro.wrapQuote(take.nvl(this.OTCStlInvoDetailDS.getColumn(nRow, "pymt_term")));
+		
+	this.DueDateDS.clearData();
+    com.syncTransaction(this, "DUEDATE", "SVC_LOC::foreignDAInvoice/DUEDATE.do", "", "DueDateDS=DueDateDS", param, "");
+	
+	if(this.DueDateDS.rowcount > 0) {
+		this.OTCStlInvoDetailDS.setColumn(nRow, "due_date", this.DueDateDS.getColumn(0, "code"));
+	}
+};
+
+//110426 GYJ
+this.getAccNat = function(acc_code)
+{
+	(async () => {
+		var arrArg = await com.getCommCode(this, "accountCodeAll", acc_code, "");
+		if (arrArg == 0 || com.length(take.getTrim(arrArg)) == 0) return; // upgrade 박진석
+		return arrArg[3];
+	}).call(this);
+};
+
+// //So Mic search [Event] actiona
+// this.returnQueryValue = "";
+// com.lastDateSet = function(str)
+// {
+//     var param = "";
+//         param += "functionGubun=GET_SQL";
+//         param += " sql="+nexacro.wrapQuote(take.nvl(str));
+//         com.syncTransaction(this, "CHECK", "SVC_LOC::" + com.pageCtx + "/EstimateCharterBaseServlet", "", "", param,"");
+//         return this.returnQueryValue;
+// };
+
+this.getAPCount = async function(v_invo_no)
+{
+    // var sql = "";
+    //     sql += " SELECT COUNT(*)  ";
+    //     sql += " FROM OTC_STL_DETAIL  ";             // 업무별 테이블
+    //     sql += " WHERE STL_NO = '"+v_invo_no+"' ";          // 전표번호
+    //     sql += " AND CLCT_OPEN_CODE = 'AP'   ";      // 미지급금(AP)
+    //     sql += " AND NVL(PYMT_HOLD_FLAG, 'N') IN ('N', '0')    ";  // PYMT_FLAG 'N' 만 허용
+    // var result = com.lastDateSet(this, sql);
+    // return result;
+    var param  = "";
+		param += " invoNo=" + nexacro.wrapQuote(v_invo_no);
+	return com.lastDateSet(this, "getAPCountForSOMSetOffTransaction", param);
+};
+
+/*********************************************************
+ * 5 TRANSACTION OR CALLBACK 콜백 처리부분
+ ********************************************************/
+
+this.fnOnLoadCallback = function(svcid, errcd, errmsg)
+{
+    if (errcd == -1) {
+        com.fnMessageOpenForm(this, 'S', errmsg);
+    } else {
+        var sysToday = com.somToday(this, 'h');
+		trace("###############sysToday:::", sysToday);
+        // 9시 이전 이면 이전날짜 default
+        if(nexacro.toNumber(com.substr(sysToday, 8, 2)) >= 9) {
+            sysToday = com.somToday(this, 'd'); //com.left(sysToday, 8);
+        } else {
+            sysToday = take.getAddDays(com.left(sysToday, 8), -1);
+        }
+        this.somToday = com.left(sysToday, 8);
+        this.OTCStlHeadDS.set_enableevent(false);
+        this.OTCStlHeadDS.setColumn(0, "team_name", nexacro.getApplication().gdsUserInfo.getColumn(0,"teamName"));
+        this.OTCStlHeadDS.setColumn(0, "team_code", nexacro.getApplication().gdsUserInfo.getColumn(0,"teamCode"));
+        this.OTCStlHeadDS.setColumn(0, "posting_date", this.somToday);
+        this.OTCStlHeadDS.set_enableevent(true);
+        this.OTCStlHeadDS.setColumn(0, "curcy_code", "USD");
+        this.currencyCol = "USD";
+        //검색조건(날짜) default 설정
+		//this.SearchDS.setColumn(0, "from_date", take.getAddMonths(this.somToday, -1));
+		this.SearchDS.setColumn(0, "from_date", take.getStrData(take.getAddMonths(this.somToday, -1)).date);
+        this.SearchDS.setColumn(0, "to_date", this.somToday);
+        //120726 GYJ
+        // -> 김경미 대리 due_date default 날짜 설정 제거 요청(2012.10.11) hijang
+        //SearchDS.SetColumn(0, "from_due_date", AddMonth(somToday, -1));
+        //SearchDS.SetColumn(0, "to_due_date", somToday);
+        this.gd_TermARDS.set_visible(false);
+        this.gd_TermAPDS.set_visible(false);
+        this.ed_accntCode1.setFocus();
+    }
+};
+
+this.fnInquiryCallback = function(svcid, errcd, errmsg)
+{
+    if (errcd == -1) {
+        com.fnMessageOpenForm(this, 'S', errmsg);
+    } else {
+        this.fnSetPropBkColorAndEdit();  // 정산 DS에 대해 정산 칼럼의 Back Color  및 Edit 속성 세팅함
+    }
+};
+
+// Save하면서 동시에 Request 하도록 함. pending을 바로 하기 위함.
+this.fnSaveCallback = function(svcid, errcd, errmsg)
+{
+    (async () => {
+        if (errcd == -1) {
+            com.fnMessageOpenForm(this, 'S', errmsg);
+        } else {
+            if( await this.fnPreReceiptAccYn() ) {
+                await com.fnMessageOpenForm(this, "E", "마감일 지난 선수금 계정이 존재합니다.\n저장 완료 후, 상세화면에서 사유서를 작성하시기 바랍니다.");
+                await com.fnMessageOpenForm(this, "E", "Domain.msg.common.VAL_0017");
+                this.OTCStlSettleDetailDS.clearData();
+                this.OTCStlInvoDetailDS.clearData();
+                this.OTCStlSettleDetailSaveDS.clearData();
+            }else{
+				//----------------------------- [시작] AP 전표에 대해서, HOLD 관련 '알림메시지 창' 띄우기 (HIJANG 20200508)  --------------------------------//
+				var v_due_date;
+				var v_ap_cnt = 0;
+				for(var i=0; i < this.OTCStlInvoDetailDS.rowcount; i++)
+				{
+					//alert("clct_open_code : " + OTCStlInvoDetailDS.GetColumn(i, "clct_open_code"));
+					if( this.OTCStlInvoDetailDS.getColumn(i, "clct_open_code") == "AP" ) {     // AP 일때
+						v_due_date = com.dateFormatString(this.OTCStlInvoDetailDS.getColumn(i, "due_date"));
+						if( com.isEmpty(v_due_date) ) {
+							await com.fnMessageOpenForm(this, "E", com.replace("Domain.msg.common.VAL_0001", "input", "Due Date"));
+							//me_due_date.SetFocus();
+							return false;
+						}
+						// 1) 시간 확인용 : due_date
+						var dueDate_flag = await com.getDueDateCheck(this, com.substr(v_due_date,0,8));
+						//alert("dueDate_flag : " + dueDate_flag);
+						if( dueDate_flag != "Y" ) {
+							await com.fnMessageOpenForm(this, "E", dueDate_flag);
+							return false;
+						}
+						v_ap_cnt++;
+					}
+				}
+				//alert("v_ap_cnt : " + v_ap_cnt);
+				//alert("stl_no : " + OTCStlHeadDS.GetColumn(0,"stl_no"));
+				// 2) 송금건/비송금건 메시지 처리  : gl_date   -> ap 존재할때만 체크
+				if( v_ap_cnt > 0 )
+				{
+					var postingDate = com.dateFormatString(this.me_postingDate.value);
+					var year = com.substr(postingDate, 0, 4);
+					var month = com.substr(postingDate, 4, 2);
+					var day = com.substr(postingDate, 6, 2);
+					//alert("year : " + year);
+					//alert("month : " + month);
+					//alert("day : " + day);
+					var param = "functionGubun='AP_COUNT_INFO_SEARCH'";
+						param += " aprvKey=" + nexacro.wrapQuote("OOTC06");        // 해당 전표 service Id
+						param += " srcTrxNo=" + nexacro.wrapQuote(take.nvl(this.OTCStlHeadDS.getColumn(0,"stl_no")));    // 전표번호
+						param += " gubun=" + nexacro.wrapQuote("SOMO");
+					this.ApCountInfoDS.clearData();
+					com.syncTransaction(this, "AP_COUNT_INFO_SEARCH", "SVC_LOC::commonService/AP_COUNT_INFO_SEARCH.do", "", "ApCountInfoDS=ApCountInfoDS", param, "");
+					//alert("tot_ap_cnt : " + ApCountInfoDS.GetColumn(0, "tot_ap_cnt"));
+					//alert("pymt_hold_cnt : " + ApCountInfoDS.GetColumn(0, "pymt_hold_cnt"));
+					//alert("non_pymt_hold_cnt : " + ApCountInfoDS.GetColumn(0, "non_pymt_hold_cnt"));
+					var tcnt; // 총건수
+					var cnt; // 송금
+					var ncnt; // 송금보류
+						tcnt =  this.ApCountInfoDS.getColumn(0, "tot_ap_cnt");
+						cnt  =  this.ApCountInfoDS.getColumn(0, "non_pymt_hold_cnt");
+						ncnt =  this.ApCountInfoDS.getColumn(0, "pymt_hold_cnt");
+					var param = "msgType=" + nexacro.wrapQuote("C");
+						//param += " message=" + nexacro.wrapQuote("Domain.msg.common.VAL_0178");
+                        param+= " message=" + com.replace("Domain.msg.common.VAL_0178", {year: year, month: month, day: day, tcnt: tcnt, cnt: cnt, ncnt: ncnt}).replaceAll(String.fromCharCode(10),"▼");
+                    var result = await com.Dialog(this, 'biz::common/PaperLessMessageForm.xfdl', param, 660, 330);
+					//var result = com.Dialog(pThis, 'biz::common/PaperLessMessageForm.xfdl', com.replace(com.replace(com.replace(com.replace(com.replace(com.replace(param, "@year", year), "@month", month), "@day", day), "@tcnt", tcnt), "@cnt", cnt), "@ncnt", ncnt), 660, 330);
+					//var result = await com.Dialog(this, 'biz::common/PaperLessMessageForm.xfdl', com.replace(param, {year: "year", month: "month", day: "day", tcnt: "tcnt", cnt: "cnt", ncnt: "ncnt"}), 660, 330);
+					//com.fnMessageOpenForm(this, "C", "");
+					//alert("result : " + result);
+					if (result == 0 || com.length(take.getTrim(result)) == 0) return; // upgrade
+					if (result == "CANCEL") {
+						return false;
+					}
+				}
+				//----------------------------- [종료] AP 전표에 대해서, HOLD 관련 '알림메시지 창' 띄우기 (HIJANG 20200508)  --------------------------------//
+				this.fnRequestTransaction();    // 저장시 바로 결재실행 못하도록 처리함. ( HIJANG - 20110526 )
+            }
+        }
+    }).call(this);
+};
+
+this.fnRequestCallback = function(svcid, errcd, errmsg)
+{
+	(async () => {
+		if (errcd == -1) {
+			com.fnMessageOpenForm(this, 'S', errmsg);
+		} else {
+			//if(CCDAprvReqMDS.GetColumn(0, 'aprv_req_key') != null && CCDAprvReqMDS.GetColumn(0, 'aprv_req_key') != "")  {
+			if( !com.isEmpty(this.CCDAprvReqMDS.getColumn(0, "aprv_req_key"))) {    // upgrade
+				this.OZToPDF();
+			} else {
+				await com.fnMessageOpenForm(this, 'S', "결재 정보 가져오는 중 에러가 발생했습니다. ~r~n Setoff List 화면에서 재결재 하세요");
+			}
+			this.OTCStlSettleDetailDS.clearData();
+			this.OTCStlInvoDetailDS.clearData();
+			this.OTCStlSettleDetailSaveDS.clearData();
+		}
+	}).call(this);
+};
+
+this.fnGetExcRateCallback = function(svcid, errcd, errmsg)
+{
+    if (errcd == -1) {
+        com.fnMessageOpenForm(this, "E", errmsg);
+    } else{
+        this.OTCStlHeadDS.setColumn(0, "loc_exc_rate", new nexacro.Decimal(take.nvl(this.TempRateDS.getColumn(0, "loc_rate"))));
+        this.OTCStlHeadDS.setColumn(0, "usd_exc_rate", new nexacro.Decimal(take.nvl(this.TempRateDS.getColumn(0, "usd_rate"))));
+        this.OTCStlHeadDS.setColumn(0, "usd_loc_rate", new nexacro.Decimal(take.nvl(this.TempRateDS.getColumn(0, "loc_usd_rate"))));
+    }
+    this.locExcRate = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "loc_exc_rate")));
+    this.usdLocExcRate = new nexacro.Decimal(take.nvl(this.OTCStlHeadDS.getColumn(0, "usd_loc_rate")));
+};
+
+this.ed_accntCode1_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode1, this.st_accntName1, null, 'Y');
+	}).call(this);
+};
+
+this.ed_accntCode2_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode2, this.st_accntName2, null, 'Y');
+	}).call(this);
+};
+
+this.ed_accntCode3_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode3, this.st_accntName3, null, 'Y');
+	}).call(this);
+};
+
+this.ed_accntCode4_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "settleAccountCode", this.ed_accntCode4, this.st_accntName4, null, 'Y');
+	}).call(this);
+};
+
+this.ed_teamCode1_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode1, this.st_teamName1, null, "Y");
+	}).call(this);
+};
+
+this.ed_teamCode2_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode2, this.st_teamName2, null, "Y");
+	}).call(this);
+};
+
+this.ed_teamCode3_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode3, this.st_teamName3, null, "Y");
+	}).call(this);
+};
+
+this.ed_teamCode4_onchanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo)
+{
+	(async () => {
+		await com.commCodeInquiry(this, "activeTeamCode", this.ed_teamCode4, this.st_teamName4, null, "Y");
+	}).call(this);
+};
+]]></Script>
+  </Form>
+</FDL>
