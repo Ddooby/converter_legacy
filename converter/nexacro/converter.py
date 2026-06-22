@@ -20,6 +20,12 @@ _ROUND_PAT_RE = re.compile(r'nexacro\.round\(')
 _GETCOL_RE = re.compile(r'\.getColumn\(')
 _OP_TO_METHOD = {'+': 'add', '-': 'sub', '*': 'mul', '/': 'div'}
 
+# 금액 관련 변수명 키워드 (부분 문자열 매칭) — 필요 시 추가
+_FINANCIAL_KW_RE = re.compile(
+    r'amt|amount|rate|vat|cost|fee',
+    re.IGNORECASE,
+)
+
 
 class XfdlConverter:
     def __init__(self, patterns_file: Path = PATTERNS_FILE):
@@ -332,12 +338,15 @@ class XfdlConverter:
                 continue
             func_bodies[fname] = content[op + 1: cp]
 
-        # 2단계: com.* 직접 호출 → async 대상
+        # 2단계: com.* / so.* / sa.* / ins.* 직접 호출 → async 대상
         async_funcs: set[str] = set()
+        ext_js_pat = re.compile(r'\b((?:so|sa|ins)\.\w+)\(')
         for fname, body in func_bodies.items():
             needs = any(f in body for f in await_com_funcs)
             if not needs and com_prefix_await:
                 needs = any(c not in excl for c in re.findall(r'\b(com\.\w+)\(', body))
+            if not needs:
+                needs = bool(ext_js_pat.search(body))
             if needs:
                 async_funcs.add(fname)
 
@@ -425,6 +434,11 @@ class XfdlConverter:
             if sm and sm.group(1) in async_script_funcs:
                 call = f"this.{sm.group(1)}("
                 line = line.replace(call, "await " + call, 1)
+        # 외부 JS 함수 호출 (so.* / sa.* / ins.*)
+        em = re.search(r'\b((?:so|sa|ins)\.\w+)\(', line)
+        if em:
+            ext_call = em.group(1) + "("
+            line = line.replace(ext_call, "await " + ext_call, 1)
         return line
 
     # ──────────────────────────────────────────
@@ -468,26 +482,58 @@ class XfdlConverter:
         stripped = line.strip()
         if stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('*'):
             return line
-        m = re.match(r'^((?:var\s+)?\w+\s*=\s*)(.+?)(\s*;?\s*)$', stripped)
+        # var_kw=("var "|""), lhs_var=변수명, eq=(" = "), rhs=식, suffix=(";")
+        m = re.match(r'^(var\s+)?(\w+)(\s*=\s*)(.+?)(\s*;?\s*)$', stripped)
         if not m:
             return line
-        rhs = m.group(2)
+        var_kw, lhs_var, eq_part, rhs, suffix = m.group(1) or '', m.group(2), m.group(3), m.group(4), m.group(5)
+        rhs_s = rhs.strip()
+
+        if 'nexacro.Decimal' in rhs_s:
+            return line
+
+        indent = line[: len(line) - len(line.lstrip())]
+        is_fin = self._is_financial_var(lhs_var)
+
+        # Case 1: 금액 변수 숫자 리터럴 초기화 (var X = 0)
+        if is_fin and re.match(r'^\d+(\.\d+)?$', rhs_s):
+            return f'{indent}{var_kw}{lhs_var}{eq_part}new nexacro.Decimal({rhs_s}){suffix}'
+
+        # Case 2: 금액 변수 단일 getColumn 대입 (X = DS.getColumn(...))
+        if is_fin and '.getColumn(' in rhs_s and not _ARITH_OP_RE.search(rhs_s) and 'take.nvl(' not in rhs_s:
+            return f'{indent}{var_kw}{lhs_var}{eq_part}new nexacro.Decimal(take.nvl({rhs_s}, 0)){suffix}'
+
+        # Case 3: 산술 대입 (getColumn 2개↑ 또는 금액 변수)
+        has_getcol2   = len(_GETCOL_RE.findall(rhs_s)) >= 2
+        has_financial = self._is_financial_arithmetic(lhs_var, rhs_s)
         if (
-            len(_GETCOL_RE.findall(rhs)) < 2
-            or not _ARITH_OP_RE.search(rhs)
-            or 'nexacro.Decimal' in rhs
-            or 'nexacro.round(' in rhs
-            or re.search(r'[<>!]|==|&&|\|\|', rhs)
+            not (has_getcol2 or has_financial)
+            or not _ARITH_OP_RE.search(rhs_s)
+            or 'nexacro.round(' in rhs_s
+            or re.search(r'[<>!]|==|&&|\|\|', rhs_s)
         ):
             return line
         try:
-            converted = self._arith_to_decimal(rhs)
-            if converted != rhs:
-                indent = line[: len(line) - len(line.lstrip())]
-                return f'{indent}{m.group(1)}{converted}{m.group(3)}'
+            converted = self._arith_to_decimal(rhs_s)
+            if converted != rhs_s:
+                return f'{indent}{var_kw}{lhs_var}{eq_part}{converted}{suffix}'
         except Exception:
             pass
         return line
+
+    def _is_financial_var(self, name: str) -> bool:
+        """변수명에 금액 관련 키워드가 포함되어 있으면 True"""
+        return bool(_FINANCIAL_KW_RE.search(name))
+
+    def _is_financial_arithmetic(self, lhs_var: str, rhs: str) -> bool:
+        """LHS 또는 RHS 피연산자 중 금액 관련 변수명이 있으면 True"""
+        if self._is_financial_var(lhs_var):
+            return True
+        try:
+            tokens = self._tokenize_arith(rhs)
+            return any(self._is_financial_var(t['v']) for t in tokens if t['t'] == 'atom')
+        except Exception:
+            return False
 
     def _extract_first_func_arg(self, content: str, start: int) -> tuple[str, int]:
         """함수 호출 '(' 직후 start 위치에서 첫 번째 인자와 종료 위치 반환"""

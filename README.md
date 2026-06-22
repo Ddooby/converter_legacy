@@ -367,7 +367,7 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 | 7 | Decimal 산술 변환 (`nexacro.round` 내 산술식 → Decimal 체인) |
 | 8 | 텍스트 치환 (com.isEmpty / pThis → this 등) |
 | 9 | 외부 JS 참조 주입 (`sa.*` / `so.*` / `ins.*` 감지 → `take.loadJs`) |
-| 10 | async/await 변환 (`com.*` 호출 함수 전체 래핑) |
+| 10 | async/await 변환 (`com.*` / `so.*` / `sa.*` / `ins.*` 호출 함수 전체 래핑) |
 
 ### 주요 변환 규칙 (Script 영역)
 
@@ -400,20 +400,44 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 
 #### Decimal 산술 변환
 
-`nexacro.round()` 내 산술식과 `getColumn` 2개 이상 포함 대입문을 `nexacro.Decimal` 체인으로 변환.
-부동소수점 오차 방지 목적.
+부동소수점 오차 방지 목적으로 산술 연산을 `nexacro.Decimal` 체인으로 변환.
+변환 트리거는 아래 두 가지이며 재귀 하강 파서로 연산자 우선순위를 정확히 보존한다.
+
+**트리거 1 — `nexacro.round()` 내 산술식**
 
 | AS-IS | TO-BE |
 |-------|-------|
 | `nexacro.round((a - diff) * b + c)` | `nexacro.round(new nexacro.Decimal(take.nvl(a, 0)).sub(diff).mul(take.nvl(b, 0)).add(take.nvl(c, 0)))` |
 | `nexacro.round(val - getCol1 - getCol2)` | `nexacro.round(new nexacro.Decimal(val).sub(take.nvl(getCol1, 0)).sub(take.nvl(getCol2, 0)))` |
 | `nexacro.round(bal / (getCol1 - getCol2))` | `nexacro.round(new nexacro.Decimal(bal).div(new nexacro.Decimal(take.nvl(getCol1, 0)).sub(take.nvl(getCol2, 0))))` |
-| `diff = getColumn1 + getColumn2` (getColumn 2개↑) | `diff = new nexacro.Decimal(take.nvl(getColumn1, 0)).add(take.nvl(getColumn2, 0))` |
+
+**트리거 2 — 금액 관련 변수 산술 대입문**
+
+LHS 변수명 또는 RHS 피연산자 변수명에 아래 금액 키워드가 포함된 산술 대입문을 변환.
+
+| 금액 키워드 | 예시 변수명 |
+|------------|------------|
+| `amt` / `amount` | `bal_amt`, `pl_amt`, `supply_amount` |
+| `rate` | `exc_rate`, `vat_rate` |
+| `vat` | `vat_amt`, `input_vat` |
+| `cost` | `nav_cost`, `total_cost` |
+| `fee` | `service_fee`, `base_fee` |
+
+> 키워드 추가가 필요하면 `converter.py` 상단 `_FINANCIAL_KW_RE` 패턴에 `|키워드` 추가.
+
+| AS-IS | TO-BE |
+|-------|-------|
+| `bal_amt = cb_bal_amt - al_bal_amt;` | `bal_amt = new nexacro.Decimal(cb_bal_amt).sub(al_bal_amt);` |
+| `nav_cost = cb_nav_cost - al_nav_cost;` | `nav_cost = new nexacro.Decimal(cb_nav_cost).sub(al_nav_cost);` |
+| `vat_amt = supply_amt * vat_rate;` | `vat_amt = new nexacro.Decimal(supply_amt).mul(vat_rate);` |
+
+**공통 변환 규칙**
 
 - `getColumn(...)` atom → `take.nvl(..., 0)` 자동 래핑
-- 일반 변수(`diff`, `balance` 등) → 래핑 없이 그대로 전달
+- 일반 변수 (`diff`, `balance` 등) → 래핑 없이 그대로 전달 (이미 Decimal이거나 number 모두 수용)
 - 우변에 복잡한 식이 오는 경우 재귀적으로 Decimal 체인 생성
 - 이미 `nexacro.Decimal` 이 포함된 식은 변환 스킵
+- 비교/논리 연산자 포함 식 (`==`, `>`, `&&` 등) 스킵
 - 파싱 실패 시 원본 유지 (예외 무시)
 
 #### 외부 JS 참조 주입
@@ -429,14 +453,15 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 
 #### async/await 변환
 
-`com.*` 직접 호출이 있는 함수 → `async` 대상으로 표시.
+`com.*` / `so.*` / `sa.*` / `ins.*` 직접 호출이 있는 함수 → `async` 대상으로 표시.
 해당 함수를 호출하는 함수도 전파(propagation)되어 `async` 처리.
 
 | 패턴 | 변환 내용 |
 |------|-----------|
-| `com.*` 직접 호출 함수 | `(async () => { ... }).call(this)` 로 감싸기 |
+| `com.*` / `so.*` / `sa.*` / `ins.*` 직접 호출 함수 | `(async () => { ... }).call(this)` 로 감싸기 |
 | 다른 async 함수에서 호출되는 함수 | `return (async () => { ... }).call(this)` |
 | `com.*` 함수 호출 라인 | `await com.*()` 자동 추가 |
+| `so.*` / `sa.*` / `ins.*` 함수 호출 라인 | `await so.*()` 등 자동 추가 |
 | `this.fnXxx()` (async 전파된 함수) | `await this.fnXxx()` 자동 추가 |
 
 ### 주요 변환 규칙 (Layout Cell 영역)
