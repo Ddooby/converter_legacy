@@ -354,6 +354,32 @@ python -m converter.nexacro.nexacroMain --dir path/to/input_dir path/to/output_d
 
 > 결과 파일은 기본적으로 `converter/nexacro/to-be/` 폴더에 생성됩니다.
 
+### 환경변수 (`.env` 설정)
+
+우선순위: `NEXACRO_BASE_DIR` > `NEXACRO_FILES` > `NEXACRO_INPUT_DIR` / `NEXACRO_OUTPUT_DIR`
+
+| 변수 | 설명 |
+|------|------|
+| `NEXACRO_BASE_DIR` | 폴더 경로 → 하위 `*.xfdl` 전체 재귀 **in-place** 변환 |
+| `NEXACRO_FILES` | **폴더 경로** → 하위 `*.xfdl` 전체 재귀 in-place 변환 |
+| `NEXACRO_FILES` | **쉼표 구분 파일 경로** → 개별 파일 in-place 변환 |
+| `NEXACRO_INPUT_DIR` | as-is 입력 폴더 (기본값: `converter/nexacro/as-is`) |
+| `NEXACRO_OUTPUT_DIR` | to-be 출력 폴더 (기본값: `converter/nexacro/to-be`) |
+
+**외부 프로젝트 폴더 변환 예시 (`.env`)**
+
+```dotenv
+# 특정 폴더 하위 *.xfdl 전체 in-place 변환
+NEXACRO_FILES=C:\Projects\Panocean\nexacro\biz\salesOpportunity\report
+
+# 개별 파일만 변환
+# NEXACRO_FILES=converter/nexacro/as-is/FooForm.xfdl,converter/nexacro/as-is/BarForm.xfdl
+```
+
+```bash
+python -m converter.nexacro.nexacroMain
+```
+
 ### 변환 처리 순서 (converter.py `_convert_script`)
 
 | 순서 | 처리 내용 |

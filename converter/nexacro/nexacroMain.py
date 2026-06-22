@@ -5,6 +5,12 @@ Nexacro XFDL 변환 CLI 진입점
   python -m converter.nexacro.nexacroMain                          # .env 기준 실행
   python -m converter.nexacro.nexacroMain <input.xfdl> [output.xfdl]
   python -m converter.nexacro.nexacroMain --dir <input_dir> [output_dir]
+
+.env 환경변수 (우선순위 순):
+  NEXACRO_BASE_DIR  - 폴더 재귀 in-place 변환 (하위 *.xfdl 전체)
+  NEXACRO_FILES     - 폴더 경로 → 해당 폴더 *.xfdl in-place 변환 (재귀)
+                    - 파일 경로(쉼표 구분) → 개별 파일 in-place 변환
+  NEXACRO_INPUT_DIR / NEXACRO_OUTPUT_DIR  - as-is → to-be 폴더 변환 (기본값)
 """
 
 import os
@@ -79,15 +85,26 @@ def main() -> None:
         for src in xfdl_files:
             converter.convert_file(src, src)
     elif files_env:
-        # 파일 목록 모드: 각 파일을 원본 위치에 덮어씀 (in-place)
-        paths = [p.strip() for p in files_env.split(",") if p.strip()]
+        files_path = Path(files_env)
         converter = XfdlConverter()
-        for raw in paths:
-            src = _resolve(raw)
-            if not src.exists():
-                logger.warning("파일 없음, 건너뜀: %s", src)
-                continue
-            converter.convert_file(src, src)
+        if files_path.is_dir():
+            # 폴더 경로 모드: 해당 폴더 하위 *.xfdl 전체 in-place 변환
+            xfdl_files = sorted(files_path.rglob("*.xfdl"))
+            if not xfdl_files:
+                logger.warning("변환 대상 xfdl 파일이 없습니다: %s", files_path)
+                return
+            logger.info("NEXACRO_FILES 폴더 변환 시작 (%d개): %s", len(xfdl_files), files_path)
+            for src in xfdl_files:
+                converter.convert_file(src, src)
+        else:
+            # 파일 목록 모드: 쉼표 구분 파일 경로, 원본 위치에 덮어씀 (in-place)
+            paths = [p.strip() for p in files_env.split(",") if p.strip()]
+            for raw in paths:
+                src = _resolve(raw)
+                if not src.exists():
+                    logger.warning("파일 없음, 건너뜀: %s", src)
+                    continue
+                converter.convert_file(src, src)
     else:
         # 폴더 일괄 변환 모드
         input_dir = _resolve(os.getenv("NEXACRO_INPUT_DIR", "converter/nexacro/as-is"))
