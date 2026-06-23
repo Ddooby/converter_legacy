@@ -150,6 +150,13 @@
       "to": "== Dataset.ROWTYPE_DELETE"
     },
     {
+      "id": "av_siv_groups_to_app",
+      "description": "전역 변수 av_sIvGroups → nexacro.getApplication().av_sIvGroups",
+      "is_regex": true,
+      "from_pattern": "(?<!\\.)\\bav_sIvGroups\\b",
+      "to": "nexacro.getApplication().av_sIvGroups"
+    },
+    {
       "id": "close_null_to_fnclose",
       "description": "직접 close 호출 → com.fnClose 사용",
       "from": "this.close(null)",
