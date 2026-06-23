@@ -156,6 +156,14 @@
       "to": "com.fnClose(this)"
     },
     {
+      "id": "fnclose_add_rtnval",
+      "description": "fnClose 함수 정의에 rtnVal 파라미터 추가",
+      "is_regex": true,
+      "flags": "DOTALL",
+      "from_pattern": "this\\.fnClose\\s*=\\s*function\\s*\\(\\s*\\)\\s*\\{\\s*com\\.fnClose\\(this\\)\\s*;\\s*\\}",
+      "to": "this.fnClose = function(rtnVal){\n\tcom.fnClose(this, rtnVal);\n}"
+    },
+    {
       "id": "gds_user_info",
       "description": "구 사용자 정보 Dataset 명 → 신규 Dataset 명",
       "from": "gdsCCDUserMDS",
