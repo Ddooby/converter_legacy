@@ -20,11 +20,8 @@ _ROUND_PAT_RE = re.compile(r'nexacro\.round\(')
 _GETCOL_RE = re.compile(r'\.getColumn\(')
 _OP_TO_METHOD = {'+': 'add', '-': 'sub', '*': 'mul', '/': 'div'}
 
-# 금액 관련 변수명 키워드 (부분 문자열 매칭) — 필요 시 추가
-_FINANCIAL_KW_RE = re.compile(
-    r'amt|amount|rate|vat|cost|fee',
-    re.IGNORECASE,
-)
+_FINANCIAL_KW = {'amt', 'amount', 'rate', 'vat', 'cost', 'fee'}
+_CAMEL_SPLIT_RE = re.compile(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\d|\b)|[A-Z]|\d+')
 
 
 class XfdlConverter:
@@ -44,20 +41,39 @@ class XfdlConverter:
         logger.info("변환 완료: %s", output_path)
 
     def convert(self, content: str, form_name: str = "") -> str:
-        idx_start = content.find(SCRIPT_START)
-        idx_end = content.find(SCRIPT_END)
-
-        if idx_start == -1 or idx_end == -1:
+        if SCRIPT_START not in content:
             return self._convert_layout(content)
 
-        layout = content[:idx_start]
-        script = content[idx_start + len(SCRIPT_START): idx_end]
-        tail = content[idx_end + len(SCRIPT_END):]
+        script_count = content.count(SCRIPT_START)
+        if script_count > 1:
+            logger.warning("Script 블록 %d개 감지 — 모두 변환합니다: %s", script_count, form_name)
 
-        layout = self._convert_layout(layout)
-        script = self._convert_script(script, form_name=form_name)
+        result = []
+        remaining = content
+        first = True
 
-        return layout + SCRIPT_START + script + SCRIPT_END + tail
+        while SCRIPT_START in remaining:
+            idx_start = remaining.find(SCRIPT_START)
+            idx_end = remaining.find(SCRIPT_END, idx_start)
+
+            if idx_end == -1:
+                logger.warning("Script 닫힘 태그 없음 — 나머지는 layout으로 처리: %s", form_name)
+                result.append(self._convert_layout(remaining))
+                remaining = ""
+                break
+
+            layout = remaining[:idx_start]
+            script = remaining[idx_start + len(SCRIPT_START): idx_end]
+            remaining = remaining[idx_end + len(SCRIPT_END):]
+
+            result.append(self._convert_layout(layout))
+            result.append(SCRIPT_START)
+            result.append(self._convert_script(script, form_name=form_name if first else ""))
+            result.append(SCRIPT_END)
+            first = False
+
+        result.append(self._convert_layout(remaining))
+        return "".join(result)
 
     # ──────────────────────────────────────────
     # Layout section
@@ -137,7 +153,7 @@ class XfdlConverter:
                         if 'cssclass=' in line:
                             css_val = self._extract_attr(line, "cssclass")
                             if css_val:
-                                line = self._set_attr(line, "cssclass", f'{css_val}+&quot;,&quot;+{color_mapped}')
+                                line = self._set_attr(line, "cssclass", f'{css_val}+&quot;,&quot;+&quot;{color_mapped}&quot;')
                         else:
                             line = line.replace("/>", f' cssclass="{color_mapped}"/>')
 
@@ -403,42 +419,52 @@ class XfdlConverter:
                                com_prefix_await: bool = False, com_exclusions: set = None,
                                async_script_funcs: set = None) -> str:
         lines = content.split("\n")
-        return "\n".join(
-            self._add_await_to_line(ln, await_funcs, com_prefix_await, com_exclusions, async_script_funcs)
-            for ln in lines
-        )
+        result = []
+        in_block_comment = False
+        for ln in lines:
+            stripped = ln.lstrip()
+            if in_block_comment:
+                result.append(ln)
+                if '*/' in ln:
+                    in_block_comment = False
+                continue
+            if stripped.startswith('/*'):
+                if '*/' not in ln:
+                    in_block_comment = True
+                result.append(ln)
+                continue
+            result.append(self._add_await_to_line(ln, await_funcs, com_prefix_await, com_exclusions, async_script_funcs))
+        return "\n".join(result)
 
     def _add_await_to_line(self, line: str, await_funcs: list,
                             com_prefix_await: bool = False, com_exclusions: set = None,
                             async_script_funcs: set = None) -> str:
         stripped = line.lstrip()
-        if stripped.startswith("//") or stripped.startswith("/*") or "await " in line:
+        if stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
             return line
-        # 명시적 com.* 함수
+        # 명시적 com.* 함수 — 한 줄에 여러 호출 모두 처리
         for func in await_funcs:
-            if func in line:
-                line = line.replace(func, "await " + func, 1)
-                return line
-        # 광범위 com.* 프리픽스
+            if func in line and f'await {func}' not in line:
+                line = line.replace(func, "await " + func)
+        # 광범위 com.* 프리픽스 — 한 줄 내 모든 매치 처리
         if com_prefix_await:
             excl = com_exclusions or set()
-            cm = re.search(r'\b(com\.\w+)\(', line)
-            if cm:
+            for cm in re.finditer(r'\b(com\.\w+)\(', line):
                 full_call = cm.group(1)
-                if full_call not in excl and full_call not in await_funcs:
+                if full_call not in excl and full_call not in await_funcs and f'await {full_call}' not in line:
                     line = line.replace(full_call + "(", "await " + full_call + "(", 1)
-                    return line
-        # Script 내 async 함수 호출 (this.fnXxx())
+        # Script 내 async 함수 호출 — 한 줄 내 모든 매치 처리
         if async_script_funcs:
-            sm = re.search(r'\bthis\.(\w+)\s*\(', line)
-            if sm and sm.group(1) in async_script_funcs:
-                call = f"this.{sm.group(1)}("
-                line = line.replace(call, "await " + call, 1)
-        # 외부 JS 함수 호출 (so.* / sa.* / ins.*)
-        em = re.search(r'\b((?:so|sa|ins)\.\w+)\(', line)
-        if em:
+            for sm in re.finditer(r'\bthis\.(\w+)\s*\(', line):
+                if sm.group(1) in async_script_funcs:
+                    call = f"this.{sm.group(1)}("
+                    if f'await {call}' not in line:
+                        line = line.replace(call, "await " + call, 1)
+        # 외부 JS 함수 호출 — 한 줄 내 모든 매치 처리
+        for em in re.finditer(r'\b((?:so|sa|ins)\.\w+)\(', line):
             ext_call = em.group(1) + "("
-            line = line.replace(ext_call, "await " + ext_call, 1)
+            if f'await {ext_call}' not in line:
+                line = line.replace(ext_call, "await " + ext_call, 1)
         return line
 
     # ──────────────────────────────────────────
@@ -522,8 +548,11 @@ class XfdlConverter:
         return line
 
     def _is_financial_var(self, name: str) -> bool:
-        """변수명에 금액 관련 키워드가 포함되어 있으면 True"""
-        return bool(_FINANCIAL_KW_RE.search(name))
+        """변수명의 카멜케이스 토큰 중 금액 키워드가 있으면 True (부분문자열 오탐 방지)"""
+        tokens = []
+        for part in name.split('_'):
+            tokens.extend(_CAMEL_SPLIT_RE.findall(part))
+        return any(t.lower() in _FINANCIAL_KW for t in tokens) or name.lower() in _FINANCIAL_KW
 
     def _is_financial_arithmetic(self, lhs_var: str, rhs: str) -> bool:
         """LHS 또는 RHS 피연산자 중 금액 관련 변수명이 있으면 True"""
@@ -613,6 +642,12 @@ class XfdlConverter:
         if pos >= len(toks):
             raise ValueError("Unexpected end of tokens")
         tok = toks[pos]
+        # 단항 마이너스 처리 (-expr)
+        if tok['t'] == 'op' and tok['v'] == '-':
+            node, pos = self._parse_primary(toks, pos + 1)
+            if node['t'] == 'atom':
+                return {'t': 'atom', 'v': f'-{node["v"]}'}, pos
+            return {'t': 'bin', 'op': '-', 'l': {'t': 'atom', 'v': '0'}, 'r': node}, pos
         if tok['t'] == 'lp':
             node, pos = self._parse_add(toks, pos + 1)
             if pos < len(toks) and toks[pos]['t'] == 'rp':
@@ -644,15 +679,67 @@ class XfdlConverter:
     # ──────────────────────────────────────────
 
     def _find_matching_brace(self, content: str, open_pos: int) -> int:
-        """open_pos 위치의 { 에 매칭되는 } 위치 반환 (문자열/주석 미인식, 단순 카운팅)"""
+        """open_pos 위치의 { 에 매칭되는 } 위치 반환 (문자열/주석 내부 중괄호 무시)"""
         depth = 0
-        for i in range(open_pos, len(content)):
-            if content[i] == "{":
+        i = open_pos
+        n = len(content)
+        in_single = False
+        in_double = False
+        in_block = False
+
+        while i < n:
+            c = content[i]
+
+            if in_block:
+                if c == '*' and i + 1 < n and content[i + 1] == '/':
+                    in_block = False
+                    i += 2
+                else:
+                    i += 1
+                continue
+
+            if in_single:
+                if c == '\\':
+                    i += 2
+                elif c == "'":
+                    in_single = False
+                    i += 1
+                else:
+                    i += 1
+                continue
+
+            if in_double:
+                if c == '\\':
+                    i += 2
+                elif c == '"':
+                    in_double = False
+                    i += 1
+                else:
+                    i += 1
+                continue
+
+            if c == '/' and i + 1 < n:
+                if content[i + 1] == '/':
+                    eol = content.find('\n', i)
+                    i = eol + 1 if eol != -1 else n
+                    continue
+                if content[i + 1] == '*':
+                    in_block = True
+                    i += 2
+                    continue
+
+            if c == "'":
+                in_single = True
+            elif c == '"':
+                in_double = True
+            elif c == '{':
                 depth += 1
-            elif content[i] == "}":
+            elif c == '}':
                 depth -= 1
                 if depth == 0:
                     return i
+            i += 1
+
         return -1
 
     # ──────────────────────────────────────────
@@ -669,4 +756,7 @@ class XfdlConverter:
     def _set_attr(self, line: str, attr: str, value: str) -> str:
         if f'{attr}=' in line:
             return re.sub(rf'{attr}="[^"]*"', f'{attr}="{value}"', line)
-        return line.replace("/>", f' {attr}="{value}"/>')
+        if '/>' in line:
+            return line.replace("/>", f' {attr}="{value}"/>', 1)
+        # 비자기닫힘 태그(<Cell ...>) 처리
+        return re.sub(r'(?<!/)(>)', f' {attr}="{value}">', line, count=1)

@@ -47,8 +47,15 @@ def convert_dir(input_dir: Path, output_dir: Path) -> None:
     if not xfdl_files:
         logger.warning("변환 대상 xfdl 파일이 없습니다: %s", input_dir)
         return
+    ok, fail = 0, 0
     for f in xfdl_files:
-        converter.convert_file(f, output_dir / f.name)
+        try:
+            converter.convert_file(f, output_dir / f.name)
+            ok += 1
+        except Exception as e:
+            logger.error("[FAIL] %s — %s", f.name, e)
+            fail += 1
+    logger.info("완료: 성공 %d / 실패 %d", ok, fail)
 
 
 def main() -> None:
@@ -82,8 +89,15 @@ def main() -> None:
             return
         converter = XfdlConverter()
         logger.info("BASE_DIR 변환 시작 (%d개): %s", len(xfdl_files), base_dir)
+        ok, fail = 0, 0
         for src in xfdl_files:
-            converter.convert_file(src, src)
+            try:
+                converter.convert_file(src, src)
+                ok += 1
+            except Exception as e:
+                logger.error("[FAIL] %s — %s", src.name, e)
+                fail += 1
+        logger.info("완료: 성공 %d / 실패 %d", ok, fail)
     elif files_env:
         files_path = Path(files_env)
         converter = XfdlConverter()
@@ -94,17 +108,31 @@ def main() -> None:
                 logger.warning("변환 대상 xfdl 파일이 없습니다: %s", files_path)
                 return
             logger.info("NEXACRO_FILES 폴더 변환 시작 (%d개): %s", len(xfdl_files), files_path)
+            ok, fail = 0, 0
             for src in xfdl_files:
-                converter.convert_file(src, src)
+                try:
+                    converter.convert_file(src, src)
+                    ok += 1
+                except Exception as e:
+                    logger.error("[FAIL] %s — %s", src.name, e)
+                    fail += 1
+            logger.info("완료: 성공 %d / 실패 %d", ok, fail)
         else:
             # 파일 목록 모드: 쉼표 구분 파일 경로, 원본 위치에 덮어씀 (in-place)
             paths = [p.strip() for p in files_env.split(",") if p.strip()]
+            ok, fail = 0, 0
             for raw in paths:
                 src = _resolve(raw)
                 if not src.exists():
                     logger.warning("파일 없음, 건너뜀: %s", src)
                     continue
-                converter.convert_file(src, src)
+                try:
+                    converter.convert_file(src, src)
+                    ok += 1
+                except Exception as e:
+                    logger.error("[FAIL] %s — %s", src.name, e)
+                    fail += 1
+            logger.info("완료: 성공 %d / 실패 %d", ok, fail)
     else:
         # 폴더 일괄 변환 모드
         input_dir = _resolve(os.getenv("NEXACRO_INPUT_DIR", "converter/nexacro/as-is"))

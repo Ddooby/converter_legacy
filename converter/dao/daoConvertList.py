@@ -109,7 +109,7 @@ def main():
     print("=" * 120)
 
     # ── 결과를 텍스트 파일로 저장 ──
-    output_path = Path("dao_compare_result.txt")
+    output_path = Path("dao/daoConvertList_result.txt")
     with open(output_path, "w", encoding="utf-8") as out:
         out.write(f"Business   : {PATH_SOM}\n")
         out.write(f"Common     : {PATH_COMMON}\n")
