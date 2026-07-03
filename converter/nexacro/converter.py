@@ -251,18 +251,34 @@ class XfdlConverter:
         parts = name.split("_")
         return parts[0] + "".join(p.capitalize() for p in parts[1:])
 
+    # snake_case → camelCase 일반 규칙이 맞지 않는 컬럼명 예외 매핑
+    _COL_NAME_OVERRIDES = {
+        "user_name": "userNm",
+    }
+
+    def _col_to_camel(self, col: str) -> str:
+        """컬럼명 변환: 예외 매핑 우선, 없으면 snake_case → camelCase"""
+        return self._COL_NAME_OVERRIDES.get(col, self._snake_to_camel(col))
+
     def _convert_dataset_get_column(self, content: str) -> str:
         """getColumn 컬럼명 snake_case → camelCase 변환 (단/쌍따옴표 모두 처리, 쌍따옴표로 통일)"""
-        # gdsCCDUserMDS → gdsUserInfo 이름 변환 (단일/두 파라미터 모두)
+        # gdsCCDUserMDS → gdsUserInfo 이름 변환 (row index 있으면 유지, 없으면 생략)
+        def _replace_ccd(m: re.Match) -> str:
+            row_idx = m.group(1)  # row index (없으면 None)
+            col_name = self._col_to_camel(m.group(2))
+            if row_idx:
+                return f'gdsUserInfo.getColumn({row_idx.strip()}, "{col_name}")'
+            return f'gdsUserInfo.getColumn("{col_name}")'
+
         content = re.sub(
-            r"gdsCCDUserMDS\.getColumn\((?:[^,)]+,\s*)?['\"]([^'\"]+)['\"]\)",
-            lambda m: f'gdsUserInfo.getColumn("{self._snake_to_camel(m.group(1))}")',
+            r"gdsCCDUserMDS\.getColumn\((?:([^,)]+),\s*)?['\"]([^'\"]+)['\"]\)",
+            _replace_ccd,
             content,
         )
         # gdsUserInfo.getColumn([rowIdx,] 'col'/"col") → camelCase
         content = re.sub(
             r"(gdsUserInfo\.getColumn\([^)]*)['\"]([^'\"]+)['\"](\s*\))",
-            lambda m: f'{m.group(1)}"{self._snake_to_camel(m.group(2))}"{m.group(3)}',
+            lambda m: f'{m.group(1)}"{self._col_to_camel(m.group(2))}"{m.group(3)}',
             content,
         )
         return content

@@ -8,10 +8,8 @@
     "NexacroComJSFindConverter.java",
     "VoyageListNewForm.xfdl (as-is vs to-be diff)"
   ],
-
   "layout_cell_patterns": {
     "description": "<Cell> 요소에 적용되는 변환 (XML Layout 영역, <Script> 태그 이전)",
-
     "expr_replacements": [
       {
         "id": "cell_expr_uppercase",
@@ -19,7 +17,6 @@
         "to": "expr:("
       }
     ],
-
     "aichanger_marker_removals": [
       {
         "id": "aichanger_disable_cssclass",
@@ -42,7 +39,6 @@
         "to": "com.drawDetailGridBkColor"
       }
     ],
-
     "body_cell_date_format": {
       "description": "<Band id=\"body\"> 내 displaytype=\"date\" Cell → calendardateformat=\"yyyy-MM-dd\" 자동 추가 (없을 때만)",
       "items": [
@@ -55,7 +51,6 @@
         }
       ]
     },
-
     "property_to_cssclass": {
       "description": "background/color 속성 → cssclass 변환 (GridCellConverter.java 로직 기반)",
       "rules": [
@@ -85,12 +80,17 @@
         }
       ],
       "color_value_replacements": [
-        { "from": "#000000", "to": "" },
-        { "from": "#e40000", "to": "cellredFC" }
+        {
+          "from": "#000000",
+          "to": ""
+        },
+        {
+          "from": "#e40000",
+          "to": "cellredFC"
+        }
       ]
     }
   },
-
   "script_text_replacements": [
     {
       "id": "com_isEmpty_remove_pThis",
@@ -215,6 +215,18 @@
       "to": "com.G_OzSplit"
     },
     {
+      "id": "oz_sid_this_to_com",
+      "description": "OZ 세션ID 전역 참조 → com 객체",
+      "from": "this.G_OzSID",
+      "to": "com.G_OzSID"
+    },
+    {
+      "id": "oz_server_this_to_com",
+      "description": "OZ 서버 전역 참조 → com 객체",
+      "from": "this.G_OzServer",
+      "to": "com.G_OzServer"
+    },
+    {
       "id": "exozviewer300_line_remove",
       "description": "EXOZViewer300 컴포넌트 참조 라인 제거 (com.createReportOZ 로 대체됨)",
       "is_regex": true,
@@ -228,7 +240,6 @@
       "to": "\"input\""
     }
   ],
-
   "script_aichanger_markers": {
     "description": "Script 영역 내 [AIChanger] 마커 → 실제 함수 호출로 변환",
     "items": [
@@ -244,7 +255,6 @@
       }
     ]
   },
-
   "script_warning_removals": [
     {
       "id": "aichanger_statusbar_remove",
@@ -261,7 +271,6 @@
       "to": ""
     }
   ],
-
   "script_uxb_info": {
     "get_bind_dataset": {
       "id": "uxb_info_get_bind_dataset",
@@ -271,7 +280,6 @@
       "to": "com.getBindDataset(this, \\1)"
     }
   },
-
   "script_fnauth_button_control": {
     "description": "fnAuthButtonControl 내 마커 패턴 → 표준 코드로 변환",
     "is_exist_var_fix": {
@@ -290,11 +298,9 @@
       "to": "if(!com.isNull(this.ArgFormId))\n\t\tcom.fnAuthButtonControl("
     }
   },
-
   "async_patterns": {
     "description": "async/await 변환 규칙",
     "note_on_method": "<Script> 이외에서 호출되는 함수 → (async()=>{}).call(this) 감싸기, Script 내에서 호출되는 함수 → async function 키워드 추가",
-
     "com_functions_need_await": {
       "description": "await를 붙일 com.* 함수 목록. com_prefix_await=true 시 exclusions 제외한 모든 com.* 에 await 추가",
       "com_prefix_await": true,
@@ -320,15 +326,12 @@
         "com.fnMessageOpenForm"
       ]
     },
-
     "functions_need_wrapper": {
       "description": "미사용 — Script 내 모든 함수를 스캔해 com.* 호출이 있으면 자동 래핑",
       "items": []
     },
-
     "wrapper_indent": "\t"
   },
-
   "layout_grid_css_patterns": {
     "description": "그리드 CSS 함수 변환 (GridCellConverter.java 기반)",
     "items": [
@@ -350,14 +353,12 @@
       }
     ]
   },
-
   "script_form_name_replacement": {
     "description": "JSDoc 헤더의 'SYSTEM FORM NAME' 플레이스홀더 → xfdl 파일명(확장자 제외)으로 치환",
     "placeholder": "SYSTEM FORM NAME",
     "value_source": "input filename stem (e.g. VoyageAnalysisAdmForm.xfdl → VoyageAnalysisAdmForm)",
     "apply_after": "script_text_replacements"
   },
-
   "conversion_order": [
     "1. layout_cell_patterns.expr_replacements (Cell 라인)",
     "2. layout_cell_patterns.aichanger_marker_removals (Cell 라인)",
@@ -371,7 +372,6 @@
     "10. script_form_name_replacement (Script 전체 - SYSTEM FORM NAME → 파일명)",
     "11. async_patterns (Script 함수 단위)"
   ],
-
   "notes": [
     "Cell 변환은 <Script> 태그 이전 Layout 영역에서만 적용",
     "Script 변환은 <Script type='xscript5.1'><![CDATA[...]]></Script> 내부에만 적용",

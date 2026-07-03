@@ -14,6 +14,9 @@ C:\Projects\Panocean\nexacro\biz\salesOpportunity\salesOpportunityList\SalesOppo
 # salesOpportunity/internalTCOut
 C:\Projects\Panocean\nexacro\biz\salesOpportunity\internalTCOut\TCOutMainForm.xfdl
 
+# salesOpportunity/FFA
+C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\FFTSettleListForm.xfdl
+
 # voyagePerformance/analysis
 C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBAllStatusShowForm.xfdl
 C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBVersionComparisonForm.xfdl
