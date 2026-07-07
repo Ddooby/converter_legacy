@@ -254,6 +254,7 @@ class XfdlConverter:
     # snake_case → camelCase 일반 규칙이 맞지 않는 컬럼명 예외 매핑
     _COL_NAME_OVERRIDES = {
         "user_name": "userNm",
+        "userName": "userNm",   # 이전 변환에서 잘못 생성된 케이스 대비
     }
 
     def _col_to_camel(self, col: str) -> str:
@@ -262,23 +263,30 @@ class XfdlConverter:
 
     def _convert_dataset_get_column(self, content: str) -> str:
         """getColumn 컬럼명 snake_case → camelCase 변환 (단/쌍따옴표 모두 처리, 쌍따옴표로 통일)"""
-        # gdsCCDUserMDS → gdsUserInfo 이름 변환 (row index 있으면 유지, 없으면 생략)
+        # gdsCCDUserMDS → gdsUserInfo 이름 변환 (row index 있으면 유지, 없으면 0 기본값)
         def _replace_ccd(m: re.Match) -> str:
             row_idx = m.group(1)  # row index (없으면 None)
             col_name = self._col_to_camel(m.group(2))
-            if row_idx:
-                return f'gdsUserInfo.getColumn({row_idx.strip()}, "{col_name}")'
-            return f'gdsUserInfo.getColumn("{col_name}")'
+            idx = row_idx.strip() if row_idx else "0"
+            return f'gdsUserInfo.getColumn({idx}, "{col_name}")'
 
         content = re.sub(
             r"gdsCCDUserMDS\.getColumn\((?:([^,)]+),\s*)?['\"]([^'\"]+)['\"]\)",
             _replace_ccd,
             content,
         )
-        # gdsUserInfo.getColumn([rowIdx,] 'col'/"col") → camelCase
+        # gdsUserInfo.getColumn([rowIdx,] 'col'/"col") → camelCase, row index 없으면 0 삽입
+        def _replace_gds(m: re.Match) -> str:
+            prefix = m.group(1)   # "gdsUserInfo.getColumn(" 또는 "gdsUserInfo.getColumn(0, " 등
+            col_name = self._col_to_camel(m.group(2))
+            suffix = m.group(3)
+            if prefix.rstrip().endswith("("):
+                return f'{prefix}0, "{col_name}"{suffix}'
+            return f'{prefix}"{col_name}"{suffix}'
+
         content = re.sub(
-            r"(gdsUserInfo\.getColumn\([^)]*)['\"]([^'\"]+)['\"](\s*\))",
-            lambda m: f'{m.group(1)}"{self._col_to_camel(m.group(2))}"{m.group(3)}',
+            r"(gdsUserInfo\.getColumn\([^)]*)['\"]([^'\"]+)[\'\"](\s*\))",
+            _replace_gds,
             content,
         )
         return content
@@ -314,7 +322,6 @@ class XfdlConverter:
         insert_after = anchor_pos + len(ANCHOR)
         inject = "\n" + "\n".join(needed)
         return content[:insert_after] + inject + content[insert_after:]
-
     def _convert_fn_message_domain(self, content: str) -> str:
         """따옴표 없이 나오는 Domain.msg~ → "Domain.msg~" 로 감싸기"""
         return re.sub(r"(?<!['\"])(Domain\.msg[\w.]+)(?!['\"])", r'"\1"', content)

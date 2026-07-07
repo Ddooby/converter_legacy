@@ -218,13 +218,13 @@
       "id": "oz_sid_this_to_com",
       "description": "OZ 세션ID 전역 참조 → com 객체",
       "from": "this.G_OzSID",
-      "to": "com.G_OzSID"
+      "to": "common_oz.G_OzSID"
     },
     {
       "id": "oz_server_this_to_com",
       "description": "OZ 서버 전역 참조 → com 객체",
       "from": "this.G_OzServer",
-      "to": "com.G_OzServer"
+      "to": "common_oz.G_OzServer"
     },
     {
       "id": "exozviewer300_line_remove",
