@@ -80,6 +80,18 @@ class XfdlConverter:
     # ──────────────────────────────────────────
 
     def _convert_layout(self, content: str) -> str:
+        # Grid 태그에 takegrid / countcomp 기본 속성 추가 (이미 있으면 스킵)
+        def _grid_default_attrs(m: re.Match) -> str:
+            tag = m.group(0)
+            pos = tag.rindex(">")
+            prefix, suffix = tag[:pos], tag[pos:]
+            extra = ""
+            if "takegrid=" not in tag:
+                extra += ' takegrid="sort,rowcount"'
+            if "countcomp=" not in tag:
+                extra += ' countcomp=""'
+            return prefix + extra + suffix
+        content = re.sub(r"<Grid\b[^>]*>", _grid_default_attrs, content)
         lines = content.split("\n")
         result = []
         in_body_band = False
@@ -182,11 +194,15 @@ class XfdlConverter:
         content = self._apply_uxb_info(content)
         content = self._convert_svc_url(content)
         content = self._convert_dataset_get_column(content)
+        content = self._fix_is_null_trim_check(content)
+        content = self._fix_export_excel_grid(content)
+        content = self._fix_wrap_quote_nvl(content)
         content = self._convert_arithmetic_to_decimal(content)
         content = self._apply_text_replacements(content)
         content = self._convert_fn_message_domain(content)
         if form_name:
             content = self._replace_system_form_name(content, form_name)
+        content = self._comment_out_auth_button_callers(content)
         content = self._inject_external_js_refs(content)
         content = self._apply_async_patterns(content)
         return content
@@ -333,6 +349,84 @@ class XfdlConverter:
                 content = re.sub(r["from_pattern"], r["to"], content, flags=flags)
             else:
                 content = content.replace(r["from"], r["to"])
+        return content
+
+
+    def _fix_is_null_trim_check(self, content: str) -> str:
+        """com.isNullTrimCheck / com.isNullFieldGrid 첫 인자 this 추가
+        이미 첫 인자가 this 인 경우는 건드리지 않음"""
+        for fn in ("isNullTrimCheck", "isNullFieldGrid", "commAllCodeInquiry"):
+            content = re.sub(
+                r'com\.' + fn + r'\((this\.[^\s,)]+)',
+                r'com.' + fn + r'(this, \1',
+                content,
+            )
+        return content
+
+    def _fix_export_excel_grid(self, content: str) -> str:
+        """ExportExcelGrid("Sheet1", "A1", false, true, true)
+        → ExportExcelGrid(this.titletext + "_" + com.somToday(this), "Sheet1")"""
+        return re.sub(
+            r'\.ExportExcelGrid\("[^"]+",\s*"[aA][0-9]+",\s*false,\s*true,\s*true\)',
+            r'.ExportExcelGrid(this.titletext + "_" + com.somToday(this), "Sheet1")',
+            content,
+        )
+
+    def _fix_wrap_quote_nvl(self, content: str) -> str:
+        """nexacro.wrapQuote(this.xxx.value) → nexacro.wrapQuote(take.nvl(this.xxx.value))
+        이미 take.nvl 로 감싼 경우 건드리지 않음"""
+        return re.sub(
+            r'nexacro\.wrapQuote\((?!take\.nvl)(this\.[a-zA-Z_][a-zA-Z0-9_.]*)\)',
+            r'nexacro.wrapQuote(take.nvl(\1))',
+            content,
+        )
+
+
+    def _comment_out_auth_button_callers(self, content: str) -> str:
+        """
+        com.fnAuthButtonControl()을 내부에서 호출하는 함수명을 찾아
+        그 함수를 호출하는 라인을 // 주석처리
+        예) this.cntrCvc_authButtonControl = function(){...com.fnAuthButtonControl...}
+            → this.cntrCvc_authButtonControl(); 호출 라인을 주석처리
+        """
+        func_names: set[str] = set()
+        lines = content.split("\n")
+
+        i = 0
+        while i < len(lines):
+            m = re.match(r"\s*this\.(\w+)\s*=\s*function", lines[i])
+            if m:
+                func_name = m.group(1)
+                depth = 0
+                body: list[str] = []
+                j = i
+                while j < len(lines):
+                    depth += lines[j].count("{") - lines[j].count("}")
+                    body.append(lines[j])
+                    if depth <= 0 and j > i:
+                        break
+                    j += 1
+                if "com.fnAuthButtonControl" in "\n".join(body):
+                    func_names.add(func_name)
+                i = j + 1
+            else:
+                i += 1
+
+        for name in func_names:
+            pattern = (
+                r"^(\s*)(await\s+)?this\."
+                + re.escape(name)
+                + r"\s*\(([^)]*)\)\s*;"
+            )
+            def _make_repl(fn: str):
+                def _repl(m: re.Match) -> str:
+                    indent  = m.group(1)
+                    aw      = m.group(2) or ""
+                    args    = m.group(3)
+                    return f"{indent}//{aw}this.{fn}({args});"
+                return _repl
+            content = re.sub(pattern, _make_repl(name), content, flags=re.MULTILINE)
+
         return content
 
     def _fix_fnauth_button_control(self, content: str) -> str:

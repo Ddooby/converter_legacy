@@ -1,0 +1,613 @@
+{
+  "_summary": {
+    "file_pairs": 12,
+    "inline_total": 17,
+    "line_total": 472,
+    "candidate_inline": 2,
+    "candidate_line": 40,
+    "rare_inline": 3,
+    "rare_line": 369
+  },
+  "candidates": {
+    "inline_replace": [
+      {
+        "type": "inline_replace",
+        "count": 11,
+        "from_frag": "_",
+        "to_frag": "/",
+        "context_before": "om.Dialog(this, 'biz::contract",
+        "context_after": "contract/ContractCGOViewDetail",
+        "example_from": "var save = await com.Dialog(this, 'biz::contract_contract/ContractCGOViewDetailForm.xfdl',\"cntrNo=\"+cntrNo, \"1100\", \"800\", \"Autosize=false\");",
+        "example_to": "var save = await com.Dialog(this, 'biz::contract/contract/ContractCGOViewDetailForm.xfdl',\"cntrNo=\"+cntrNo, \"1100\", \"800\", \"Autosize=false\");"
+      },
+      {
+        "type": "inline_replace",
+        "count": 3,
+        "from_frag": "m",
+        "to_frag": "fd",
+        "context_before": "::common/CommonCodePopupForm.x",
+        "context_after": "l', param, \"660\", \"560\", \"Auto",
+        "example_from": "var arrArg = await com.Dialog(this, 'biz::common/CommonCodePopupForm.xml', param, \"660\", \"560\", \"Autosize=false\");",
+        "example_to": "var arrArg = await com.Dialog(this, 'biz::common/CommonCodePopupForm.xfdl', param, \"660\", \"560\", \"Autosize=false\");"
+      }
+    ],
+    "line_replace": [
+      {
+        "type": "line_replace",
+        "count": 13,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += \"\" + com.G_OzDel  ;",
+        "to": "strDS2 += \"\" + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 4,
+        "from": "await this.fnSetAuthButton();",
+        "to": "//await this.fnSetAuthButton();"
+      },
+      {
+        "type": "line_replace",
+        "count": 4,
+        "from": "__BLOCK__://공통 라이브러리 호출\ntake.loadJs(this, \"soJsLoad_\" + this.name, \"/biz/commonJs/so.js\");",
+        "to": "__BLOCK__:"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "var oldRnum = 0;",
+        "to": "var oldRnum = new nexacro.Decimal(0);"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "for(var i = 0 ; this.SCBCoaInfoDS.rowcount > i ; i++){",
+        "to": "for(var i = 0; this.SCBCoaInfoDS.rowcount > i; i++){"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "this.gd_list.ExportExcelGrid(\"Sheet1\", \"A1\", false, true, true);",
+        "to": "this.gd_list.ExportExcelGrid(this.titletext + \"_\" + com.somToday(this), \"Sheet1\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "var team_code = this.cb_teamCode.value;",
+        "to": "var team_code = take.nvl(this.cb_teamCode.value);"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "var team_name = this.cb_teamCode.text.com.substr(6,(this.cb_teamCode.text.length-6));",
+        "to": "var team_name = com.substr(take.nvl(this.cb_teamCode.text), 6,(this.cb_teamCode.text.length-6));"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"tot_biz_dur\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"tot_biz_dur\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"total_cb\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"total_cb\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 3,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"total_pl_amt\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"total_pl_amt\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "__BLOCK__:}).call(this);",
+        "to": "__BLOCK__:this.fnExcel = function()\n{\nthis.btn_excel_Onclick();"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "this.gd_SCTBrokerage.ExportExcelGrid(\"sheet1\", \"a1\", false, true, true);",
+        "to": "this.gd_SCTBrokerage.ExportExcelGrid(this.titletext + \"_\" + com.somToday(this), \"Sheet1\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "__BLOCK__:inquiryCallback = function(svcid, errcd, errmsg) {",
+        "to": "__BLOCK__:\nthis.inquiryCallback = function(svcid, errcd, errmsg) {"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "await so.getEamGroupId();",
+        "to": "await this.getEamGroupId();"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "if (await com.isNullTrimCheck(this.cb_cntr_type, \"Contract Type\") == true) {",
+        "to": "if (await com.isNullTrimCheck(this, this.cb_cntr_type, \"Contract Type\") == true) {"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "if (await com.isNullTrimCheck(this.cb_team, \"Team\") == true) {",
+        "to": "if (await com.isNullTrimCheck(this, this.cb_team, \"Team\") == true) {"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "//INQUIRYa",
+        "to": "//INQUIRY"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "//CLOSEa",
+        "to": "//CLOSE"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "__BLOCK__:*  2025.09.01    AICHanger          자동변환\n*  2025.09.DD   수동변환자          수동변환",
+        "to": "__BLOCK__:*  2025.09.01    \tAICHanger          \t자동변환\n*  2025.09.DD   \t수동변환자          수동변환\n* \t2026.07.06\t\t정철환\t\t\t\t수동변환(1차)"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* Filter은 로직에 맞게 수정하시기 바랍니다.*/ this.VComOrgCDS.filter(\"sales_org==\"+nexacro.wrapQuote(\"Y\"));",
+        "to": "this.VComOrgCDS.filter(\"sales_org==\"+nexacro.wrapQuote(\"Y\"));"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "var dsObj = obj./**UXB INFO : com.getBindDataset(this[폼], objComp[컴포넌트]); 로 변경 필요 **/;",
+        "to": "var dsObj = com.getBindDataset(this, obj);"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* Filter은 로직에 맞게 수정하시기 바랍니다.*/ this.VComOrgCDS.filter(\"sales_org =='Y'\");",
+        "to": "this.VComOrgCDS.filter(\"sales_org =='Y'\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "return \"#D5D5D5\";",
+        "to": "return \"cellgray\"; //\"#D5D5D5\";"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "return \"#FAF4C0\";",
+        "to": "return \"cellyellow\"; //\"#FAF4C0\";"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "return \"#CEFBC9\";",
+        "to": "return \"cellgreen\"; //\"#CEFBC9\";"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "return \"default\";",
+        "to": "return \"\"; //\"default\";"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "__BLOCK__:this.returnQueryValue = \"\";\ncom.lastDateSet = function(str)\n{\nvar param = \"\";\nparam += \"functionGubun=GET_SQL\";\nparam += \" sql=\"+nexacro.wrapQuote(str);\n/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.syncTransaction(this, \"CHECK\", \"SVC_LOC::estimateCharterBase/GET_SQL.do\", \"\", \"\", param,\"\");\nreturn this.returnQueryValue;\n};",
+        "to": "__BLOCK__:"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "__BLOCK__:this.gd_list_OnHeadClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo)\n{\n/*[AIChanger] com.sortGrid 제거 필요 takegrid 사용 필요*/ //(obj,e.cell);\n};",
+        "to": "__BLOCK__:"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzSplit)가 있는지 확인이 필요합니다.  변수(G_OzSplit)가 있는지 확인이 필요합니다.*/ param += \"TEAM=\" + team_code + com.G_OzSplit;",
+        "to": "param += \"TEAM=\" + team_code + com.G_OzSplit;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzSplit)가 있는지 확인이 필요합니다.  변수(G_OzSplit)가 있는지 확인이 필요합니다.*/ param += \"TEAM_NAME=\" + team_name + com.G_OzSplit;",
+        "to": "param += \"TEAM_NAME=\" + team_name + com.G_OzSplit;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzSplit)가 있는지 확인이 필요합니다.  변수(G_OzSplit)가 있는지 확인이 필요합니다.*/ param += \"DEPT_NM=\" + dept_nm + com.G_OzSplit;",
+        "to": "param += \"DEPT_NM=\" + dept_nm + com.G_OzSplit;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzSplit)가 있는지 확인이 필요합니다.  변수(G_OzSplit)가 있는지 확인이 필요합니다.*/ param += \"EMP_NM=\" + emp_nm + com.G_OzSplit;",
+        "to": "param += \"EMP_NM=\" + emp_nm + com.G_OzSplit;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"vsl_name\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"vsl_name\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"position\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"position\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"row_num\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"row_num\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"dwt_blt\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"dwt_blt\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"account\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"account\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "/* 변수(G_OzDel)가 있는지 확인이 필요합니다.  변수(G_OzDel)가 있는지 확인이 필요합니다.*/ strDS2 += this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"scrub\") + com.G_OzDel  ;",
+        "to": "strDS2 += take.nvl(this.OwnedPeriodVesselCvcFleetDS.getColumn(i,\"scrub\")) + com.G_OzDel;"
+      },
+      {
+        "type": "line_replace",
+        "count": 2,
+        "from": "await com.fnMessageOpenForm(this, \"E\", await com.replace(\"Domain.msg.common.VAL_0044\", \"input\",  \"Date\"));",
+        "to": "await com.fnMessageOpenForm(this, \"E\", com.replace(\"Domain.msg.common.VAL_0044\", \"input\",  \"Date\"));"
+      }
+    ]
+  },
+  "rare": {
+    "inline_replace": [
+      {
+        "type": "inline_replace",
+        "count": 1,
+        "from_frag": "C",
+        "to_frag": "_c",
+        "context_before": "his.ReportDS.setColumn(0,'team",
+        "context_after": "ode', \"\");",
+        "example_from": "this.ReportDS.setColumn(0,'teamCode', \"\");",
+        "example_to": "this.ReportDS.setColumn(0,'team_code', \"\");"
+      },
+      {
+        "type": "inline_replace",
+        "count": 1,
+        "from_frag": "//",
+        "to_frag": "* ",
+        "context_before": "",
+        "context_after": "▲▼Sort 정렬",
+        "example_from": "//▲▼Sort 정렬",
+        "example_to": "* ▲▼Sort 정렬"
+      },
+      {
+        "type": "inline_replace",
+        "count": 1,
+        "from_frag": "return vsl_code;",
+        "to_frag": "}",
+        "context_before": "",
+        "context_after": "",
+        "example_from": "return vsl_code;",
+        "example_to": "}"
+      }
+    ],
+    "line_replace": [
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  @MenuPath    1Depth > 2Depth",
+        "to": "*  @MenuPath    Sales > Contract Management > Contract Information > Contract Brokerage Information"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:*  2025.09.01    AICHanger          자동변환\n*  2025.09.DD   수동변환자          수동변환",
+        "to": "__BLOCK__:* \t2008.04.15\t\tsjbaek\n*  2025.09.01    \tAICHanger          \t자동변환\n*  2026.07.09   \t정철환\t          \t수동변환(1차)"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.syncTransaction(this, \"ONLOAD\", \"SVC_LOC::resultClosing/ONLOAD.do\",\n\"\",\n\"VComOrgCDS=VComOrgCDS \",\nparam, \"fnOnloadCallback\");\n",
+        "to": "__BLOCK__:com.syncTransaction(this, \"ONLOAD\", \"SVC_LOC::resultClosing/ONLOAD.do\", \"\", \"VComOrgCDS=VComOrgCDS \", param, \"fnOnloadCallback\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:if (await com.isNullTrimCheck(this.cb_team_code,\"Team Code\")) return false;\nif (await com.isNullTrimCheck(this.me_StartDate,\"Start Date\")) return false;\nif (await com.isNullTrimCheck(this.me_EndDate,\"End Date\")) return false;",
+        "to": "__BLOCK__:if (await com.isNullTrimCheck(this, this.cb_team_code,\"Team Code\")) return false;\nif (await com.isNullTrimCheck(this, this.me_StartDate,\"Start Date\")) return false;\nif (await com.isNullTrimCheck(this, this.me_EndDate,\"End Date\")) return false;\n\nthis.SCTBrokerageDS.clearData();\n"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:param += \"functionGubun=brokerageinquiry\";\nparam += \" team_code=\"+nexacro.wrapQuote(this.cb_team_code.value);\nparam += \" from_date=\"+nexacro.wrapQuote(this.me_StartDate.value);\nparam += \" to_date=\"+nexacro.wrapQuote(this.me_EndDate.value);\n/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.transaction(this, \"BROKERAGEINQUIRY\", \"SVC_LOC::contractList/brokerageinquiry.do\",  \"\", \"SCTBrokerageDS=SCTBrokerageDS\", param, \"inquiryCallback\");",
+        "to": "__BLOCK__:param += \"functionGubun=brokerageinquiry\";\nparam += \" team_code=\"+nexacro.wrapQuote(take.nvl(this.cb_team_code.value));\nparam += \" from_date=\"+nexacro.wrapQuote(take.nvl(this.me_StartDate.value));\nparam += \" to_date=\"+nexacro.wrapQuote(take.nvl(this.me_EndDate.value));\ncom.transaction(this, \"BROKERAGEINQUIRY\", \"SVC_LOC::contractList/brokerageinquiry.do\",  \"\", \"SCTBrokerageDS=SCTBrokerageDS\", param, \"inquiryCallback\");\n}).call(this);\n};"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await com.calendar(obj, this.me_StartDate\n);",
+        "to": "__BLOCK__:await com.calendar(obj, this.me_StartDate);"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://FormID :\n//작성자 : sjbaek\n//작성일 : 2008-04-15a\n//include \"biz::commonJS/common.js\";\n//include \"biz::commonJS/calendar.js\";\n//include \"biz::commonJS/constants.js\";\n//include \"biz::commonJS/common_filter.js\";",
+        "to": "__BLOCK__:/*\n* Calendar 함수(From Date From)\n* parameter :  obj 버튼id\n* return value : void\n*/\nthis.fromCalendarCheck = function(fromDate, toDate) {\nreturn (async () => {\n// 카렌다의 크기를 비교한다.\nif(nexacro.toNumber(fromDate) > nexacro.toNumber(toDate) && nexacro.toNumber(toDate) != 0){\nawait com.fnMessageOpenForm(this, 'E', \"Domain.msg.UCG_1200.VAL_0084\");\nfromDate.set_text(\"\");\nfromDate.setFocus();\nreturn false;\n}else{\nreturn true;\n}\n}).call(this);\n};\n\n/*\n* Calendar 함수(To Date To)\n* parameter :  obj 버튼id\n* return value : void\n*/\nthis.toCalendarCheck = function(fromDate, toDate) {\nreturn (async () => {\n// 카렌다의 크기를 비교한다.\nif(nexacro.toNumber(fromDate) > nexacro.toNumber(toDate)){\nawait com.fnMessageOpenForm(this, 'E', \"Domain.msg.UCG_1200.VAL_0085\");\ntoDate.set_text(\"\");\ntoDate.setFocus();\nreturn false;\n}else{\nreturn true;\n}\n}).call(this);\n};\n\n// this.fnSetAuthButton = function()\n// {\n// \treturn (async () => {\n// \t    var strAuthParam = \"\";\n// \t    var arrayButtonFullID = new Array();        // 버튼 ID\n// \t    var arrayTargetPermission = new Array();    // 버튼 권한\n// \t    if(take.nvl(this.parent.param) != \"\") {\n// \t\t\tstrAuthParam = this.parent.param;\n// \t\t}\n// \t    // Excel버튼\n// \t    arrayButtonFullID[0] = \"btn_excel\";\n// \t    arrayTargetPermission[0] = \"E\";\n// \t    // Inquiry 버튼\n// \t    arrayButtonFullID[1] = \"btn_Inquiry\";\n// \t    arrayTargetPermission[1] = \"R\";\n// \t    // 버튼 컨트롤 Check를 한다.(권한 제어 대상 버튼을 모두 비활성화 시킨다.)\n// \t    //g_testAuthButton(ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n// \t    // 권한에 대한 버튼 제어를 한다.\n// \t    /* 변수(ArgFormId)가 있는지 확인이 필요합니다.  변수(ArgFormId)가 있는지 확인이 필요합니다.  변수(param_auth)가 있는지 확인이 필요합니다.  변수(param_auth)가 있는지 확인이 필요합니다.*/ com.fnAuthButtonControl(this, this.ArgFormId, this.param_auth, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n//\n// \t}).call(this);\n// };\n\nthis.checkFilterGbn = function(strValue, grdObj)\n{\nreturn (async () => {\nif(strValue == \"Filter\"){\nthis.btn_filter.set_text(\"UnFilter\");\ngrdObj.setTakeGrid(\"sort,rowcount,filter\");\ncom.GridSetFilter(grdObj);\n}else{\nthis.btn_filter.set_text(\"Filter\");\ngrdObj.setTakeGrid(\"sort,rowcount\");\ncom.GridClearFilter(grdObj);\n}\n}).call(this);\n};\n\n/*********************************************************\n* 5 TRANSACTION OR CALLBACK 콜백 처리부분\n********************************************************/\n"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  @MenuPath    1Depth > 2Depth",
+        "to": "*  @MenuPath    Sales > Contract Management > Contract Information > Contract Brokerage Summary"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  2025.09.01    AICHanger          자동변환",
+        "to": "*  2025.09.01    \tAICHanger          \t자동변환"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  2025.09.DD   수동변환자          수동변환",
+        "to": "*  2026.07.09   \t정철환          \t수동변환(1차)"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://this.fv_nFormVal = null;     //용도",
+        "to": "__BLOCK__:this.eamGroupId = \"\";\n"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.transaction(this, \"ONLOAD\", \"SVC_LOC::salesOpportunityList/ONLOAD.do\", \"\",\n\"VComOrgCDS=VComOrgCDS\",\nparam, \"fnOnloadCallback\");\n",
+        "to": "__BLOCK__:com.transaction(this, \"ONLOAD\", \"SVC_LOC::salesOpportunityList/ONLOAD.do\", \"\", \"VComOrgCDS=VComOrgCDS\", param, \"fnOnloadCallback\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:if (await com.isNullTrimCheck(this.me_StartDate,\"Start Date\")) return false;\nif (await com.isNullTrimCheck(this.me_EndDate,\"End Date\")) return false;",
+        "to": "__BLOCK__:if (await com.isNullTrimCheck(this, this.me_StartDate,\"Start Date\")) return false;\nif (await com.isNullTrimCheck(this, this.me_EndDate,\"End Date\")) return false;\n\nthis.SCTBrokerageDS.clearData();\n"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:param += \"functionGubun=brokerageListInquiry\";\nparam += \" cb_team=\"+nexacro.wrapQuote(this.cb_team.value);\nparam += \" from_date=\"+nexacro.wrapQuote(this.me_StartDate.value);\nparam += \" to_date=\"+nexacro.wrapQuote(this.me_EndDate.value);\nparam += \" cb_cntr_type=\"+nexacro.wrapQuote(this.cb_cntr_type.value);\nparam += \" broker=\"+nexacro.wrapQuote(this.ed_customer.value);\nparam += \" cb_kind=\"+nexacro.wrapQuote(this.cb_kind.value);\nparam += \" in_brok=\"+nexacro.wrapQuote(in_brok.value);\n/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.transaction(this, \"INQUIRY\", \"SVC_LOC::contractList/brokerageListInquiry.do\",  \"\", \"SCTBrokerageDS=SCTBrokerageDS\", param, \"inquiryCallback\");",
+        "to": "__BLOCK__:param += \"functionGubun=brokerageListInquiry\";\nparam += \" cb_team=\"+nexacro.wrapQuote(take.nvl(this.cb_team.value));\nparam += \" from_date=\"+nexacro.wrapQuote(take.nvl(this.me_StartDate.value));\nparam += \" to_date=\"+nexacro.wrapQuote(take.nvl(this.me_EndDate.value));\nparam += \" cb_cntr_type=\"+nexacro.wrapQuote(take.nvl(this.cb_cntr_type.value));\nparam += \" broker=\"+nexacro.wrapQuote(take.nvl(this.ed_customer.value));\nparam += \" cb_kind=\"+nexacro.wrapQuote(take.nvl(this.cb_kind.value));\nparam += \" in_brok=\"+nexacro.wrapQuote(take.nvl(this.in_brok.value));\ncom.transaction(this, \"INQUIRY\", \"SVC_LOC::contractList/brokerageListInquiry.do\",  \"\", \"SCTBrokerageDS=SCTBrokerageDS\", param, \"inquiryCallback\");\n}).call(this);\n};"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "await com.calendar(obj, this.me_StartDate",
+        "to": "await com.calendar(obj, this.me_StartDate);"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "if(vDate){",
+        "to": "if (vDate){"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:/* 변수(param)가 있는지 확인이 필요합니다.  변수(param)가 있는지 확인이 필요합니다.*/ com.Dialog(this, 'biz::contract_contract/BrokerageSummaryForm.xfdl', this.param, \"1650\", \"840\", \"Autosize=false\");\n",
+        "to": "__BLOCK__:com.Dialog(this, 'biz::contract/contract/BrokerageSummaryForm.xfdl', \"\", \"1650\", \"840\", \"Autosize=false\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "if(await com.commAllCodeInquiry(\"accountCodeAll\", this.ed_customer , this.ed_custonerName) == false) {",
+        "to": "if(await com.commAllCodeInquiry(this, \"accountCodeAll\", this.ed_customer , this.ed_custonerName) == false) {"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "param += \" conditionValue=\" + nexacro.wrapQuote(this.ed_custonerName.value);",
+        "to": "param += \" conditionValue=\" + nexacro.wrapQuote(take.nvl(this.ed_custonerName.value));"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://FormID :\n//작성자 :\n//작성일 :a\n//include \"biz::commonJS/common.js\";\n//include \"biz::commonJS/calendar.js\";\n//include \"biz::commonJS/constants.js\";\n//include \"biz::commonJS/common_filter.js\";\nthis.authButtonControl = function()\n{\nreturn (async () => {\nvar strAuthParam = \"\";\nvar arrayButtonFullID = new Array();        // 버튼 ID\nvar arrayTargetPermission = new Array();    // 버튼 권한\nif(take.nvl(this.parent.param) != \"\") {\nstrAuthParam = this.parent.param;\n}\n// Excel버튼\narrayButtonFullID[0] = \"btn_excel\";\narrayTargetPermission[0] = \"E\";\n// Summary버튼\narrayButtonFullID[0] = \"btn_smry\";\narrayTargetPermission[0] = \"C\";\n// Inquiry 버튼\narrayButtonFullID[1] = \"btn_Inquiry\";\narrayTargetPermission[1] = \"R\";\n// 권한에 대한 버튼 제어를 한다.\nif(!com.isNull(this.ArgFormId))\nawait com.fnAuthButtonControl(this, this.ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission,\"TRUE\");",
+        "to": "__BLOCK__:// this.authButtonControl = function()\n// {\n// \treturn (async () => {\n// \t    var strAuthParam = \"\";\n// \t    var arrayButtonFullID = new Array();        // 버튼 ID\n// \t    var arrayTargetPermission = new Array();    // 버튼 권한\n// \t    if(take.nvl(this.parent.param) != \"\") {\n// \t\t\tstrAuthParam = this.parent.param;\n// \t\t}\n// \t    // Excel버튼\n// \t    arrayButtonFullID[0] = \"btn_excel\";\n// \t    arrayTargetPermission[0] = \"E\";\n// \t    // Summary버튼\n// \t    arrayButtonFullID[0] = \"btn_smry\";\n// \t    arrayTargetPermission[0] = \"C\";\n// \t    // Inquiry 버튼\n// \t    arrayButtonFullID[1] = \"btn_Inquiry\";\n// \t    arrayTargetPermission[1] = \"R\";\n// \t    // 권한에 대한 버튼 제어를 한다.\n// \t    if(!com.isNull(this.ArgFormId))\n// \t\t\tawait com.fnAuthButtonControl(this, this.ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission,\"TRUE\");\n//\n// \t}).call(this);\n// };"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:}).call(this);",
+        "to": "__BLOCK__://EAM에서 사용자의 그룹가져오기\nthis.getEamGroupId = function() {\nthis.eamGroupId = \"\";\nvar param = \" functionGubun=GET_EAM_GROUP_ID\";\ncom.syncTransaction(this, \"GET_EAM_GROUP_ID\", \"SVC_LOC::commonService/GET_EAM_GROUP_ID.do\", \"\", \"\", param, \"getEamGroupIdCallback\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:}).call(this);\n};\n//EAM에서 사용자의 그룹가져오기a\nthis.eamGroupId = \"\";\nso.getEamGroupId = function() {\nthis.eamGroupId = \"\";\nvar param = \" functionGubun=GET_EAM_GROUP_ID\";\n/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.syncTransaction(this, \"GET_EAM_GROUP_ID\", \"SVC_LOC::commonService/GET_EAM_GROUP_ID.do\", \"\", \"\", param, \"getEamGroupIdCallback\");\n};\nso.getEamGroupIdCallback = function(svcid, errcd, errmsg) {\nif (errcd == -1) {\ncom.fnMessageOpenForm(this, \"S\", errmsg);\n} else {\nif(com.length(this.eamGroupId)<1) {\ncom.fnMessageOpenForm(this, \"I\", \"Domain.msg.UCG_1200.VAL_0177\"); // EAM서버에서 제공되는 정보가 없습니다.\n}\n}\n};\ninquiryCallback = function(svcid, errcd, errmsg) {\nif (errcd == -1) {\ncom.fnMessageOpenForm(this, \"S\", errmsg);\n}else{\n//(this.SCTBrokerageDS);\n}\n};\n//Calendar 함수(From Date From)\n* parameter :  obj 버튼id",
+        "to": "__BLOCK__:/*\n* Calendar 함수(From Date From)\n* parameter :  obj 버튼id"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://Calendar 함수(To Date To)\n* parameter :  obj 버튼id\n* return value : voida",
+        "to": "__BLOCK__:*/"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await com.GridSetFilter(grdObj);",
+        "to": "__BLOCK__:grdObj.setTakeGrid(\"sort,rowcount,filter\");\ncom.GridSetFilter(grdObj);"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await com.GridClearFilter(grdObj);",
+        "to": "__BLOCK__:grdObj.setTakeGrid(\"sort,rowcount\");\ncom.GridClearFilter(grdObj);"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  @MenuPath    1Depth > 2Depth",
+        "to": "*  @MenuPath    Charter Base Main > C/B Status Comparison"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  @FileName    UXBConvForm.xfdl",
+        "to": "*  @FileName    CBAllStatusShowForm.xfdl"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  2025.09.DD   \t수동변환자          수동변환",
+        "to": "*  2026.07.02   \t정철환          \t1차변환"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:if (take.formOnLoad(this))\n{\nawait this.fnInit();\n}\n",
+        "to": "__BLOCK__:if (take.formOnLoad(this))\n{\nawait this.fnInit();\n}"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:// 온로드 할때 호출 하는 함수\n//사용 안함 제거 필요com.initSetForm(this);\nawait this.fnSetAuthButton();\n/*var grpArr = Split(G_Iv_Groups, \",\");\nif( !g_isEmpty(grpArr)){\nfor(var i = 0; i < grpArr.length; i++){\nif( grpArr[i] == \"AAM\" || grpArr[i] == \"PLN\"){\nadm_flag = \"Y\";\nbreak;\n}\n}\n}*/\n//onload();\nawait com.orgGetSalesList(this);\n//  Grid를 여러개로 나누면서 주석처리\n//     차후 삭제해도 됨.\n//    g_drawGridDisableColor();",
+        "to": "__BLOCK__:// 온로드 할때 호출 하는 함수\n//사용 안함 제거 필요com.initSetForm(this);\n//await this.fnSetAuthButton();\n/*\nvar grpArr = Split(G_Iv_Groups, \",\");\nif( !g_isEmpty(grpArr)){\nfor(var i = 0; i < grpArr.length; i++){\nif( grpArr[i] == \"AAM\" || grpArr[i] == \"PLN\"){\nadm_flag = \"Y\";\nbreak;\n}\n}\n}\n*/\n//onload();"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:/*if (!g_isEmpty(ed_vslCode.Text) && !g_isEmpty(ed_voyNo.Text)) {\nif( adm_flag != \"N\" ){\nif( !teamCheck() ){\ng_fnMessageOpenForm(\"E\", \"동일 본부 채산 자료만 조회 가능 합니다.\");\nreturn;\n}\n}\ndataInquiry();\n}*/\nawait this.dataInquiry();\n",
+        "to": "__BLOCK__:/*\nif (!g_isEmpty(ed_vslCode.Text) && !g_isEmpty(ed_voyNo.Text)) {\nif( adm_flag != \"N\" ){\nif( !teamCheck() ){\ng_fnMessageOpenForm(\"E\", \"동일 본부 채산 자료만 조회 가능 합니다.\");\nreturn;\n}\n}\ndataInquiry();\n}\n*/\nawait this.dataInquiry();"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "//EXPORTa",
+        "to": "//EXPORT"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "this.gd_export.ExportExcelGrid(\"sheet1\");",
+        "to": "this.gd_export.ExportExcelGrid(this.titletext + \"_\" + com.somToday(this), \"Sheet1\");"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await com.CommonCodePopup(this, \"vesselCode\", \"Vessel Code\", this.ed_vslCode, this.st_vslName);",
+        "to": "__BLOCK__:await com.CommonCodePopup(this, \"vesselCode\", \"Vessel Code\", this.ed_vslCode, this.st_vslName);\n}).call(this);\n};\n\nthis.ed_vslCode_OnChanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo) {\n(async () => {\nawait com.commCodeInquiry(this, \"vesselCode\", this.ed_vslCode, this.st_vslName);\n//SCBVoyagePerfomDS.DeleteAll();\nthis.ed_voyNo.set_value(\"\");\n}).call(this);\n};\n\nthis.btn_vslVoy_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo) {\n(async () => {\nawait sa.openVslVoy(this, this.ed_vslCode, this.ed_voyNo, this.st_vslName);\n}).call(this);\n};\n\nthis.ed_voyNo_OnChanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo) {\n(async () => {\nawait com.fnVoyNoFillZero(this.ed_voyNo);\n}).call(this);\n};\n\nthis.gd_SCBVoyagePerfomDS7_OnCellDblClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo) {\n(async () => {\nvar param = \"\";\nparam += \" vslCode=\" + nexacro.wrapQuote(take.nvl(this.SCBVoyageSearchDS.getColumn(0, \"vsl_code\")));\nparam += \" voyNo=\" + nexacro.wrapQuote(take.nvl(this.SCBVoyageSearchDS.getColumn(0, \"voy_no\")));\nif (this.SCBVoyagePerfomDS.getColumn(0, \"cb_type\") == \"LN\" || this.SCBVoyagePerfomDS.getColumn(0, \"cb_type\") == \"TR\") {\nif (e.cell ==38 || e.cell == 39 || e.cell == 46 || e.cell == 53) {\nawait com.Dialog(this, 'biz::voyagePerformance/analysis/CBAllStatusPortChargeForm.xfdl', param, \"760\", \"400\");\n}\n} else {\nif (e.cell == 33 || e.cell == 34 || e.cell == 40 || e.cell == 46) {\nawait com.Dialog(this, 'biz::voyagePerformance/analysis/CBAllStatusPortChargeForm.xfdl', param, \"760\", \"400\");\n}\n}"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:this.ed_vslCode_OnChanged = function(obj:nexacro.Edit,e:nexacro.ChangeEventInfo) {",
+        "to": "__BLOCK__:\nthis.gd_SCBVoyagePerfomDS8_OnCellDblClick = function(obj:nexacro.Grid, e:nexacro.GridClickEventInfo) {"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await com.commCodeInquiry(this, \"vesselCode\", this.ed_vslCode, this.st_vslName);\n//SCBVoyagePerfomDS.DeleteAll();\nthis.ed_voyNo.set_value(\"\");",
+        "to": "__BLOCK__:var param = \"\";\nparam += \" vslCode=\" + nexacro.wrapQuote(this.SCBVoyageSearchDS.getColumn(0, \"vsl_code\"));\nparam += \" voyNo=\" + nexacro.wrapQuote(this.SCBVoyageSearchDS.getColumn(0, \"voy_no\"));\nif (this.SCBVoyagePerfomDS.getColumn(0, \"cb_type\") == \"LN\" || this.SCBVoyagePerfomDS.getColumn(0, \"cb_type\") == \"TR\") {\nif (e.cell == 0) {\nawait com.Dialog(this, 'biz::voyagePerformance/analysis/CBAllStatusCargoExpenseForm.xfdl', param, \"760\", \"400\");\n}\n} else {\nif (e.cell == 0) {\nawait com.Dialog(this, 'biz::voyagePerformance/analysis/CBAllStatusCargoExpenseForm.xfdl', param, \"760\", \"400\");\n}\n}"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:this.btn_vslVoy_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo) {",
+        "to": "__BLOCK__:\nthis.btn_filing_OnClick = function(obj:nexacro.Button, e:nexacro.ClickEventInfo) {"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await sa.openVslVoy(this.ed_vslCode, this.ed_voyNo, this.st_vslName);",
+        "to": "__BLOCK__://if (Trim(SCBVoyagePerfomDS.GetColumn(0, \"vsl_code\")) != null) {  upgrade\nif (!com.isEmpty(this.SCBVoyagePerfomDS.getColumn(0, \"vsl_code\"))) {\nvar vsl_code = take.nvl(this.SCBVoyagePerfomDS.getColumn(0, \"vsl_code\"));\nvar voy_no = take.nvl(this.SCBVoyagePerfomDS.getColumn(0, \"voy_no\"));\nvar fileName = vsl_code + \"-\" + voy_no + \"(CB Status)\";\n//var str = com.OZCreatEx(\"/som/operSt/2300/OST002.ozr\", \"OST002\", \"false\", this.getDSData(), \"/som/operSt/2300/OST002.odi\", this.fnGetOZParam(), fileName, \"pdf\");\nvar str = com.OZCreat4Ex(\"/som/operSt/2300/OST002.ozr\", \"OST002\", \"false\", this.getDSData(), \"/som/operSt/2300/OST002.odi\", this.fnGetOZParam(), fileName, \"pdf\");\ncom.createReportOZ(this, str);\n}"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://바로 PRINT 할 수 있도록 추가\n//WHSHIN 2016.07.27 김주현 대리 요청\nif (!com.isEmpty(this.SCBVoyagePerfomDS.getColumn(0, \"vsl_code\"))) {\nvar str = await com.OZCreatPrt(\"/som/operSt/2300/OST002.ozr\", \"OST002\", \"false\", this.getDSData(), \"/som/operSt/2300/OST002.odi\", this.fnGetOZParam());\nawait com.createReportOZ(this, str);\n}\n",
+        "to": "__BLOCK__://바로 PRINT 할 수 있도록 추가\n//WHSHIN 2016.07.27 김주현 대리 요청\nif (!com.isEmpty(this.SCBVoyagePerfomDS.getColumn(0, \"vsl_code\"))) {\nvar str = await com.OZCreatPrt(\"/som/operSt/2300/OST002.ozr\", \"OST002\", \"false\", this.getDSData(), \"/som/operSt/2300/OST002.odi\", this.fnGetOZParam());\nawait com.createReportOZ(this, str);\n}"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:this.fnSetAuthButton = function() {\nreturn (async () => {\n/* 권한 제어 시작 */\nvar strAuthParam = \"\";\nvar arrayButtonFullID = new Array();\nvar arrayTargetPermission = new Array();\nif(take.nvl(this.parent.param) != \"\") {\nstrAuthParam = this.parent.param;\n}\narrayButtonFullID[0] = \"btn_export\";\narrayTargetPermission[0] = \"E\";\narrayButtonFullID[1] = \"btn_print\";\narrayTargetPermission[1] = \"P\";\narrayButtonFullID[2] = \"btn_filing\";\narrayTargetPermission[2] = \"C\";\narrayButtonFullID[3] = \"btn_inquiry\";\narrayTargetPermission[3] = \"R\";\n// 버튼 컨트롤 Check를 한다.(권한 제어 대상 버튼을 모두 비활성화 시킨다.)\n//g_testAuthButton(ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n// 권한에 대한 버튼 제어를 한다.\nif(!com.isNull(this.ArgFormId))\nawait com.fnAuthButtonControl(this, this.ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n/* 권한 제어 끝 */",
+        "to": "__BLOCK__:// this.fnSetAuthButton = function() {\n// \treturn (async () => {\n// \t\t/* 권한 제어 시작 */\n// \t\tvar strAuthParam = \"\";\n// \t\tvar arrayButtonFullID = new Array();\n// \t\tvar arrayTargetPermission = new Array();\n// \t\tif(take.nvl(this.parent.param) != \"\") {\n// \t\t\tstrAuthParam = this.parent.param;\n// \t\t}\n// \t\tarrayButtonFullID[0] = \"btn_export\";\n// \t\tarrayTargetPermission[0] = \"E\";\n// \t\tarrayButtonFullID[1] = \"btn_print\";\n// \t\tarrayTargetPermission[1] = \"P\";\n// \t\tarrayButtonFullID[2] = \"btn_filing\";\n// \t\tarrayTargetPermission[2] = \"C\";\n// \t\tarrayButtonFullID[3] = \"btn_inquiry\";\n// \t\tarrayTargetPermission[3] = \"R\";\n// \t\t// 버튼 컨트롤 Check를 한다.(권한 제어 대상 버튼을 모두 비활성화 시킨다.)\n// \t\t//g_testAuthButton(ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n// \t\t// 권한에 대한 버튼 제어를 한다.\n// \t\tif(!com.isNull(this.ArgFormId))\n// \t\t\tawait com.fnAuthButtonControl(this, this.ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n// \t\t/* 권한 제어 끝 */\n//\n// \t}).call(this);\n// };"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "var param = \"\";",
+        "to": "this.SCBVoyagePerfomDS.clearData();"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "param += \"functionGubun=INQUIRY\";",
+        "to": "var param = \"\";"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "com.transaction(this, \"INQURIY\", \"SVC_LOC::cBAllStatusShow/INQUIRY.do\",",
+        "to": "param += \"functionGubun=INQUIRY\";"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "\"SCBVoyageSearchDS=SCBVoyageSearchDS:A\", \"SCBVoyagePerfomDS=SCBVoyagePerfomDS\", param, \"fnInquiryCallback\");",
+        "to": "com.transaction(this, \"INQURIY\", \"SVC_LOC::cBAllStatusShow/INQUIRY.do\","
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "*  @MenuPath    1Depth > 2Depth",
+        "to": "*  @MenuPath    Sales > Charter Base Main > 결재요청 채산 조회(증빙포함)"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://this.fv_nFormVal = null;     //용도",
+        "to": "__BLOCK__://EAM에서 사용자의 그룹가져오기\nthis.eamGroupId = \"\";\nthis.attach_svc_id = \"\";\nthis.src_key_value = \"\";\n"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://OnLoada",
+        "to": "__BLOCK__:\n//OnLoad"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:await this.authButtonControl();\nawait so.getEamGroupId();",
+        "to": "__BLOCK__://await this.authButtonControl();\n// \t    await take.loadJs(this, \"soJsLoad\", \"/biz/commonJs/so.js\", function(){\n// \t\t\tso.getEamGroupId(this);\n// \t\t});\nawait this.getEamGroupId();"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__://FormID :\n//작성자 :\n//작성일 : a\n//include \"biz::commonJS/common.js\";\n//include \"biz::commonJS/so_common.js\";\n//include \"biz::commonJS/constants.js\";\nthis.attach_svc_id = \"\";\nthis.src_key_value = \"\";\n/*------------------------------------------------------------------------------------------------------------------*/\n/*------------------------------------------------- Main Action -----------------------------------------------------*/\n/*------------------------------------------------------------------------------------------------------------------*/\n//권한 별 Button 설정a\nthis.authButtonControl = function(){\nreturn (async () => {\n/* 권한 제어 시작 */\nvar strAuthParam = \"\";\nvar arrayButtonFullID = new Array();\nvar arrayTargetPermission = new Array();\nif(take.nvl(this.parent.param) != \"\") {\nstrAuthParam = this.parent.param;\n}\nvar aIdx = 0;\n// INQUIR\narrayButtonFullID[++aIdx] = \"btn_inquiry\";\narrayTargetPermission[aIdx] = \"R\";\narrayButtonFullID[++aIdx] = \"btn_export\";\narrayTargetPermission[aIdx] = \"E\";\n// 권한에 대한 버튼 제어를 한다.\nif(!com.isNull(this.ArgFormId))\nawait com.fnAuthButtonControl(this, this.ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n/* 권한 제어 끝 */",
+        "to": "__BLOCK__://권한 별 Button 설정\n// this.authButtonControl = function(){\n// \treturn (async () => {\n// \t    /* 권한 제어 시작 */\n// \t    var strAuthParam = \"\";\n// \t    var arrayButtonFullID = new Array();\n// \t    var arrayTargetPermission = new Array();\n// \t    if(take.nvl(this.parent.param) != \"\") {\n// \t\t\tstrAuthParam = this.parent.param;\n// \t\t}\n// \t    var aIdx = 0;\n// \t    // INQUIR\n// \t    arrayButtonFullID[++aIdx] = \"btn_inquiry\";\n// \t    arrayTargetPermission[aIdx] = \"R\";\n// \t    arrayButtonFullID[++aIdx] = \"btn_export\";\n// \t    arrayTargetPermission[aIdx] = \"E\";\n// \t    // 권한에 대한 버튼 제어를 한다.\n// \t    if(!com.isNull(this.ArgFormId))\n// \t\t\tawait com.fnAuthButtonControl(this, this.ArgFormId, strAuthParam, arrayButtonFullID, arrayTargetPermission);\n// \t    /* 권한 제어 끝 */\n//\n// \t}).call(this);\n// };"
+      },
+      {
+        "type": "line_replace",
+        "count": 1,
+        "from": "__BLOCK__:/* 변수(pageCtx)가 있는지 확인이 필요합니다.  변수(pageCtx)가 있는지 확인이 필요합니다.*/ com.transaction(this, \"ONLOAD\", \"SVC_LOC::salesOpportunityList/ONLOAD_LIST.do\", \"\", \"CCDCbTypeDS=CCDCbTypeDS VComOrgCDS=VComOrgCDS\", param, \"fnOnloadCallback\");\n",
+        "to": "__BLOCK__:com.transaction(this, \"ONLOAD\", \"SVC_LOC::salesOpportunityList/ONLOAD_LIST.do\", \"\", \"CCDCbTypeDS=CCDCbTypeDS VComOrgCDS=VComOrgCDS\", param, \"fnOnloadCallback\");"
+      }
+    ]
+  }
+}

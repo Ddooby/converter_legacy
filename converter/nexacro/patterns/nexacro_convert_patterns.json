@@ -238,6 +238,50 @@
       "description": "com.replace() 2번째 인자 '@input' → 'input' (AS-IS 플레이스홀더 제거)",
       "from": "\"@input\"",
       "to": "\"input\""
+    },
+    {
+      "id": "comment_inquiry_suffix_fix",
+      "description": "//INQUIRYa 오타 → //INQUIRY",
+      "from": "//INQUIRYa",
+      "to": "//INQUIRY"
+    },
+    {
+      "id": "comment_close_suffix_fix",
+      "description": "//CLOSEa 오타 → //CLOSE",
+      "from": "//CLOSEa",
+      "to": "//CLOSE"
+    },
+    {
+      "id": "comment_export_suffix_fix",
+      "description": "//EXPORTa 오타 → //EXPORT",
+      "from": "//EXPORTa",
+      "to": "//EXPORT"
+    },
+    {
+      "id": "fn_set_auth_button_comment_out",
+      "description": "fnSetAuthButton 호출 주석처리",
+      "from": "await this.fnSetAuthButton();",
+      "to": "//await this.fnSetAuthButton();"
+    },
+    {
+      "id": "biz_path_underscore_to_slash",
+      "description": "biz:: 도메인 경로 언더바→슬래시 폴더 분리",
+      "is_regex": true,
+      "from_pattern": "biz::(\\w+)_(\\w+)/",
+      "to": "biz::\\1/\\2/"
+    },
+    {
+      "id": "uxb_info_obj_getbinddataset",
+      "description": "UXB INFO obj 방식 getBindDataset → com.getBindDataset(this, obj)",
+      "from": "var dsObj = obj./**UXB INFO : com.getBindDataset(this[폼], objComp[컴포넌트]); 로 변경 필요 **/;",
+      "to": "var dsObj = com.getBindDataset(this, obj);"
+    },
+    {
+      "id": "xml_ext_to_xfdl",
+      "description": "Script 내 .xml 확장자 → .xfdl (xfdl 파일 경로 문자열)",
+      "is_regex": true,
+      "from_pattern": "\\.xml(['\\\"])",
+      "to": ".xfdl\\1"
     }
   ],
   "script_aichanger_markers": {
@@ -268,6 +312,20 @@
       "description": "[UXB변환 Info] 제거필요 주석과 후속 코드 라인 제거",
       "is_regex": true,
       "from_pattern": "/\\* \\[UXB변환 Info\\]\\s*제거필요\\*/[^\n]+",
+      "to": ""
+    },
+    {
+      "id": "aiconvert_var_comment_remove",
+      "description": "자동변환 '변수 확인 필요' 인라인 주석 제거",
+      "is_regex": true,
+      "from_pattern": "/\\* 변수\\(\\w+\\)가 있는지 확인이 필요합니다\\.  변수\\(\\w+\\)가 있는지 확인이 필요합니다\\.\\*/ ",
+      "to": ""
+    },
+    {
+      "id": "aiconvert_filter_comment_remove",
+      "description": "자동변환 'Filter 수정 필요' 인라인 주석 제거",
+      "is_regex": true,
+      "from_pattern": "/\\* Filter은 로직에 맞게 수정하시기 바랍니다\\.\\*/ ",
       "to": ""
     }
   ],
