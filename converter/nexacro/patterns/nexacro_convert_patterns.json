@@ -334,7 +334,7 @@
       "id": "uxb_info_get_bind_dataset",
       "description": "UXB INFO getBindDataset 마커 → com.getBindDataset 호출로 변환",
       "is_regex": true,
-      "from_pattern": "this\\[((?:this\\.)?\\w+)\\s*\\.\\s*/\\*\\*UXB INFO : com\\.getBindDataset\\(pThis\\[폼\\], objComp\\[컴포넌트\\]\\); 로 변경 필요 \\*\\*\\/\\]",
+      "from_pattern": "([A-Za-z_][\\w.]*)\\.\\s*/\\*\\*UXB INFO : com\\.getBindDataset\\((?:pThis|this)\\[폼\\], objComp\\[컴포넌트\\]\\); 로 변경 필요 \\*\\*/",
       "to": "com.getBindDataset(this, \\1)"
     }
   },

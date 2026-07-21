@@ -1,5 +1,6 @@
 # AI 1차 변환파일에 대해서 Script 작업 편의를 위해 2차로 가공할 대상
 # /nexacro/biz 폴더 아래
+# python -m converter.nexacro.nexacroMain
 
 # 2026-06-25 : 2차 Convert
 # C:\Projects\Panocean\nexacro\biz\globalOperationStatus\dailyReport\VesselMovementDailyReportForm.xfdl
@@ -1882,6 +1883,17 @@
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractLinerManagmentForm.xfdl
 
 # 2026-07-15 : 2차 -> 3차 Convert
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\OilOrderListForm.xfdl
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\OilOrderTCListForm.xfdl
-C:\Projects\Panocean\nexacro\biz\contract\contract\PositionReNewForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\OilOrderListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\OilOrderTCListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\PositionReNewForm.xfdl
+
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListBNKSubForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractBNKNewForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListCGOSubForm.xfdl
+
+# 2026-07-21
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGONewForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractBnkScheduleForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGOPositionDivisionForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGOPositionSpotForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGRNewForm.xfdl

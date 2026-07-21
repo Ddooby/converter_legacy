@@ -187,6 +187,7 @@ class XfdlConverter:
         7. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
         8. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
         9. async/await 변환 — com.* 호출 함수 전체 래핑
+        10. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -197,6 +198,7 @@ class XfdlConverter:
         content = self._fix_is_null_trim_check(content)
         content = self._fix_export_excel_grid(content)
         content = self._fix_wrap_quote_nvl(content)
+        content = self._wrap_ozdel_concat_nvl(content)
         content = self._convert_arithmetic_to_decimal(content)
         content = self._apply_text_replacements(content)
         content = self._convert_fn_message_domain(content)
@@ -380,6 +382,16 @@ class XfdlConverter:
             r'nexacro.wrapQuote(take.nvl(\1))',
             content,
         )
+
+    _OZDEL_NVL_RE = re.compile(
+        r'(?<!take\.nvl\()(this\.[\w.]+\.(?:value|text)|this\.[\w.]+\.getColumn\([^()]*\))(\s*\+\s*com\.G_OzDel)'
+    )
+
+    def _wrap_ozdel_concat_nvl(self, content: str) -> str:
+        """OZ리포트 += 문자열 조립: com.G_OzDel 앞의 this.xxx.value/.text/.getColumn(...)을
+        take.nvl(...)로 감싸 null 이 그대로 이어붙는 것을 방지.
+        이미 take.nvl 로 감싼 경우는 건드리지 않음"""
+        return self._OZDEL_NVL_RE.sub(r'take.nvl(\1)\2', content)
 
 
     def _comment_out_auth_button_callers(self, content: str) -> str:
