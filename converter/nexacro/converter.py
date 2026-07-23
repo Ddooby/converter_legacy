@@ -6,6 +6,7 @@ Nexacro XFDL Converter
 import re
 import json
 import logging
+import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,10 @@ _OP_TO_METHOD = {'+': 'add', '-': 'sub', '*': 'mul', '/': 'div'}
 
 _FINANCIAL_KW = {'amt', 'amount', 'rate', 'vat', 'cost', 'fee'}
 _CAMEL_SPLIT_RE = re.compile(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\d|\b)|[A-Z]|\d+')
+
+_MANUAL_CONVERT_ROW_RE = re.compile(
+    r'\*(\s*)2025\.09\.DD(\s+)수동변환자(\s+)수동변환(?!\()'
+)
 
 
 class XfdlConverter:
@@ -188,6 +193,7 @@ class XfdlConverter:
         8. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
         9. async/await 변환 — com.* 호출 함수 전체 래핑
         10. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
+        11. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -201,6 +207,7 @@ class XfdlConverter:
         content = self._wrap_ozdel_concat_nvl(content)
         content = self._convert_arithmetic_to_decimal(content)
         content = self._apply_text_replacements(content)
+        content = self._stamp_manual_convert_date(content)
         content = self._convert_fn_message_domain(content)
         if form_name:
             content = self._replace_system_form_name(content, form_name)
@@ -392,6 +399,17 @@ class XfdlConverter:
         take.nvl(...)로 감싸 null 이 그대로 이어붙는 것을 방지.
         이미 take.nvl 로 감싼 경우는 건드리지 않음"""
         return self._OZDEL_NVL_RE.sub(r'take.nvl(\1)\2', content)
+
+    def _stamp_manual_convert_date(self, content: str) -> str:
+        """소스 수정 이력의 '2025.09.DD 수동변환자 수동변환' 플레이스홀더를
+        실행 시점의 오늘 날짜 + 정철환 + 수동변환(1차) 로 치환.
+        (JSON 정적 패턴이 아니라 실행 코드로 처리 — 날짜는 매 실행마다 달라져야 하므로)"""
+        today = datetime.date.today().strftime('%Y.%m.%d')
+
+        def _repl(m: re.Match) -> str:
+            return f'*{m.group(1)}{today}{m.group(2)}정철환{m.group(3)}수동변환(1차)'
+
+        return _MANUAL_CONVERT_ROW_RE.sub(_repl, content)
 
 
     def _comment_out_auth_button_callers(self, content: str) -> str:

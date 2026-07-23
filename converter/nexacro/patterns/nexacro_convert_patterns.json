@@ -282,6 +282,13 @@
       "is_regex": true,
       "from_pattern": "\\.xml(['\\\"])",
       "to": ".xfdl\\1"
+    },
+    {
+      "id": "select_row_to_set_rowposition",
+      "description": "MiPlatform Dataset.selectRow() → Nexacro set_rowposition() 변환",
+      "is_regex": true,
+      "from_pattern": "(this\\.\\w+)\\.selectRow\\(([^)]+)\\)",
+      "to": "\\1.set_rowposition(\\2)"
     }
   ],
   "script_aichanger_markers": {
