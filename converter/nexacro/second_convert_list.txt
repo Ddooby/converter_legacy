@@ -1898,3 +1898,15 @@
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGOPositionSpotForm.xfdl
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGRNewForm.xfdl
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGOPositionForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGOPositionDivisionReletForm.xfdl
+
+# 2026-07-24
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGODetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractAccountModifyForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractCGRDetailForm.xfdl
+
+# 2026-07-28
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListCGRSubForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListFFASubForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFANewForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFADetailForm.xfdl

@@ -196,9 +196,9 @@
     },
     {
       "id": "for_loop_var_declaration",
-      "description": "for 루프 변수 선언 누락 → var 추가 (var/let/const 이미 있으면 제외)",
+      "description": "for 루프 변수 선언 누락 → var 추가 (var/let/const 이미 있으면 제외). for와 ( 사이 공백 유무 모두 대응",
       "is_regex": true,
-      "from_pattern": "for\\(\\s*(?!var |let |const )([a-zA-Z_]\\w*)\\s*=",
+      "from_pattern": "for\\s*\\(\\s*(?!var\\b|let\\b|const\\b)([a-zA-Z_]\\w*)\\s*=",
       "to": "for( var \\1 ="
     },
     {
