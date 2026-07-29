@@ -202,6 +202,13 @@
       "to": "for( var \\1 ="
     },
     {
+      "id": "dataset_deleteall_to_cleardata",
+      "description": "Dataset.deleteAll() → Dataset.clearData() (MiPlatform → Nexacro API 명 변경)",
+      "is_regex": true,
+      "from_pattern": "\\.[Dd]elete[Aa]ll\\(\\s*\\)",
+      "to": ".clearData()"
+    },
+    {
       "id": "filter_eq_to_double_eq",
       "description": "Dataset.filter() 내 비교 연산자 = → == (컬럼명=\" 패턴 대상)",
       "is_regex": true,
