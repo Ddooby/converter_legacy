@@ -1907,6 +1907,18 @@
 
 # 2026-07-28
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListCGRSubForm.xfdl
-C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListFFASubForm.xfdl
-C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFANewForm.xfdl
-C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFADetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListFFASubForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFANewForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFADetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListFFAPopUpForm.xfdl
+
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListFFTSubForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListFFFSubForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListTCISubForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListTCOSubForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListInternalTCISubForm.xfdl
+
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTDetailForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTOptionDetailForm.xfdl
+
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTNewForm.xfdl

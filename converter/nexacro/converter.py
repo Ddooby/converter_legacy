@@ -39,10 +39,14 @@ class XfdlConverter:
     # ──────────────────────────────────────────
 
     def convert_file(self, input_path: Path, output_path: Path) -> None:
-        content = input_path.read_text(encoding="utf-8-sig")  # BOM 자동 제거
+        # newline="" : 원본 줄바꿈(CRLF/LF) 그대로 보존 — read_text/write_text 기본값은
+        # universal newline 변환을 적용해 CRLF 원본이 LF로 깨지는 문제가 있었음
+        with open(input_path, encoding="utf-8-sig", newline="") as f:  # BOM 자동 제거
+            content = f.read()
         result = self.convert(content, form_name=input_path.stem)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(result, encoding="utf-8")
+        with open(output_path, "w", encoding="utf-8", newline="") as f:
+            f.write(result)
         logger.info("변환 완료: %s", output_path)
 
     def convert(self, content: str, form_name: str = "") -> str:
@@ -189,11 +193,17 @@ class XfdlConverter:
         4. UXB INFO getBindDataset
         5. SVC_LOC URL 변환 (com.pageCtx + Servlet → camelCase path)
         6. Dataset getColumn 컬럼명 camelCase 변환
-        7. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
-        8. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
-        9. async/await 변환 — com.* 호출 함수 전체 래핑
-        10. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
-        11. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
+        7. this. 누락 보정 — 함수(isCheck/isDate/isExistCbMapping/inquiryCallback 등) 선언/호출부,
+           폼레벨 플래그 변수(isAdmin/isCam) 선언/참조부
+        8. take.nvl() 누락 보정 — wrapQuote/MultiSearch 결과/cntr_no/check_item getColumn/getTrim
+        9. '이중정렬방식처리관련 로직' 깨진 주석 블록(// 로만 열려 SyntaxError 나는 케이스) 복구
+        10. this["A"] / this["A.B"] 브래킷 표기 → 점 표기 (.form. 하위폼 접근 컨벤션 포함)
+        11. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
+        12. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
+        13. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
+        14. 세미콜론 앞 중복 공백 정리
+        15. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
+        16. async/await 변환 — com.* 호출 함수 전체 래핑
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -203,11 +213,20 @@ class XfdlConverter:
         content = self._convert_dataset_get_column(content)
         content = self._fix_is_null_trim_check(content)
         content = self._fix_export_excel_grid(content)
+        content = self._fix_missing_this_on_functions(content)
+        content = self._fix_missing_this_on_known_flags(content)
         content = self._fix_wrap_quote_nvl(content)
+        content = self._fix_multisearch_result_nvl(content)
+        content = self._fix_cntrno_getcolumn_nvl(content)
+        content = self._fix_checkitem_getcolumn_nvl(content)
+        content = self._fix_gettrim_cbmapping_nvl(content)
+        content = self._fix_double_sort_comment_block(content)
+        content = self._fix_this_bracket_notation(content)
         content = self._wrap_ozdel_concat_nvl(content)
         content = self._convert_arithmetic_to_decimal(content)
         content = self._apply_text_replacements(content)
         content = self._stamp_manual_convert_date(content)
+        content = self._fix_semicolon_spacing(content)
         content = self._convert_fn_message_domain(content)
         if form_name:
             content = self._replace_system_form_name(content, form_name)
@@ -254,7 +273,7 @@ class XfdlConverter:
             result.append(content[last_end:m.start()])
             servlet_name = m.group(1)
             preceding = content[:m.start()]
-            gubun_pat = re.compile(r'functionGubun\s*=\s*"?([A-Za-z0-9_]+)"?')
+            gubun_pat = re.compile(r'functionGubun\s*=\s*[\'"]?([A-Za-z0-9_]+)[\'"]?')
             gubun_matches = list(gubun_pat.finditer(preceding))
             if not gubun_matches:
                 # functionGubun이 URL 뒤(같은 transaction 호출 내)에 있는 경우도 탐색
@@ -383,12 +402,133 @@ class XfdlConverter:
 
     def _fix_wrap_quote_nvl(self, content: str) -> str:
         """nexacro.wrapQuote(this.xxx.value) → nexacro.wrapQuote(take.nvl(this.xxx.value))
+        nexacro.wrapQuote(this.xxx.getColumn(...)) 처럼 getColumn 호출이 인자인 경우도 포함.
         이미 take.nvl 로 감싼 경우 건드리지 않음"""
-        return re.sub(
+        content = re.sub(
+            r'nexacro\.wrapQuote\((?!take\.nvl)(this\.[a-zA-Z_][a-zA-Z0-9_.]*\.getColumn\([^()]*\))\)',
+            r'nexacro.wrapQuote(take.nvl(\1))',
+            content,
+        )
+        content = re.sub(
             r'nexacro\.wrapQuote\((?!take\.nvl)(this\.[a-zA-Z_][a-zA-Z0-9_.]*)\)',
             r'nexacro.wrapQuote(take.nvl(\1))',
             content,
         )
+        return content
+
+    # ──────────────────────────────────────────
+    # this. 누락 / take.nvl() 누락 보정
+    # (ContractListCGR/CGO/FFASubForm 수동변환본 패턴 기반 — Contract List 계열 반복 화면 대상)
+    # ──────────────────────────────────────────
+
+    _FUNC_DECL_ANY_RE = re.compile(r'(?:this\.)?([A-Za-z_]\w*)\s*=\s*function\s*\(')
+    _KNOWN_FORM_FLAGS = (
+        "isAdmin", "isCam",
+        "index_link", "isHdgDSChgChk", "isExit", "isModify", "isUpdate",
+    )
+    _MULTISEARCH_NVL_RE = re.compile(
+        r'\.set_value\((?!take\.nvl)((?:this\.)?\w*MultiSearchDS\.getColumn\([^()]*\))\)'
+    )
+    _CNTRNO_GETCOL_NVL_RE = re.compile(
+        r'(?<!take\.nvl\()(?<![\w.])((?:this\.)?[\w.]*\bgetColumn\([^()]*"cntr_no"[^()]*\))'
+    )
+    _CHECKITEM_GETCOL_NVL_RE = re.compile(
+        r'(?<!take\.nvl\()(?<![\w.])((?:this\.)?[\w.]*\bgetColumn\([^()]*"check_item"[^()]*\))'
+    )
+    _GETTRIM_CBMAPPING_NVL_RE = re.compile(
+        r'take\.getTrim\((?!take\.nvl\()(this\.cbMappingCntrNo)\)'
+    )
+    _DOUBLE_SORT_COMMENT_RE = re.compile(
+        r'//이중정렬방식처리관련 로직\r?\n'
+        r'(?:[^\r\n]*\r?\n){0,4}?'
+        r'[^\r\n]*마이플랫폼지원문서 참고a?[^\r\n]*\r?\n?'
+    )
+    _DOUBLE_SORT_COMMENT_FIX = (
+        "/*\n"
+        " * 이중정렬방식처리관련 로직\n"
+        " *        prarm_grid : 정렬할 Grid ID명\n"
+        " *\n"
+        " *    Author : Ssong(20090428) _ 마이플랫폼지원문서 참고\n"
+        " */\n"
+    )
+
+    def _fix_missing_this_on_functions(self, content: str) -> str:
+        """this.NAME = function(...) 형태로 선언/호출돼야 할 함수가
+        NAME = function(...) / NAME(...) 처럼 this. 없이 쓰인 경우 (AIChanger 자동변환
+        시 흔한 this. 누락 패턴) this. 를 선언부/호출부 모두에 일괄로 붙여준다.
+        예: isCheck, isDate, isExistCbMapping, inquiryCallback 등
+        주석 처리된 라인(//, /*, *) 은 건드리지 않음"""
+        names = set(self._FUNC_DECL_ANY_RE.findall(content))
+        if not names:
+            return content
+        decl_pats = [(n, re.compile(r'(?<![.\w])' + re.escape(n) + r'(\s*=\s*function\s*\()')) for n in names]
+        call_pats = [(n, re.compile(r'(?<![.\w])' + re.escape(n) + r'(\s*\()')) for n in names]
+        lines = content.split('\n')
+        for idx, line in enumerate(lines):
+            if line.lstrip().startswith(('//', '/*', '*')):
+                continue
+            for n, pat in decl_pats:
+                line = pat.sub(lambda m, nn=n: f'this.{nn}{m.group(1)}', line)
+            for n, pat in call_pats:
+                line = pat.sub(lambda m, nn=n: f'this.{nn}{m.group(1)}', line)
+            lines[idx] = line
+        return '\n'.join(lines)
+
+    def _fix_missing_this_on_known_flags(self, content: str) -> str:
+        """isAdmin / isCam 처럼 폼레벨 플래그 변수가 this. 없이 선언/참조되는 경우
+        this. 를 붙여준다. (Contract List 계열 화면에서 반복되는 패턴)
+        주석 처리된 라인(//, /*, *) 은 건드리지 않음"""
+        pats = [(n, re.compile(r'(?<![.\w])' + n + r'\b')) for n in self._KNOWN_FORM_FLAGS]
+        lines = content.split('\n')
+        for idx, line in enumerate(lines):
+            if line.lstrip().startswith(('//', '/*', '*')):
+                continue
+            for n, pat in pats:
+                line = pat.sub(f'this.{n}', line)
+            lines[idx] = line
+        return '\n'.join(lines)
+
+    def _fix_multisearch_result_nvl(self, content: str) -> str:
+        """MultiSearch 팝업 결과 set_value(...MultiSearchDS.getColumn(0, "codename"/"codeName"))
+        에 take.nvl 누락된 경우 감싸기"""
+        return self._MULTISEARCH_NVL_RE.sub(r'.set_value(take.nvl(\1))', content)
+
+    def _fix_cntrno_getcolumn_nvl(self, content: str) -> str:
+        """....getColumn(..., "cntr_no") 형태 호출 전체(변수 대입/함수 인자/setColumn 3번째 인자 등
+        위치 불문)에서 take.nvl 누락된 경우 감싸기"""
+        return self._CNTRNO_GETCOL_NVL_RE.sub(r'take.nvl(\1)', content)
+
+    def _fix_checkitem_getcolumn_nvl(self, content: str) -> str:
+        """....getColumn(..., "check_item") 형태 호출에서 take.nvl 누락된 경우 감싸기"""
+        return self._CHECKITEM_GETCOL_NVL_RE.sub(r'take.nvl(\1)', content)
+
+    def _fix_gettrim_cbmapping_nvl(self, content: str) -> str:
+        """take.getTrim(this.cbMappingCntrNo) 에 take.nvl 누락된 경우 감싸기"""
+        return self._GETTRIM_CBMAPPING_NVL_RE.sub(r'take.getTrim(take.nvl(\1))', content)
+
+    def _fix_double_sort_comment_block(self, content: str) -> str:
+        """'이중정렬방식처리관련 로직' 주석이 // 로만 시작되고 /* 로 안 닫혀서
+        다음 줄들(* prarm_grid...)이 그대로 구문으로 파싱되어 SyntaxError 가 나는 케이스를
+        정상적인 블록주석(/* ... */)으로 복구한다."""
+        return self._DOUBLE_SORT_COMMENT_RE.sub(self._DOUBLE_SORT_COMMENT_FIX, content)
+
+    _THIS_BRACKET_RE = re.compile(r'this\["(\w+)(?:\.(\w+))?"\]')
+
+    def _fix_this_bracket_notation(self, content: str) -> str:
+        """this["SCTCgoPositionDS"] → this.SCTCgoPositionDS (단순 프로퍼티)
+        this["dv_sctOrgCpInfo.CCDAttachFileInfoDS"] → this.dv_sctOrgCpInfo.form.CCDAttachFileInfoDS
+        (하위 폼에 바인딩된 데이터셋은 .form. 을 끼워 넣어야 함 — Nexacro 하위폼 접근 컨벤션)"""
+        def _repl(m: re.Match) -> str:
+            outer, inner = m.group(1), m.group(2)
+            if inner:
+                return f'this.{outer}.form.{inner}'
+            return f'this.{outer}'
+        return self._THIS_BRACKET_RE.sub(_repl, content)
+
+    def _fix_semicolon_spacing(self, content: str) -> str:
+        """'strDS_1 += "" + com.G_OzDel  ;' 처럼 세미콜론 앞에 공백 2개 이상 남는 경우 정리.
+        AIChanger가 더 긴 표현식을 짧은 값으로 치환하면서 남긴 흔적."""
+        return re.sub(r' {2,};', ';', content)
 
     _OZDEL_NVL_RE = re.compile(
         r'(?<!take\.nvl\()(this\.[\w.]+\.(?:value|text)|this\.[\w.]+\.getColumn\([^()]*\))(\s*\+\s*com\.G_OzDel)'
@@ -552,7 +692,8 @@ class XfdlConverter:
 
             inner = self._add_await_to_content(inner, await_com_funcs, com_prefix_await, excl, async_funcs)
 
-            indented = "\n".join(f"{tab}{ln}".rstrip() for ln in inner.split("\n"))
+            # rstrip()은 공백/탭만 제거 — CRLF 원본의 trailing '\r'까지 같이 날아가는 것 방지
+            indented = "\n".join(f"{tab}{ln}".rstrip(" \t") for ln in inner.split("\n"))
             if fname in called_by_async:
                 wrapped = f"{{\n{tab}return (async () => {{{indented}\n{tab}}}).call(this);\n}}"
             else:
@@ -648,8 +789,16 @@ class XfdlConverter:
         return ''.join(result)
 
     def _convert_getcol_assign_to_decimal(self, content: str) -> str:
+        # CRLF 원본 보존: '\n' 기준 split 시 각 라인 끝에 '\r'가 남는데,
+        # _try_convert_assign_line 내부에서 strip() 하면서 이 '\r'가 유실되므로 분리해뒀다가 재부착
         lines = content.split('\n')
-        return '\n'.join(self._try_convert_assign_line(ln) for ln in lines)
+        out = []
+        for ln in lines:
+            has_cr = ln.endswith('\r')
+            core = ln[:-1] if has_cr else ln
+            converted = self._try_convert_assign_line(core)
+            out.append(converted + '\r' if has_cr else converted)
+        return '\n'.join(out)
 
     def _try_convert_assign_line(self, line: str) -> str:
         stripped = line.strip()
@@ -675,6 +824,14 @@ class XfdlConverter:
         # Case 2: 금액 변수 단일 getColumn 대입 (X = DS.getColumn(...))
         if is_fin and '.getColumn(' in rhs_s and not _ARITH_OP_RE.search(rhs_s) and 'take.nvl(' not in rhs_s:
             return f'{indent}{var_kw}{lhs_var}{eq_part}new nexacro.Decimal(take.nvl({rhs_s}, 0)){suffix}'
+
+        # Case 2b: 비금액 변수 단일 getColumn 대입 (X = this.DS.getColumn(...)) → take.nvl만 래핑 (Decimal 아님)
+        if (
+            not is_fin
+            and 'take.nvl(' not in rhs_s
+            and re.match(r'^this\.[\w.]+\.getColumn\([^()]*\)$', rhs_s)
+        ):
+            return f'{indent}{var_kw}{lhs_var}{eq_part}take.nvl({rhs_s}){suffix}'
 
         # Case 3: 산술 대입 (getColumn 2개↑ 또는 금액 변수)
         has_getcol2   = len(_GETCOL_RE.findall(rhs_s)) >= 2

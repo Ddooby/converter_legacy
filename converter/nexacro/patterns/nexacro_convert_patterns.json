@@ -195,6 +195,13 @@
       "to": ",'teamCode')"
     },
     {
+      "id": "multi_common_code_popup_codename",
+      "description": "MultiCommonCodePopupForm.xfdl 팝업 결과 데이터셋 getColumn(\"codeName\") → getColumn(\"codename\") (실제 컬럼명은 소문자 codename)",
+      "is_regex": true,
+      "from_pattern": "\\.getColumn\\(([^,()]+),\\s*['\"]codeName['\"]\\)",
+      "to": ".getColumn(\\1, \"codename\")"
+    },
+    {
       "id": "for_loop_var_declaration",
       "description": "for 루프 변수 선언 누락 → var 추가 (var/let/const 이미 있으면 제외). for와 ( 사이 공백 유무 모두 대응",
       "is_regex": true,
@@ -220,6 +227,12 @@
       "description": "OZ 분할 출력 전역 참조 → com 네임스페이스",
       "from": "this.G_OzSplit",
       "to": "com.G_OzSplit"
+    },
+    {
+      "id": "oz_timerid_this_to_com",
+      "description": "OZ 타이머ID 전역 참조 → com 네임스페이스",
+      "from": "this.G_OzTimerID",
+      "to": "com.G_OzTimerID"
     },
     {
       "id": "oz_sid_this_to_com",
