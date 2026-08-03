@@ -1918,7 +1918,15 @@
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListTCOSubForm.xfdl
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListInternalTCISubForm.xfdl
 
-C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTDetailForm.xfdl
-C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTOptionDetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTDetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\OilOrderRequestNewForm.xfdl
+
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractTCODetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTOptionDetailForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractTCIDetailForm.xfdl
+
+C:\Projects\Panocean\nexacro\biz\contract\contract\ReasonForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ReferenceCbListForm.xfdl
 
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTNewForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTOptionDetailForm.xfdl

@@ -197,13 +197,18 @@ class XfdlConverter:
            폼레벨 플래그 변수(isAdmin/isCam) 선언/참조부
         8. take.nvl() 누락 보정 — wrapQuote/MultiSearch 결과/cntr_no/check_item getColumn/getTrim
         9. '이중정렬방식처리관련 로직' 깨진 주석 블록(// 로만 열려 SyntaxError 나는 케이스) 복구
-        10. this["A"] / this["A.B"] 브래킷 표기 → 점 표기 (.form. 하위폼 접근 컨벤션 포함)
-        11. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
-        12. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
-        13. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
-        14. 세미콜론 앞 중복 공백 정리
-        15. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
-        16. async/await 변환 — com.* 호출 함수 전체 래핑
+        10. com.isEmpty(this, X) → com.isEmpty(X) (pThis 잔재 인자 제거, DetailForm 계열)
+        11. 부모(List) 폼 전달 파라미터(approvalMode/cntrNo/cpDtRsn/isAdministrator/isCamGrp/reasonFlag/view)
+            this.parent.X 로 승격 (DetailForm 계열)
+        12. G_OzTimerID/G_OzTimeout 참조 이원화 (e.timerid== 비교는 com., setTimer()는 common_oz.)
+        13. AllWindows/DivMain MDI 창 순회 리프레시 패턴 → this.opener.parent.parent.fnSearch() 대체
+        14. this["A"] / this["A.B"] 브래킷 표기 → 점 표기 (.form. 하위폼 접근 컨벤션 포함)
+        15. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
+        16. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
+        17. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
+        18. 세미콜론 앞 중복 공백 정리
+        19. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
+        20. async/await 변환 — com.* 호출 함수 전체 래핑
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -221,6 +226,10 @@ class XfdlConverter:
         content = self._fix_checkitem_getcolumn_nvl(content)
         content = self._fix_gettrim_cbmapping_nvl(content)
         content = self._fix_double_sort_comment_block(content)
+        content = self._fix_isempty_remove_this_arg(content)
+        content = self._fix_missing_parent_on_known_params(content)
+        content = self._fix_oztimer_refs(content)
+        content = self._fix_mdi_allwindows_refresh(content)
         content = self._fix_this_bracket_notation(content)
         content = self._wrap_ozdel_concat_nvl(content)
         content = self._convert_arithmetic_to_decimal(content)
@@ -511,6 +520,100 @@ class XfdlConverter:
         다음 줄들(* prarm_grid...)이 그대로 구문으로 파싱되어 SyntaxError 가 나는 케이스를
         정상적인 블록주석(/* ... */)으로 복구한다."""
         return self._DOUBLE_SORT_COMMENT_RE.sub(self._DOUBLE_SORT_COMMENT_FIX, content)
+
+    # ──────────────────────────────────────────
+    # DetailForm 계열 전용 보정
+    # (ContractCGO/CGR/FFADetailForm 수동변환본 패턴 기반 — Contract Detail 계열 반복 화면 대상)
+    # ──────────────────────────────────────────
+
+    def _fix_isempty_remove_this_arg(self, content: str) -> str:
+        """com.isEmpty(this, X) → com.isEmpty(X)
+        MiPlatform pThis 인자 전달 관례의 잔재. 실제 com.js 의 com.isEmpty(pValue, pPath) 시그니처와
+        맞지 않으므로(pPath 는 MaskEdit 하위경로 전용 파라미터) 무조건 제거해야 함.
+        기존 script_text_replacements 의 pThis 제거 규칙은 AS-IS 소스가 이미
+        "com.isEmpty(this, ..." 형태로 넘어오는 경우(AIChanger가 pThis→this 를 먼저 치환해버린 케이스)를
+        못 잡아서 별도로 추가."""
+        return re.sub(r'com\.isEmpty\(this,\s*', 'com.isEmpty(', content)
+
+    _KNOWN_PARENT_PARAMS = ("approvalMode", "cntrNo", "cpDtRsn", "isAdministrator", "isCamGrp", "reasonFlag", "view")
+    _KNOWN_PARENT_PARAMS_BARE_ONLY = ("isAdministrator", "isCamGrp")
+
+    def _fix_missing_parent_on_known_params(self, content: str) -> str:
+        """DetailForm 은 List(부모) 폼에서 열릴 때 approvalMode/cntrNo/cpDtRsn/isAdministrator/
+        isCamGrp/reasonFlag/view 값을 전달받는다. this.X 또는 bare X 로 남아있으면 this.parent.X 로 승격.
+        (param 은 지역변수로 훨씬 많이 쓰여서 목록에서 제외 — 무조건 승격 시 로직 파괴 위험)
+        isModify 는 함수별로 '부모 최초값 읽기' 와 '폼 자체 dirty-flag' 두 가지 의미로 혼용되므로
+        이 메소드에서 다루지 않음 — 화면별 컨텍스트 확인 후 수동 처리 권장.
+        주석 처리된 라인(//, /*, *) 은 건드리지 않음"""
+        this_pats = [(n, re.compile(r'this\.' + n + r'\b(?!\.)(?!\s*=\s*"")')) for n in self._KNOWN_PARENT_PARAMS]
+        bare_pats = [(n, re.compile(r'(?<![.\w])' + n + r'\b')) for n in self._KNOWN_PARENT_PARAMS_BARE_ONLY]
+        lines = content.split('\n')
+        for idx, line in enumerate(lines):
+            if line.lstrip().startswith(('//', '/*', '*')):
+                continue
+            for n, pat in this_pats:
+                line = pat.sub(f'this.parent.{n}', line)
+            for n, pat in bare_pats:
+                line = pat.sub(f'this.parent.{n}', line)
+            lines[idx] = line
+        return '\n'.join(lines)
+
+    def _fix_oztimer_refs(self, content: str) -> str:
+        """G_OzTimerID/G_OzTimeout 참조 문맥별 이원화:
+        - e.timerid== 비교 → com.G_OzTimerID
+        - this.setTimer(...) 호출 인자 → common_oz.G_OzTimerID / common_oz.G_OzTimeout
+        (com/common_oz 두 네임스페이스 모두 동일 값을 갖고 있으나, 참고 화면들의 수동변환 관례를 따름)"""
+        content = content.replace('e.timerid==this.G_OzTimerID', 'e.timerid==com.G_OzTimerID')
+        content = re.sub(
+            r'this\.setTimer\(this\.G_OzTimerID,\s*this\.G_OzTimeout\)',
+            'this.setTimer(common_oz.G_OzTimerID,common_oz.G_OzTimeout)',
+            content,
+        )
+        return content
+
+    _MDI_REFRESH_ANCHOR = 'var winCnt = this.AllWindows.com.length;'
+
+    def _fix_mdi_allwindows_refresh(self, content: str) -> str:
+        """AllWindows 전체 창 순회로 List Form 을 찾아 fnInquiry() 를 호출해 새로고침하는
+        MiPlatform MDI 패턴은 Nexacro 에 대응 개념이 없음. 참고 3개 DetailForm 모두
+        this.opener.parent.parent.fnSearch() 로 대체하고 기존 로직은 주석처리하는 동일한 패턴이었으므로
+        그대로 자동화. cbListFormID 값 등 세부는 화면마다 달라도 무방(주석처리만 되면 됨)."""
+        result = []
+        pos = 0
+        while True:
+            anchor_idx = content.find(self._MDI_REFRESH_ANCHOR, pos)
+            if anchor_idx == -1:
+                result.append(content[pos:])
+                break
+            line_start = content.rfind('\n', 0, anchor_idx) + 1
+            # 이미 주석처리되어 처리된 블록이면(idempotent) 건드리지 않고 다음 탐색으로
+            if content[line_start:anchor_idx].lstrip().startswith('//'):
+                result.append(content[pos:anchor_idx + len(self._MDI_REFRESH_ANCHOR)])
+                pos = anchor_idx + len(self._MDI_REFRESH_ANCHOR)
+                continue
+            for_open = content.find('{', anchor_idx)
+            close = self._find_matching_brace(content, for_open) if for_open != -1 else -1
+            if for_open == -1 or close == -1:
+                # 예상 구조와 다르면 건드리지 않고 다음 탐색 지점으로
+                result.append(content[pos:anchor_idx + len(self._MDI_REFRESH_ANCHOR)])
+                pos = anchor_idx + len(self._MDI_REFRESH_ANCHOR)
+                continue
+            block_end = content.find('\n', close)
+            block_end = block_end + 1 if block_end != -1 else close + 1
+
+            result.append(content[pos:line_start])
+            block = content[line_start:block_end]
+            commented = '\n'.join(
+                (ln if not ln.strip() else '//' + ln) for ln in block.split('\n')
+            )
+            replacement = (
+                '\tif (!com.isEmpty(this.opener.parent.parent)) {\n'
+                '\t\tthis.opener.parent.parent.fnSearch();\n'
+                '\t}\n'
+            )
+            result.append(replacement + commented)
+            pos = block_end
+        return ''.join(result)
 
     _THIS_BRACKET_RE = re.compile(r'this\["(\w+)(?:\.(\w+))?"\]')
 
