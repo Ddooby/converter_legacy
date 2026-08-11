@@ -111,43 +111,46 @@
       "to": ".rowcount"
     },
     {
-      "id": "rowtype_insert_lowercase",
-      "description": "rowtype 문자열 비교 → Dataset 상수 (insert)",
-      "from": "== \"insert\"",
-      "to": "== Dataset.ROWTYPE_INSERT"
+      "id": "getsum_compare_left_tonumber",
+      "description": "getSum() 대소비교(>,<,>=,<=) 좌변 → nexacro.toNumber() 래핑 (문자열 대소비교 오류 방지)",
+      "is_regex": true,
+      "from_pattern": "(this\\.[\\w.]+\\.getSum\\([^()]*\\))\\s*(>=|<=|>|<)",
+      "to": "nexacro.toNumber(\\1) \\2"
     },
     {
-      "id": "rowtype_insert_uppercase",
-      "from": "== \"INSERT\"",
-      "to": "== Dataset.ROWTYPE_INSERT"
+      "id": "getsum_compare_right_tonumber",
+      "description": "getSum() 대소비교(>,<,>=,<=) 우변 → nexacro.toNumber() 래핑",
+      "is_regex": true,
+      "from_pattern": "(>=|<=|>|<)\\s*(this\\.[\\w.]+\\.getSum\\([^()]*\\))",
+      "to": "\\1 nexacro.toNumber(\\2)"
+    },
+    {
+      "id": "rowtype_insert_to_const",
+      "description": "getRowType() 비교 문자열('insert', 대소문자/따옴표/공백 무관) → Dataset.ROWTYPE_INSERT",
+      "is_regex": true,
+      "from_pattern": "([!=]=)\\s*['\"](?i:insert)['\"]",
+      "to": "\\1 Dataset.ROWTYPE_INSERT"
+    },
+    {
+      "id": "rowtype_update_to_const",
+      "description": "getRowType() 비교 문자열('update', 대소문자/따옴표/공백 무관) → Dataset.ROWTYPE_UPDATE",
+      "is_regex": true,
+      "from_pattern": "([!=]=)\\s*['\"](?i:update)['\"]",
+      "to": "\\1 Dataset.ROWTYPE_UPDATE"
+    },
+    {
+      "id": "rowtype_delete_to_const",
+      "description": "getRowType() 비교 문자열('delete', 대소문자/따옴표/공백 무관) → Dataset.ROWTYPE_DELETE",
+      "is_regex": true,
+      "from_pattern": "([!=]=)\\s*['\"](?i:delete)['\"]",
+      "to": "\\1 Dataset.ROWTYPE_DELETE"
     },
     {
       "id": "rowtype_normal_upper",
-      "description": "NORMAL rowtype 비교 → Dataset 상수",
-      "from": ".toUpperCase() != \"NORMAL\"",
+      "description": "NORMAL rowtype 비교(.toUpperCase() 경유, 따옴표 무관) → Dataset 상수",
+      "is_regex": true,
+      "from_pattern": "\\.toUpperCase\\(\\)\\s*!=\\s*['\"]NORMAL['\"]",
       "to": " != Dataset.ROWTYPE_NORMAL"
-    },
-    {
-      "id": "rowtype_update_lowercase",
-      "description": "rowtype 문자열 비교 → Dataset 상수 (update)",
-      "from": "== \"update\"",
-      "to": "== Dataset.ROWTYPE_UPDATE"
-    },
-    {
-      "id": "rowtype_update_uppercase",
-      "from": "== \"UPDATE\"",
-      "to": "== Dataset.ROWTYPE_UPDATE"
-    },
-    {
-      "id": "rowtype_delete_lowercase",
-      "description": "rowtype 문자열 비교 → Dataset 상수 (delete)",
-      "from": "== \"delete\"",
-      "to": "== Dataset.ROWTYPE_DELETE"
-    },
-    {
-      "id": "rowtype_delete_uppercase",
-      "from": "== \"DELETE\"",
-      "to": "== Dataset.ROWTYPE_DELETE"
     },
     {
       "id": "av_siv_groups_to_app",
