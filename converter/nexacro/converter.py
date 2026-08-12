@@ -101,6 +101,8 @@ class XfdlConverter:
                 extra += ' countcomp=""'
             return prefix + extra + suffix
         content = re.sub(r"<Grid\b[^>]*>", _grid_default_attrs, content)
+        content = self._fix_radio_cssclass_border(content)
+        content = self._fix_calendar_autoselect(content)
         lines = content.split("\n")
         result = []
         in_body_band = False
@@ -113,6 +115,33 @@ class XfdlConverter:
                 ln = self._convert_cell_line(ln, in_body_band)
             result.append(ln)
         return "\n".join(result)
+
+    def _fix_radio_cssclass_border(self, content: str) -> str:
+        """<Radio> 태그 cssclass 에 rdo_border 클래스 추가.
+        cssclass 가 없으면 새로 추가, 있으면 기존값 뒤에 병합(중복이면 건드리지 않음)"""
+        def _add_border(m: re.Match) -> str:
+            tag = m.group(0)
+            existing = self._extract_attr(tag, "cssclass")
+            if existing is None:
+                new_val = "rdo_border"
+            else:
+                classes = [c.strip() for c in existing.split(",") if c.strip()]
+                if "rdo_border" in classes:
+                    return tag
+                new_val = existing + ", rdo_border"
+            return self._set_attr(tag, "cssclass", new_val)
+        return re.sub(r"<Radio\b[^>]*>", _add_border, content)
+
+    def _fix_calendar_autoselect(self, content: str) -> str:
+        """<Calendar> 태그 autoselect 를 true 로 강제.
+        속성이 없으면 추가, false 로 되어있으면 true 로 교체, 이미 true 면 그대로"""
+        def _set_true(m: re.Match) -> str:
+            tag = m.group(0)
+            existing = self._extract_attr(tag, "autoselect")
+            if existing == "true":
+                return tag
+            return self._set_attr(tag, "autoselect", "true")
+        return re.sub(r"<Calendar\b[^>]*>", _set_true, content)
 
     def _convert_cell_line(self, line: str, in_body_band: bool = False) -> str:
         cell_p = self.p["layout_cell_patterns"]
@@ -431,6 +460,9 @@ class XfdlConverter:
     # ──────────────────────────────────────────
 
     _FUNC_DECL_ANY_RE = re.compile(r'(?:this\.)?([A-Za-z_]\w*)\s*=\s*function\s*\(')
+    # Dataset/컴포넌트의 CanColumnChange, CanChange 이벤트 — 리턴값을 Nexacro가
+    # 동기적으로 평가해 변경을 취소/허용하므로 async 래핑 대상에서 제외해야 함
+    _SYNC_EVENT_HANDLER_RE = re.compile(r'_Can(?:ColumnChange|Change)$')
     _KNOWN_FORM_FLAGS = (
         "isAdmin", "isCam",
         "index_link", "isHdgDSChgChk", "isExit", "isModify", "isUpdate",
@@ -766,6 +798,13 @@ class XfdlConverter:
                 if any(re.search(rf'\bthis\.{re.escape(af)}\s*\(', body) for af in async_funcs):
                     async_funcs.add(fname)
                     changed = True
+
+        # 3.4단계: Can* 동기 이벤트 핸들러(CanColumnChange, CanChange 등)는 async 래핑 대상에서 제외.
+        # Nexacro는 이 핸들러의 리턴값(boolean)을 동기적으로 평가해서 변경을 취소/허용하므로,
+        # (async () => {...}).call(this) 로 감싸면 실제 로직이 끝나기 전에 함수가 먼저 리턴돼버려
+        # 취소 로직(return false)이 무시되는 등 오동작한다. await 가 필요한 로직은 별도 화살표
+        # 함수로 분리해 fire-and-forget 으로 호출하는 수작업 리팩터링이 필요 — 자동 변환 대상 아님.
+        async_funcs -= {f for f in async_funcs if self._SYNC_EVENT_HANDLER_RE.search(f)}
 
         # 3.5단계: 다른 async 함수에서 호출되는 함수 파악 → 해당 함수만 return 필요
         called_by_async: set[str] = set()
