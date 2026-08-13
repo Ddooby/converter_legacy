@@ -1930,5 +1930,5 @@
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractTCINewForm.xfdl
 # C:\Projects\Panocean\nexacro\biz\contract\contract\Upload_onlyFile_Credit.xfdl
 
-C:\Projects\Panocean\nexacro\biz\contract\contract\ContractTCONewForm.xfdl
-# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractFFTNewForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\contract\contract\ContractTCONewForm.xfdl
+C:\Projects\Panocean\nexacro\biz\contract\contract\ContractTCIViewDetailForm.xfdl

@@ -103,6 +103,7 @@ class XfdlConverter:
         content = re.sub(r"<Grid\b[^>]*>", _grid_default_attrs, content)
         content = self._fix_radio_cssclass_border(content)
         content = self._fix_calendar_autoselect(content)
+        content = self._fix_checkbox_truefalse_style(content)
         lines = content.split("\n")
         result = []
         in_body_band = False
@@ -142,6 +143,52 @@ class XfdlConverter:
                 return tag
             return self._set_attr(tag, "autoselect", "true")
         return re.sub(r"<Calendar\b[^>]*>", _set_true, content)
+
+    # CheckBox value 가 속할 수 있는 3가지 스타일: 숫자(0/1) / 불리언(true/false) / Y-N
+    _CB_NUM_STYLE = {"0", "1"}
+    _CB_BOOL_STYLE = {"true", "false"}
+    _CB_YN_STYLE = {"y", "n"}
+    _CB_STYLE_OUTPUT = {
+        "num": ("1", "0"),
+        "bool": ("true", "false"),
+        "yn": ("Y", "N"),
+    }
+
+    def _classify_checkbox_style(self, v: str) -> str | None:
+        lv = v.lower()
+        if lv in self._CB_NUM_STYLE:
+            return "num"
+        if lv in self._CB_BOOL_STYLE:
+            return "bool"
+        if lv in self._CB_YN_STYLE:
+            return "yn"
+        return None
+
+    def _fix_checkbox_truefalse_style(self, content: str) -> str:
+        """CheckBox 의 value 가 숫자(0/1) / 불리언(true/false) / Y-N 세 스타일 중 하나로 판별되면,
+        truevalue/falsevalue 를 value 와 같은 스타일로 맞춰준다.
+        예: value="FALSE" truevalue="Y" falsevalue="N" → truevalue="true" falsevalue="false"
+        (반대로 value="0" truevalue="true" falsevalue="false" → truevalue="1" falsevalue="0")
+        value 나 truevalue/falsevalue 가 업무 코드값(GUA, IMM 등) 등 3가지 스타일 밖이면 손대지 않음."""
+        def _fix_tag(m: re.Match) -> str:
+            tag = m.group(0)
+            value = self._extract_attr(tag, "value")
+            truevalue = self._extract_attr(tag, "truevalue")
+            falsevalue = self._extract_attr(tag, "falsevalue")
+            if value is None or truevalue is None or falsevalue is None:
+                return tag
+            v_style = self._classify_checkbox_style(value)
+            tv_style = self._classify_checkbox_style(truevalue)
+            fv_style = self._classify_checkbox_style(falsevalue)
+            if v_style is None or tv_style is None or fv_style is None:
+                return tag
+            if tv_style != fv_style or tv_style == v_style:
+                return tag
+            new_tv, new_fv = self._CB_STYLE_OUTPUT[v_style]
+            tag = self._set_attr(tag, "truevalue", new_tv)
+            tag = self._set_attr(tag, "falsevalue", new_fv)
+            return tag
+        return re.sub(r"<CheckBox\b[^>]*>", _fix_tag, content)
 
     def _convert_cell_line(self, line: str, in_body_band: bool = False) -> str:
         cell_p = self.p["layout_cell_patterns"]
@@ -750,13 +797,51 @@ class XfdlConverter:
     # Async / await
     # ──────────────────────────────────────────
 
+    def _unwrap_broken_can_async_handlers(self, content: str) -> str:
+        """CanColumnChange/CanChange 가 (예외 처리 로직이 생기기 전) 과거 변환에서
+        (async () => {...}).call(this) 로 잘못 감싸진 채 파일에 그대로 남아있는 경우를
+        원래의 동기 함수 형태로 되돌린다.
+        단, 내부에 있던 await 키워드는 일부러 그대로 남겨둔다 — async 함수가 아닌 곳에
+        await 가 있으면 스크립트 로드 시점에 SyntaxError 로 바로 터지기 때문에, 개발자가
+        눈치채지 못하고 넘어가는 것보다 시끄럽게 에러가 나서 수동으로 고치게 만드는 게 안전함.
+        (조용히 있다가 CanColumnChange 취소 로직이 씹히는 런타임 버그보다 낫다는 판단)"""
+        decl_pat = re.compile(r'this\.(\w+)\s*=\s*function\s*\([^)]*\)')
+        wrap_open_re = re.compile(r'\A(?:return\s+)?\(async\s*\(\)\s*=>\s*\{')
+        for m in reversed(list(decl_pat.finditer(content))):
+            fname = m.group(1)
+            if not self._SYNC_EVENT_HANDLER_RE.search(fname):
+                continue
+            op = content.find("{", m.end())
+            if op == -1:
+                continue
+            cp = self._find_matching_brace(content, op)
+            if cp == -1:
+                continue
+            inner = content[op + 1: cp]
+            stripped = inner.strip()
+            open_m = wrap_open_re.match(stripped)
+            if not open_m or not stripped.endswith('}).call(this);'):
+                continue
+            body = stripped[open_m.end():-len('}).call(this);')]
+            # 래핑 시 추가됐던 한 단계 들여쓰기(tab 1개) 제거
+            dedented = "\n".join(
+                ln[1:] if ln.startswith('\t') else ln
+                for ln in body.strip('\n').split('\n')
+            )
+            content = content[:op + 1] + "\n" + dedented + "\n" + content[cp:]
+        return content
+
     def _apply_async_patterns(self, content: str) -> str:
         """
+        0단계: CanColumnChange/CanChange 에 과거 잘못 씌워진 async 래핑 원복(await는 남겨 SyntaxError 유도)
         1단계: 모든 함수 body 수집
         2단계: com.* 직접 호출이 있는 함수 → async 대상
         3단계: async 함수를 호출하는 함수도 async로 전파
+        3.4단계: CanColumnChange/CanChange 는 async 래핑 대상에서 제외
         4단계: 역순으로 래핑 — return (async () => {...}).call(this)
         """
+        content = self._unwrap_broken_can_async_handlers(content)
+
         await_cfg = self.p["async_patterns"]["com_functions_need_await"]
         await_com_funcs: list = await_cfg["items"]
         com_prefix_await: bool = await_cfg.get("com_prefix_await", False)
