@@ -152,6 +152,158 @@ def scan_file(path: Path) -> list[dict]:
     return findings
 
 
+_HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CheckBox value 불일치 리포트</title>
+<style>
+  :root {
+    --high: #d64545;
+    --medium: #d69a45;
+    --bg: #f7f7f8;
+    --border: #e2e2e5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    margin: 0; padding: 24px; background: var(--bg); color: #222;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .summary { color: #555; margin-bottom: 16px; font-size: 13px; }
+  .toolbar {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .toolbar input[type=text] {
+    padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; width: 260px; font-size: 13px;
+  }
+  .toolbar button {
+    padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: #fff;
+    cursor: pointer; font-size: 13px;
+  }
+  .toolbar button.active { background: #333; color: #fff; border-color: #333; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12.5px; text-align: left; vertical-align: top; }
+  th { background: #fafafa; cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { background: #f0f0f0; }
+  tr:hover td { background: #fbfbfc; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; color: #fff; font-weight: 600; }
+  .badge.high { background: var(--high); }
+  .badge.medium { background: var(--medium); }
+  .mono { font-family: "SFMono-Regular", Consolas, "Courier New", monospace; font-size: 11.5px; }
+  .file { color: #555; word-break: break-all; }
+  .lit { color: var(--high); font-weight: 600; }
+  .ex { display: block; white-space: pre-wrap; color: #444; margin-bottom: 2px; }
+  .count { color: #888; }
+  .empty { padding: 40px; text-align: center; color: #999; }
+</style>
+</head>
+<body>
+  <h1>CheckBox value 불일치 리포트</h1>
+  <div class="summary" id="summary"></div>
+  <div class="toolbar">
+    <button data-filter="all" class="active">전체</button>
+    <button data-filter="high">high</button>
+    <button data-filter="medium">medium</button>
+    <input type="text" id="search" placeholder="파일명 / checkbox id 검색...">
+  </div>
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th data-key="confidence">신뢰도</th>
+        <th data-key="file">파일</th>
+        <th data-key="checkbox_id">checkbox id</th>
+        <th data-key="layout">layout (value / true / false)</th>
+        <th data-key="bind">바인딩 (dataset.column)</th>
+        <th data-key="mismatch">불일치 리터럴</th>
+        <th data-key="refs">참조수</th>
+        <th data-key="examples">스크립트 예시</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div class="empty" id="emptyMsg" style="display:none;">조건에 맞는 항목이 없습니다.</div>
+
+<script>
+const DATA = __DATA_JSON__;
+let rows = [...DATA.high_confidence, ...DATA.medium_confidence];
+let filter = "all";
+let sortKey = "confidence";
+let sortAsc = false;
+
+document.getElementById("summary").textContent =
+  `스캔 파일 ${DATA._summary.scanned_files}개 / 전체 ${DATA._summary.total_findings}건 ` +
+  `(high ${DATA._summary.high_confidence} / medium ${DATA._summary.medium_confidence})`;
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function render() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  let list = rows.filter(r => filter === "all" || r.confidence === filter);
+  if (q) {
+    list = list.filter(r =>
+      r.file.toLowerCase().includes(q) || r.checkbox_id.toLowerCase().includes(q)
+    );
+  }
+  list.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === "refs") { av = a.total_script_refs; bv = b.total_script_refs; }
+    av = av ?? ""; bv = bv ?? "";
+    if (av < bv) return sortAsc ? -1 : 1;
+    if (av > bv) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const tbody = document.querySelector("#tbl tbody");
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><span class="badge ${r.confidence}">${r.confidence}</span></td>
+      <td class="file mono">${esc(r.file)}</td>
+      <td class="mono">${esc(r.checkbox_id)}</td>
+      <td class="mono">${esc(r.layout_value)} / ${esc(r.layout_truevalue)} / ${esc(r.layout_falsevalue)}</td>
+      <td class="mono">${esc(r.binddataset || "-")}${r.bind_column ? "." + esc(r.bind_column) : ""}</td>
+      <td class="mono lit">${r.script_mismatch_literals.map(esc).join(", ")}</td>
+      <td class="count">${r.mismatched_refs} / ${r.total_script_refs}</td>
+      <td class="mono">${r.examples.map(e => `<span class="ex">${esc(e)}</span>`).join("")}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById("emptyMsg").style.display = list.length ? "none" : "block";
+  document.getElementById("tbl").style.display = list.length ? "table" : "none";
+}
+
+document.querySelectorAll(".toolbar button[data-filter]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".toolbar button[data-filter]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    filter = btn.dataset.filter;
+    render();
+  });
+});
+document.getElementById("search").addEventListener("input", render);
+document.querySelectorAll("th[data-key]").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; }
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
+"""
+
+
+def _render_html(output: dict) -> str:
+    # 스크립트 예시 안에 우연히 "</script>" 문자열이 들어있으면 HTML이 깨지므로 이스케이프
+    data_json = json.dumps(output, ensure_ascii=False).replace("</script>", "<\\/script>")
+    return _HTML_TEMPLATE.replace("__DATA_JSON__", data_json)
+
+
 def main():
     if len(sys.argv) < 2:
         print("사용법: python -m converter.nexacro.checkbox_value_scan <스캔 대상 폴더>")
@@ -186,9 +338,13 @@ def main():
     out_path = Path(__file__).parent / "patterns" / "checkbox_value_mismatch_report.json"
     out_path.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    html_path = out_path.with_suffix(".html")
+    html_path.write_text(_render_html(output), encoding="utf-8")
+
     print(f"스캔 완료: {len(files)}개 파일")
     print(f"발견: {len(all_findings)}건 (high: {len(high)}, medium: {len(medium)})")
     print(f"결과 저장: {out_path}")
+    print(f"HTML 리포트: {html_path}  (더블클릭으로 브라우저에서 열기, 필터/정렬/검색 가능)")
     print("\n주의: 자동 수정 아님. truevalue/falsevalue는 실제 DB 저장값이라")
     print("파일별로 직접 확인 후 적용할 것. high 부터 보는 걸 추천.")
 
