@@ -104,6 +104,7 @@ class XfdlConverter:
         content = self._fix_radio_cssclass_border(content)
         content = self._fix_calendar_autoselect(content)
         content = self._fix_checkbox_truefalse_style(content)
+        content = self._fix_combo_remove_all_value(content)
         lines = content.split("\n")
         result = []
         in_body_band = False
@@ -189,6 +190,19 @@ class XfdlConverter:
             tag = self._set_attr(tag, "falsevalue", new_fv)
             return tag
         return re.sub(r"<CheckBox\b[^>]*>", _fix_tag, content)
+
+    _COMBO_ALL_VALUE_RE = re.compile(r'^-\s*all\s*-$', re.IGNORECASE)
+
+    def _fix_combo_remove_all_value(self, content: str) -> str:
+        """<Combo> 의 value="-ALL-" (대소문자/공백 변형 "- All -" 등 포함)는
+        MiPlatform 시절 '전체' sentinel 값 — Nexacro 에선 의미 없는 문자열이라 빈 값으로 비워줌."""
+        def _clear(m: re.Match) -> str:
+            tag = m.group(0)
+            value = self._extract_attr(tag, "value")
+            if value is None or not self._COMBO_ALL_VALUE_RE.match(value):
+                return tag
+            return self._set_attr(tag, "value", "")
+        return re.sub(r"<Combo\b[^>]*>", _clear, content)
 
     def _convert_cell_line(self, line: str, in_body_band: bool = False) -> str:
         cell_p = self.p["layout_cell_patterns"]
