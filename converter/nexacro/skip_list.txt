@@ -4,20 +4,20 @@
 # - 빈 줄 무시
 
 # salesOpportunity/common
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\common\VoyageListNewForm.xfdl
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\common\VaCbChangeResonListForm.xfdl
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\common\VaCbVaChangeResonListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\common\VoyageListNewForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\common\VaCbChangeResonListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\common\VaCbVaChangeResonListForm.xfdl
 
 # salesOpportunity/salesOpportunityList
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\salesOpportunityList\SalesOpportunityListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\salesOpportunityList\SalesOpportunityListForm.xfdl
 
 # salesOpportunity/internalTCOut
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\internalTCOut\TCOutMainForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\internalTCOut\TCOutMainForm.xfdl
 
 # salesOpportunity/FFA
-C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\FFTSettleListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\FFA\FFTSettleListForm.xfdl
 
 # voyagePerformance/analysis
-C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBAllStatusShowForm.xfdl
-C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBVersionComparisonForm.xfdl
-C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBDifferenceShowForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBAllStatusShowForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBVersionComparisonForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\voyagePerformance\analysis\CBDifferenceShowForm.xfdl

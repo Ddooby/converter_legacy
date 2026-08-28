@@ -232,6 +232,12 @@
       "to": "com.G_OzSplit"
     },
     {
+      "id": "oz_row_split_this_to_com",
+      "description": "OZ 행단위 분할 출력 전역 참조 → com 네임스페이스",
+      "from": "this.G_OzRowSplit",
+      "to": "com.G_OzRowSplit"
+    },
+    {
       "id": "oz_timerid_this_to_com",
       "description": "OZ 타이머ID 전역 참조 → com 네임스페이스",
       "from": "this.G_OzTimerID",
@@ -411,7 +417,8 @@
       "items": [
         "com.commCodeInquiry",
         "com.isNullFieldGrid",
-        "com.fnMessageOpenForm"
+        "com.fnMessageOpenForm",
+        "take.loadJs"
       ]
     },
     "functions_need_wrapper": {

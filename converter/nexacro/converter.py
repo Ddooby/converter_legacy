@@ -297,8 +297,10 @@ class XfdlConverter:
         16. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
         17. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
         18. 세미콜론 앞 중복 공백 정리
-        19. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → take.loadJs)
-        20. async/await 변환 — com.* 호출 함수 전체 래핑
+        19. 스크립트 최상단에 남아있는 구형 take.loadJs 제거 (fnInit 안에 이미 있는 건 유지)
+        20. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → fnInit 첫 줄에 take.loadJs)
+        21. '//공통 라이브러리 호출' 주석 라인 제거 (take.loadJs가 fnInit 안으로 옮겨가서 더이상 불필요)
+        22. async/await 변환 — com.* 호출 함수 전체 래핑
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -330,7 +332,9 @@ class XfdlConverter:
         if form_name:
             content = self._replace_system_form_name(content, form_name)
         content = self._comment_out_auth_button_callers(content)
+        content = self._migrate_legacy_toplevel_loadjs(content)
         content = self._inject_external_js_refs(content)
+        content = self._remove_common_lib_anchor_comment(content)
         content = self._apply_async_patterns(content)
         return content
 
@@ -434,21 +438,64 @@ class XfdlConverter:
         )
         return content
 
+    _FN_INIT_DECL_RE = re.compile(r'this\.fnInit\s*=\s*function\s*\([^)]*\)\s*\{')
+    _LOADJS_LINE_RE = re.compile(
+        r'[ \t]*take\.loadJs\(this,\s*"(?:sa|so|ins)JsLoad_"\s*\+\s*this\.name,\s*"[^"]*"\);[ \t]*\r?\n?'
+    )
+
+    def _migrate_legacy_toplevel_loadjs(self, content: str) -> str:
+        """예전 방식(스크립트 최상단, '//공통 라이브러리 호출' 주석 아래)으로 이미 들어가 있는
+        take.loadJs 호출을 찾아서 제거한다. fnInit 내부에 이미 올바르게 들어가 있는 건 건드리지 않음
+        (재작업 방지, idempotent 유지).
+
+        제거만 하고 여기서 다시 넣지는 않음 — 이 뒤에 돌아가는 _inject_external_js_refs 가
+        "이미 있음" 체크에 안 걸리게 돼서 자동으로 fnInit 첫 줄에 새로 넣어주고,
+        _apply_async_patterns 가 await + async 래핑까지 마저 처리해줌."""
+        m = self._FN_INIT_DECL_RE.search(content)
+        fn_init_range = None
+        if m:
+            op = m.end() - 1  # fnInit 여는 '{' 위치
+            cp = self._find_matching_brace(content, op)
+            if cp != -1:
+                fn_init_range = (op, cp)
+
+        result = []
+        last = 0
+        for lm in self._LOADJS_LINE_RE.finditer(content):
+            if fn_init_range is not None and fn_init_range[0] <= lm.start() <= fn_init_range[1]:
+                continue  # fnInit 안에 이미 올바르게 들어가 있음 — 건드리지 않음
+            result.append(content[last:lm.start()])
+            last = lm.end()
+        result.append(content[last:])
+        return "".join(result)
+
+    _ASYNC_WRAP_OPEN_RE = re.compile(r'\s*(?:return\s+)?\(async\s*\(\)\s*=>\s*\{')
+
     def _inject_external_js_refs(self, content: str) -> str:
         """
-        스크립트 내 sa.* / so.* / ins.* 호출을 감지해
-        //공통 라이브러리 호출 주석 바로 아래에 take.loadJs 라인을 삽입한다.
+        스크립트 내 sa.* / so.* / ins.* 호출을 감지해 fnInit 함수 첫 줄에
+        take.loadJs 라인을 삽입한다. fnInit 이 없으면 손대지 않음.
         이미 take.loadJs가 있으면 중복 삽입하지 않는다.
+
+        await 는 보통 여기서 직접 붙이지 않음 — nexacro_convert_patterns.json 의
+        async_patterns.com_functions_need_await.items 에 "take.loadJs" 를 등록해뒀고,
+        뒤이어 돌아가는 _apply_async_patterns(다음 단계) 가 이 문자열을 보고 알아서
+        fnInit 을 async 대상으로 잡아서 (async () => {...}).call(this) 로 감싸고
+        await 도 자동으로 붙여줌.
+
+        단, fnInit 이 이미 (async () => {...}).call(this) / return (async () => {...}).call(this)
+        로 감싸져 있는 경우(과거 변환분)엔 _apply_async_patterns 의 idempotency 가드
+        (이미 "(async () =>" 있으면 재처리 스킵)에 걸려서 자동 await 삽입이 안 먹힘 —
+        그래서 이 케이스만 여기서 직접 래퍼 안쪽에 await 를 붙여서 넣어준다.
         """
-        ANCHOR = "//공통 라이브러리 호출"
         JS_MAP = {
             "sa": '/biz/commonJs/sa.js',
             "so": '/biz/commonJs/so.js',
             "ins": '/biz/commonJs/ins.js',
         }
 
-        anchor_pos = content.find(ANCHOR)
-        if anchor_pos == -1:
+        m = self._FN_INIT_DECL_RE.search(content)
+        if not m:
             return content
 
         needed: list[str] = []
@@ -462,9 +509,32 @@ class XfdlConverter:
         if not needed:
             return content
 
-        insert_after = anchor_pos + len(ANCHOR)
-        inject = "\n" + "\n".join(needed)
-        return content[:insert_after] + inject + content[insert_after:]
+        tab = self.p["async_patterns"].get("wrapper_indent", "\t")
+        insert_pos = m.end()  # fnInit 여는 '{' 바로 뒤
+
+        wrap_m = self._ASYNC_WRAP_OPEN_RE.match(content, insert_pos)
+        if wrap_m:
+            # 이미 async IIFE로 감싸져 있음 — 그 안쪽에 await 직접 붙여서 삽입.
+            # fnInit 중괄호 + 래퍼 중괄호, 두 단계 들여쓰기라 tab을 두 번 써야
+            # 기존 body 라인들(_apply_async_patterns가 예전에 감쌀 때 넣은 들여쓰기)과 맞음
+            insert_pos = wrap_m.end()
+            indent = tab * 2
+            lines = [f"await {ln}" for ln in needed]
+        else:
+            # 아직 안 감싸진 경우엔 tab 한 번만 — 뒤에 _apply_async_patterns가
+            # 전체를 감싸면서 tab을 한 겹 더 씌워줘서 결과적으로 동일한 두 단계가 됨
+            indent = tab
+            lines = needed
+
+        inject = "\n" + "\n".join(f"{indent}{ln}" for ln in lines)
+        return content[:insert_pos] + inject + content[insert_pos:]
+
+    def _remove_common_lib_anchor_comment(self, content: str) -> str:
+        """스크립트 상단 '//공통 라이브러리 호출' 주석 라인 제거.
+        take.loadJs 를 이제 fnInit 안으로 옮겨서 넣기 때문에 이 주석은 더이상 쓸모없음.
+        splitlines(keepends=True) 로 줄 단위 제거 — CRLF/LF 원본 줄바꿈은 각 줄에 그대로 붙어있어서 보존됨."""
+        lines = content.splitlines(keepends=True)
+        return "".join(ln for ln in lines if ln.strip() != "//공통 라이브러리 호출")
     def _convert_fn_message_domain(self, content: str) -> str:
         """따옴표 없이 나오는 Domain.msg~ → "Domain.msg~" 로 감싸기"""
         return re.sub(r"(?<!['\"])(Domain\.msg[\w.]+)(?!['\"])", r'"\1"', content)
@@ -935,10 +1005,14 @@ class XfdlConverter:
 
             # rstrip()은 공백/탭만 제거 — CRLF 원본의 trailing '\r'까지 같이 날아가는 것 방지
             indented = "\n".join(f"{tab}{ln}".rstrip(" \t") for ln in inner.split("\n"))
+            # indented 는 원본 body가 '{ \n ... \n }' 포맷(닫는 중괄호가 자기 줄에 단독)이면
+            # 이미 끝에 개행 하나를 포함하고 있음 — 여기서 또 '\n'을 추가하면
+            # }).call(this); 위에 항상 빈 줄이 하나 더 생겨서 매번 수동으로 지워야 했음.
+            # 그래서 추가 개행 없이 바로 이어붙임.
             if fname in called_by_async:
-                wrapped = f"{{\n{tab}return (async () => {{{indented}\n{tab}}}).call(this);\n}}"
+                wrapped = f"{{\n{tab}return (async () => {{{indented}{tab}}}).call(this);\n}}"
             else:
-                wrapped = f"{{\n{tab}(async () => {{{indented}\n{tab}}}).call(this);\n}}"
+                wrapped = f"{{\n{tab}(async () => {{{indented}{tab}}}).call(this);\n}}"
 
             content = content[:op] + wrapped + content[cp + 1:]
 
