@@ -49,7 +49,134 @@ class XfdlConverter:
             f.write(result)
         logger.info("변환 완료: %s", output_path)
 
+    _LAYOUT_ID_RE = re.compile(r'\bid="([^"]+)"')
+    _FORM_COMPONENT_REF_RE = re.compile(r'this\.([\w.]+)\.form\.([A-Za-z_]\w*)\b')
+    _CREATE_COMPONENT_ID_RE = re.compile(r'createComponent\([^)]*"([A-Za-z_]\w*)"')
+    _TAG_RE = re.compile(r'<\w+\b[^>]*>')
+    _PARENT_ALIAS_RE = re.compile(r'this\.(\w+)\s*=\s*this\.(?:parent|opener)\b')
+
+    def _comment_out_missing_form_components(self, content: str) -> str:
+        """Script 안에서 this.X.form.Y 형태로 참조하는 컴포넌트(Y)가 Layout 어디에도
+        선언되어 있지 않으면(레이아웃에서 삭제됐는데 스크립트 참조만 남은 잔재 —
+        실행 시 TypeError 유발) 그 줄을 통째로 주석처리한다.
+        Tab/Tabpage/Div 내부에 인라인으로 선언된 컴포넌트도 id="..." 로 전부 잡히므로
+        중첩 구조 상관없이 동작함.
+
+        화이트리스트 방식 — 컨테이너가 이 파일 안에 실제로 <Layouts> 를 인라인으로
+        갖고 있다고 "확인된" 경우에만 검증 대상으로 삼는다 (블랙리스트로 예외 케이스를
+        일일이 나열하는 건 놓치는 케이스가 계속 나와서 위험도가 더 높다고 판단):
+        - 자기닫힘 태그(`<Div .../>`)나 url="..." 로 외부 폼을 로드하는 컨테이너,
+          또는 런타임에 동적으로 폼을 붙이는 컨테이너는 전부 화이트리스트에서 빠짐
+          → 검증 자체를 안 함 (예: this.Div0.form.fnClose() 처럼 외부/동적 폼의
+          함수를 호출하는 경우까지 컴포넌트 존재 검사 대상이 되는 걸 방지)
+        - this.parent... / this.opener... 체인, 그리고 `this.ParentForm = this.parent.parent;`
+          처럼 커스텀 이름으로 parent/opener 를 별칭 지정해둔 체인도 전부 제외
+          (이 파일의 Layout만으로는 절대 검증 불가능한 다른 폼이므로)
+        - createComponent(...) 로 런타임에 동적 생성되는 컴포넌트 id 는 known_ids 에 추가
+
+        이미 주석처리된 줄(// 로 시작)은 건드리지 않음(idempotent).
+        고신뢰 케이스만 대상 — this.X.form.Y 처럼 '.form.' 마커가 있고 X 가 인라인
+        컨테이너로 확인된 경우만 자동 처리. '.form.' 없는 평범한 this.X 참조는
+        (데이터셋/함수/폼레벨변수일 수도 있어 오탐 위험 큼) 대상에서 제외."""
+        if SCRIPT_START not in content:
+            return content
+
+        # 1) 레이아웃(스크립트 CDATA 제외) 영역에서 id="..." 전부 수집
+        layout_chunks = []
+        scripts = []
+        remaining = content
+        while SCRIPT_START in remaining:
+            idx_start = remaining.find(SCRIPT_START)
+            idx_end = remaining.find(SCRIPT_END, idx_start)
+            if idx_end == -1:
+                layout_chunks.append(remaining)
+                remaining = ""
+                break
+            layout_chunks.append(remaining[:idx_start])
+            scripts.append(remaining[idx_start + len(SCRIPT_START): idx_end])
+            remaining = remaining[idx_end + len(SCRIPT_END):]
+        layout_chunks.append(remaining)
+
+        layout_text = "".join(layout_chunks)
+        script_text_all = "\n".join(scripts)
+        known_ids = set(self._LAYOUT_ID_RE.findall(layout_text))
+        known_ids |= set(self._CREATE_COMPONENT_ID_RE.findall(script_text_all))
+
+        # 화이트리스트: 자기닫힘이 아니고, 바로 뒤에 실제 내용이 있는 <Layouts><Layout>
+        # 가 인라인으로 딸려있는 컨테이너 id만 "검증 가능"으로 인정.
+        # <Layouts><Layout/></Layouts> 나 <Layouts><Layout></Layout></Layouts> 처럼
+        # 텅 빈 placeholder(런타임에 동적으로 폼이 붙는 Div 등)는 제외 — 실제로
+        # ContractListTabForm.xfdl의 div_tcin 이 이 케이스였음 (컴포넌트 0개인데
+        # this.X.form.Y 로 다른 폼의 함수를 호출하는 용도로 쓰임)
+        inline_ids: set[str] = set()
+        for tag_m in self._TAG_RE.finditer(layout_text):
+            tag = tag_m.group(0)
+            if tag.endswith("/>"):
+                continue  # 자기닫힘 — 내용 없음(동적 로딩 등), 검증 불가
+            id_m = self._LAYOUT_ID_RE.search(tag)
+            if not id_m:
+                continue
+            after = layout_text[tag_m.end():].lstrip()
+            if not after.startswith("<Layouts>"):
+                continue
+            after2 = after[len("<Layouts>"):].lstrip()
+            if not after2.startswith("<Layout>"):
+                continue
+            after3 = after2[len("<Layout>"):].lstrip()
+            if after3.startswith("</Layout>"):
+                continue  # 텅 빈 Layout — 실제 컴포넌트 없음
+            inline_ids.add(id_m.group(1))
+
+        # parent/opener 커스텀 별칭 (this.ParentForm = this.parent.parent; 등)
+        parent_aliases = {"parent", "opener"} | set(self._PARENT_ALIAS_RE.findall(script_text_all))
+
+        def _is_verifiable(chain: str) -> bool:
+            # .form. 경계마다 등장하는 컨테이너 이름들을 전부 뽑아서 검사
+            containers = [seg.split(".")[-1] for seg in chain.split(".form.")]
+            for c in containers:
+                if c in parent_aliases:
+                    return False
+                if c not in inline_ids:
+                    return False
+            return True
+
+        def _fix_script(script: str) -> str:
+            lines = script.split("\n")
+            for i, line in enumerate(lines):
+                stripped = line.lstrip()
+                if stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
+                    continue
+                bad = False
+                for chain, comp in self._FORM_COMPONENT_REF_RE.findall(line):
+                    if not _is_verifiable(chain):
+                        continue
+                    if comp not in known_ids:
+                        bad = True
+                if bad:
+                    indent = line[:len(line) - len(stripped)]
+                    lines[i] = f"{indent}//{stripped}"
+            return "\n".join(lines)
+
+        # 2) 스크립트 부분만 다시 훑으며 주석처리 적용
+        result = []
+        remaining = content
+        while SCRIPT_START in remaining:
+            idx_start = remaining.find(SCRIPT_START)
+            idx_end = remaining.find(SCRIPT_END, idx_start)
+            if idx_end == -1:
+                result.append(remaining)
+                remaining = ""
+                break
+            result.append(remaining[:idx_start + len(SCRIPT_START)])
+            script = remaining[idx_start + len(SCRIPT_START): idx_end]
+            result.append(_fix_script(script))
+            result.append(SCRIPT_END)
+            remaining = remaining[idx_end + len(SCRIPT_END):]
+        result.append(remaining)
+        return "".join(result)
+
     def convert(self, content: str, form_name: str = "") -> str:
+        content = self._comment_out_missing_form_components(content)
         if SCRIPT_START not in content:
             return self._convert_layout(content)
 
