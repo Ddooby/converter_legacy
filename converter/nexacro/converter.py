@@ -420,14 +420,15 @@ class XfdlConverter:
         12. G_OzTimerID/G_OzTimeout 참조 이원화 (e.timerid== 비교는 com., setTimer()는 common_oz.)
         13. AllWindows/DivMain MDI 창 순회 리프레시 패턴 → this.opener.parent.parent.fnSearch() 대체
         14. this["A"] / this["A.B"] 브래킷 표기 → 점 표기 (.form. 하위폼 접근 컨벤션 포함)
-        15. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
-        16. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
-        17. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
-        18. 세미콜론 앞 중복 공백 정리
-        19. 스크립트 최상단에 남아있는 구형 take.loadJs 제거 (fnInit 안에 이미 있는 건 유지)
-        20. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → fnInit 첫 줄에 take.loadJs)
-        21. '//공통 라이브러리 호출' 주석 라인 제거 (take.loadJs가 fnInit 안으로 옮겨가서 더이상 불필요)
-        22. async/await 변환 — com.* 호출 함수 전체 래핑
+        15. X.com.substr(...) (리시버 위치 오기) → com.substr(X, ...) (올바른 시그니처) 정정
+        16. OZ리포트 += 조립 시 com.G_OzDel 앞 값 take.nvl 래핑
+        17. 텍스트 치환 (com.isEmpty(pThis, 먼저, pThis→this 마지막)
+        18. 소스 수정 이력 플레이스홀더 → 오늘 날짜 + 정철환 + 수동변환(1차)
+        19. 세미콜론 앞 중복 공백 정리
+        20. 스크립트 최상단에 남아있는 구형 take.loadJs 제거 (fnInit 안에 이미 있는 건 유지)
+        21. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → fnInit 첫 줄에 take.loadJs)
+        22. '//공통 라이브러리 호출' 주석 라인 제거 (take.loadJs가 fnInit 안으로 옮겨가서 더이상 불필요)
+        23. async/await 변환 — com.* 호출 함수 전체 래핑
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -450,6 +451,7 @@ class XfdlConverter:
         content = self._fix_oztimer_refs(content)
         content = self._fix_mdi_allwindows_refresh(content)
         content = self._fix_this_bracket_notation(content)
+        content = self._fix_misplaced_com_substr(content)
         content = self._wrap_ozdel_concat_nvl(content)
         content = self._convert_arithmetic_to_decimal(content)
         content = self._apply_text_replacements(content)
@@ -917,6 +919,107 @@ class XfdlConverter:
                 return f'this.{outer}.form.{inner}'
             return f'this.{outer}'
         return self._THIS_BRACKET_RE.sub(_repl, content)
+
+    _COM_SUBSTR_MARKER = ".com.substr("
+
+    def _fix_misplaced_com_substr(self, content: str) -> str:
+        """com.substr(str, start[, len]) 가 올바른 시그니처인데, 첫 번째 인자를 실수로
+        리시버 자리에 놓고 'X.com.substr(start[, len])' 처럼 쓴 경우를
+        'com.substr(X, start[, len])' 로 정정한다.
+        X 는 단순 변수뿐 아니라 getColumn(...) / getTodayTime().date 같은 중첩
+        함수호출·체이닝일 수도 있어서, 괄호/대괄호 균형을 맞춰가며 역방향으로
+        리시버 표현식의 시작 지점을 찾는다.
+        중첩된 오류 케이스(예: this.str_mon(X.com.substr(4,2)).com.substr(0,3))는
+        바깥쪽을 먼저 고치면 안쪽이 그 안에 그대로 파묻히므로, 변화가 없어질 때까지
+        여러 번(fixed-point) 돌려서 안쪽/바깥쪽 다 순차적으로 잡는다.
+        리시버 괄호 균형이 안 맞거나 인자가 3개 이상인 등 예상 밖 구조면
+        안전하게 건드리지 않고 스킵한다."""
+        for _ in range(5):  # 중첩 깊이 방어용 상한
+            new_content = self._fix_misplaced_com_substr_pass(content)
+            if new_content == content:
+                break
+            content = new_content
+        return content
+
+    def _fix_misplaced_com_substr_pass(self, content: str) -> str:
+        marker = self._COM_SUBSTR_MARKER
+        positions = []
+        idx = content.find(marker)
+        while idx != -1:
+            positions.append(idx)
+            idx = content.find(marker, idx + 1)
+
+        # 오른쪽(바깥쪽)부터 처리 — 바깥쪽 리시버가 안쪽 occurrence를 통째로 삼켜버리면
+        # 그 안쪽 자리는 이번 pass에서 건드리지 않고 다음 pass로 넘김(원본 좌표가 stale해지므로)
+        consumed_left_bound = len(content) + 1
+        for pos in reversed(positions):
+            if pos >= consumed_left_bound:
+                continue
+
+            recv_start = self._find_expr_start_backward(content, pos)
+            receiver = content[recv_start:pos]
+            if (
+                not receiver
+                or receiver.count('(') != receiver.count(')')
+                or receiver.count('[') != receiver.count(']')
+            ):
+                continue  # 리시버 파싱 실패 — 안전하게 스킵
+
+            args_start = pos + len(marker)
+            arg1, after1 = self._extract_first_func_arg(content, args_start)
+            if after1 < len(content) and content[after1] == ',':
+                arg2, after2 = self._extract_first_func_arg(content, after1 + 1)
+                if after2 >= len(content) or content[after2] != ')':
+                    continue  # 인자 3개 이상 등 예상 밖 구조 — 스킵
+                new_call = f"com.substr({receiver}, {arg1}, {arg2})"
+                call_end = after2 + 1
+            elif after1 < len(content) and content[after1] == ')':
+                new_call = f"com.substr({receiver}, {arg1})"
+                call_end = after1 + 1
+            else:
+                continue  # 예상 밖 구조 — 스킵
+
+            content = content[:recv_start] + new_call + content[call_end:]
+            consumed_left_bound = recv_start
+
+        return content
+
+    def _find_expr_start_backward(self, content: str, end: int) -> int:
+        """end 위치(예: '.com.substr(' 시작 지점) 바로 앞에서 왼쪽으로 스캔해
+        하나의 JS 멤버 표현식(체이닝/함수호출/배열인덱스 포함)의 시작 위치를 찾는다."""
+        i = end
+        paren_depth = 0
+        bracket_depth = 0
+        while i > 0:
+            c = content[i - 1]
+            if c == ')':
+                paren_depth += 1
+                i -= 1
+                continue
+            if c == '(':
+                if paren_depth == 0:
+                    break
+                paren_depth -= 1
+                i -= 1
+                continue
+            if c == ']':
+                bracket_depth += 1
+                i -= 1
+                continue
+            if c == '[':
+                if bracket_depth == 0:
+                    break
+                bracket_depth -= 1
+                i -= 1
+                continue
+            if paren_depth > 0 or bracket_depth > 0:
+                i -= 1  # 괄호/대괄호 안이면 뭐든(콤마, 따옴표, 공백 등) 그대로 통과
+                continue
+            if c.isalnum() or c in '_.$':
+                i -= 1
+                continue
+            break
+        return i
 
     def _fix_semicolon_spacing(self, content: str) -> str:
         """'strDS_1 += "" + com.G_OzDel  ;' 처럼 세미콜론 앞에 공백 2개 이상 남는 경우 정리.
