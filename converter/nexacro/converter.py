@@ -412,7 +412,7 @@ class XfdlConverter:
         6. Dataset getColumn 컬럼명 camelCase 변환
         7. this. 누락 보정 — 함수(isCheck/isDate/isExistCbMapping/inquiryCallback 등) 선언/호출부,
            폼레벨 플래그 변수(isAdmin/isCam) 선언/참조부
-        8. take.nvl() 누락 보정 — wrapQuote/MultiSearch 결과/cntr_no/check_item getColumn/getTrim
+        8. take.nvl() 누락 보정 — wrapQuote/toNumber 인자/MultiSearch 결과/cntr_no/check_item getColumn/getTrim
         9. '이중정렬방식처리관련 로직' 깨진 주석 블록(// 로만 열려 SyntaxError 나는 케이스) 복구
         10. com.isEmpty(this, X) → com.isEmpty(X) (pThis 잔재 인자 제거, DetailForm 계열)
         11. 부모(List) 폼 전달 파라미터(approvalMode/cntrNo/cpDtRsn/isAdministrator/isCamGrp/reasonFlag/view)
@@ -441,6 +441,7 @@ class XfdlConverter:
         content = self._fix_missing_this_on_functions(content)
         content = self._fix_missing_this_on_known_flags(content)
         content = self._fix_wrap_quote_nvl(content)
+        content = self._fix_tonumber_nvl(content)
         content = self._fix_multisearch_result_nvl(content)
         content = self._fix_cntrno_getcolumn_nvl(content)
         content = self._fix_checkitem_getcolumn_nvl(content)
@@ -713,6 +714,27 @@ class XfdlConverter:
             content,
         )
         return content
+
+    _TONUMBER_RE = re.compile(r'nexacro\.toNumber\(')
+
+    def _fix_tonumber_nvl(self, content: str) -> str:
+        """nexacro.toNumber(X) → nexacro.toNumber(take.nvl(X))
+        X 가 undefined/null 이면 toNumber() 결과가 NaN 이 되는 케이스 방지.
+        이미 take.nvl 로 감싼 경우는 건드리지 않음(idempotent)."""
+        result = []
+        last = 0
+        for m in self._TONUMBER_RE.finditer(content):
+            if m.start() < last:
+                continue  # 중첩 toNumber() 의 안쪽 — 바깥쪽 처리에서 이미 포함됨
+            args_start = m.end()
+            arg, arg_end = self._extract_first_func_arg(content, args_start)
+            if arg.startswith('take.nvl('):
+                continue
+            result.append(content[last:args_start])
+            result.append(f'take.nvl({arg})')
+            last = arg_end
+        result.append(content[last:])
+        return "".join(result)
 
     # ──────────────────────────────────────────
     # this. 누락 / take.nvl() 누락 보정

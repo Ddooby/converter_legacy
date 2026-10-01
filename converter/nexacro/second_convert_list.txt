@@ -2021,3 +2021,7 @@
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListCGRTabForm.xfdl
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractListInternalTCITabForm.xfdl
 # C:\Projects\Panocean\nexacro\biz\contract\contract\ContractNoticeListPopupForm.xfdl
+
+# 2026-09-29
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\report\InvestmentAdequacyListForm.xfdl
+# C:\Projects\Panocean\nexacro\biz\salesOpportunity\report\InvestmentAdequacyForm.xfdl
