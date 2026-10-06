@@ -220,6 +220,8 @@ class XfdlConverter:
         def _grid_default_attrs(m: re.Match) -> str:
             tag = m.group(0)
             pos = tag.rindex(">")
+            if tag[pos - 1] == "/":  # self-closing: '/>' 앞에 속성 삽입
+                pos -= 1
             prefix, suffix = tag[:pos], tag[pos:]
             extra = ""
             if "takegrid=" not in tag:
