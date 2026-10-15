@@ -175,7 +175,52 @@ class XfdlConverter:
         result.append(remaining)
         return "".join(result)
 
+    # 컴포넌트 id 문자 치환 규칙 — JS 식별자로 쓸 수 없는 문자를 대체
+    _ID_CHAR_REPLACEMENTS = {"~": "tilde", "%": "pct"}
+    # Dataset 컬럼 id(<Column>/<ConstColumn>)는 컴포넌트가 아니므로 제외
+    _COMPONENT_ID_ATTR_RE = re.compile(r'<(?!Column\b|ConstColumn\b)\w+\b[^>]*?\sid="([^"]+)"')
+    _JS_IDENT_RE = re.compile(r'^[A-Za-z_$][\w$]*$')
+
+    def _fix_invalid_component_ids(self, content: str) -> str:
+        """컴포넌트 id 에 JS 식별자로 쓸 수 없는 문자가 있으면 치환하고, 같은 id 를 쓰는 곳도 모두 바꾼다.
+        MiPlatform 은 Static id="st_~2" 같은 id 를 허용했지만, Nexacro 는 화면 로드 시
+        this._inner_form.X.form.st_~2 형태의 코드를 만들어 'Unexpected token ~' SyntaxError 가 난다.
+        - 치환 규칙은 _ID_CHAR_REPLACEMENTS (예: st_~2 → st_tilde2)
+        - 치환 결과가 기존 id 와 겹치면 뒤에 _1, _2 ... 를 붙인다
+        - 규칙으로 해결 안 되는 id 는 바꾸지 않고 경고 로그만 남긴다
+        - 참조 치환은 id 전체가 하나의 토큰으로 쓰인 곳만 대상 (st_~ 가 st_~1 안에서 매칭되지 않음)"""
+        all_ids = set(self._COMPONENT_ID_ATTR_RE.findall(content))
+        used = set(all_ids)
+        rename: dict[str, str] = {}
+        for old in sorted(all_ids):
+            if self._JS_IDENT_RE.match(old):
+                continue
+            new = old
+            for ch, rep in self._ID_CHAR_REPLACEMENTS.items():
+                new = new.replace(ch, rep)
+            if not self._JS_IDENT_RE.match(new):
+                logger.warning("JS 식별자로 쓸 수 없는 컴포넌트 id — 수동 확인 필요: %s", old)
+                continue
+            base, n = new, 1
+            while new in used:
+                new = f"{base}_{n}"
+                n += 1
+            used.add(new)
+            rename[old] = new
+
+        for old in sorted(rename, key=len, reverse=True):
+            new = rename[old]
+            if re.search(r"[A-Za-z0-9_]", old):
+                pat = re.compile(r"(?<![\w$~])" + re.escape(old) + r"(?![\w$~])")
+                content = pat.sub(new, content)
+            else:
+                # 식별자 문자가 하나도 없는 id(예: "~")는 일반 텍스트와 구분할 수 없으므로 id 속성만 치환
+                content = content.replace(f' id="{old}"', f' id="{new}"')
+            logger.info("컴포넌트 id 변경: %s → %s", old, new)
+        return content
+
     def convert(self, content: str, form_name: str = "") -> str:
+        content = self._fix_invalid_component_ids(content)
         content = self._comment_out_missing_form_components(content)
         if SCRIPT_START not in content:
             return self._convert_layout(content)
@@ -431,6 +476,7 @@ class XfdlConverter:
         21. 외부 JS 참조 주입 (sa.* / so.* / ins.* 호출 감지 → fnInit 첫 줄에 take.loadJs)
         22. '//공통 라이브러리 호출' 주석 라인 제거 (take.loadJs가 fnInit 안으로 옮겨가서 더이상 불필요)
         23. async/await 변환 — com.* 호출 함수 전체 래핑
+            (CanChange/CanColumnChange 는 재적용 플래그 + async IIFE 패턴, patterns/can_event_async_examples.md)
         """
         content = self._fix_fnauth_button_control(content)
         content = self._apply_warning_removals(content)
@@ -1139,10 +1185,8 @@ class XfdlConverter:
         """CanColumnChange/CanChange 가 (예외 처리 로직이 생기기 전) 과거 변환에서
         (async () => {...}).call(this) 로 잘못 감싸진 채 파일에 그대로 남아있는 경우를
         원래의 동기 함수 형태로 되돌린다.
-        단, 내부에 있던 await 키워드는 일부러 그대로 남겨둔다 — async 함수가 아닌 곳에
-        await 가 있으면 스크립트 로드 시점에 SyntaxError 로 바로 터지기 때문에, 개발자가
-        눈치채지 못하고 넘어가는 것보다 시끄럽게 에러가 나서 수동으로 고치게 만드는 게 안전함.
-        (조용히 있다가 CanColumnChange 취소 로직이 씹히는 런타임 버그보다 낫다는 판단)"""
+        내부에 있던 await 키워드는 그대로 남겨두고, 이후 _convert_can_async_handlers 가
+        재적용 플래그 + async IIFE 패턴으로 변환한다."""
         decl_pat = re.compile(r'this\.(\w+)\s*=\s*function\s*\([^)]*\)')
         wrap_open_re = re.compile(r'\A(?:return\s+)?\(async\s*\(\)\s*=>\s*\{')
         for m in reversed(list(decl_pat.finditer(content))):
@@ -1177,6 +1221,7 @@ class XfdlConverter:
         3단계: async 함수를 호출하는 함수도 async로 전파
         3.4단계: CanColumnChange/CanChange 는 async 래핑 대상에서 제외
         4단계: 역순으로 래핑 — return (async () => {...}).call(this)
+        5단계: CanColumnChange/CanChange — 재적용 플래그 + async IIFE + return false 변환
         """
         content = self._unwrap_broken_can_async_handlers(content)
 
@@ -1226,12 +1271,14 @@ class XfdlConverter:
         # Nexacro는 이 핸들러의 리턴값(boolean)을 동기적으로 평가해서 변경을 취소/허용하므로,
         # (async () => {...}).call(this) 로 감싸면 실제 로직이 끝나기 전에 함수가 먼저 리턴돼버려
         # 취소 로직(return false)이 무시되는 등 오동작한다. await 가 필요한 로직은 별도 화살표
-        # 함수로 분리해 fire-and-forget 으로 호출하는 수작업 리팩터링이 필요 — 자동 변환 대상 아님.
-        async_funcs -= {f for f in async_funcs if self._SYNC_EVENT_HANDLER_RE.search(f)}
+        # 함수로 분리해 fire-and-forget 으로 호출해야 함 → 5단계(_convert_can_async_handlers)에서 처리.
+        can_handlers = {f for f in func_bodies if self._SYNC_EVENT_HANDLER_RE.search(f)}
+        async_funcs -= can_handlers
 
-        # 3.5단계: 다른 async 함수에서 호출되는 함수 파악 → 해당 함수만 return 필요
+        # 3.5단계: 다른 async 함수(+ 5단계에서 async IIFE 를 갖게 될 Can* 핸들러)에서
+        # 호출되는 함수 파악 → 해당 함수만 return 필요 (그래야 호출부 await 가 실제로 기다림)
         called_by_async: set[str] = set()
-        for fname in async_funcs:
+        for fname in async_funcs | can_handlers:
             body = func_bodies.get(fname, "")
             for af in async_funcs:
                 if af != fname and re.search(rf'\bthis\.{re.escape(af)}\s*\(', body):
@@ -1270,7 +1317,328 @@ class XfdlConverter:
 
             content = content[:op] + wrapped + content[cp + 1:]
 
+        # 5단계: CanChange/CanColumnChange — 재적용 플래그 + async IIFE + return false 패턴
+        content = self._convert_can_async_handlers(
+            content, (await_com_funcs, com_prefix_await, excl, async_funcs))
+
         return content
+
+    # ──────────────────────────────────────────
+    # CanChange / CanColumnChange async 변환
+    # (patterns/can_event_async_examples.md 기준)
+    #
+    #   this._xxxReapplying = false;                       ← 플래그 선언 (Dataset 은 {} — 컬럼 단위)
+    #   this.xxx_CanChange = function(obj, e) {
+    #       if (this._xxxReapplying) { this._xxxReapplying = false; return true; }   ← 재진입 통과
+    #       var newVal = e.postvalue; var prevVal = e.prevalue;
+    #       (async () => {
+    #           ...await 검증...
+    #           this._xxxReapplying = true;  obj.set_value(유효 ? newVal : prevVal);  this._xxxReapplying = false;
+    #       })();
+    #       return false;                                  ← 일단 변경 차단, 검증 끝나면 재적용
+    #   };
+    #
+    # 유형 (await 가 있는 구간 = 세그먼트 단위로 판단)
+    #   - 분기 국소형 (예시 1-2, 1-3, 2-1): await 가 최상위 if/else 블록 안에만 있으면 그 블록만 변환,
+    #     나머지 경로는 동기 그대로 허용
+    #   - 전체형 (예시 1-1, 1-4, 1-5, 2-2): 함수 본문 전체를 IIFE 로 감쌈
+    #   세그먼트 마무리 방식
+    #   - 끝이 `return false;` (유일한 return)         → 재적용 prevVal            (1-2)
+    #   - 끝이 `if (v == false) return false;`          → (v != false) ? new : prev (2-1, 2-2)
+    #   - return 없음 + 자기 자신 set_value 있음         → newVal = X 로 바꾸고 마지막에 재적용 (1-1)
+    #   - 값 있는 return 없음 (차단 없음)               → 새 값 먼저 재적용 후 후처리 (1-5)
+    #   - 그 외                                         → 원 본문을 async 함수로 감싸 리턴값으로 판정
+    #                                                      (false 면 prevVal, 아니면 newVal) (1-3, 1-4)
+    # ──────────────────────────────────────────
+
+    _CAN_DECL_RE = re.compile(r'this\.(\w+?)_(Can(?:ColumnChange|Change))\s*=\s*function\s*\(([^)]*)\)')
+    _CAN_BRANCH_HEADER_RE = re.compile(r'(?:else\s+)?if\s*\(.*\)|else', re.DOTALL)
+    _CAN_RESERVED_VARS_RE = re.compile(r'\bvar\s+(newVal|prevVal|oldVal|nRow|sColId|isValid)\b')
+
+    @staticmethod
+    def _js_code_mask(src: str) -> str:
+        """문자열/주석 내용을 공백으로 가린 같은 길이의 문자열 (위치 계산용, 개행은 유지)"""
+        out = list(src)
+        i, n = 0, len(src)
+
+        def blank(a: int, b: int) -> None:
+            for k in range(a, b):
+                if out[k] not in "\r\n":
+                    out[k] = " "
+
+        while i < n:
+            c = src[i]
+            if c in "'\"`":
+                j = i + 1
+                while j < n and src[j] != c:
+                    j += 2 if src[j] == "\\" else 1
+                end = min(j + 1, n)
+                blank(i, end)
+                i = end
+            elif src.startswith("//", i):
+                j = src.find("\n", i)
+                j = n if j == -1 else j
+                blank(i, j)
+                i = j
+            elif src.startswith("/*", i):
+                j = src.find("*/", i + 2)
+                j = n if j == -1 else j + 2
+                blank(i, j)
+                i = j
+            else:
+                i += 1
+        return "".join(out)
+
+    @staticmethod
+    def _match_close(mask: str, open_pos: int, open_ch: str, close_ch: str) -> int:
+        depth = 0
+        for i in range(open_pos, len(mask)):
+            if mask[i] == open_ch:
+                depth += 1
+            elif mask[i] == close_ch:
+                depth -= 1
+                if depth == 0:
+                    return i
+        return -1
+
+    @staticmethod
+    def _can_flag_name(base: str) -> str:
+        """ed_yearMonth → _edYearMonthReapplying / DurCalDS → _durCalDSReapplying
+        / SCBTrFixrInfoDS → _scbTrFixrInfoDSReapplying"""
+        parts = [p for p in base.split("_") if p]
+        head = parts[0]
+        run = re.match(r"[A-Z]*", head).group(0)
+        if len(run) == 1 or len(run) == len(head):
+            head = head[:len(run)].lower() + head[len(run):]
+        elif run:
+            head = run[:-1].lower() + head[len(run) - 1:]
+        rest = "".join(p[0].upper() + p[1:] for p in parts[1:])
+        return f"_{head}{rest}Reapplying"
+
+    @staticmethod
+    def _first_indent(text: str, default: str) -> str:
+        for ln in text.split("\n"):
+            if ln.strip():
+                return ln[:len(ln) - len(ln.lstrip(" \t"))]
+        return default
+
+    @staticmethod
+    def _indent_lines(text: str, extra: str) -> list[str]:
+        lines = text.strip("\n").split("\n")
+        while lines and not lines[0].strip():
+            lines.pop(0)
+        while lines and not lines[-1].strip():
+            lines.pop()
+        return [f"{extra}{ln}".rstrip(" \t") if ln.strip() else "" for ln in lines]
+
+    def _convert_can_async_handlers(self, content: str, await_args: tuple) -> str:
+        nl = "\r\n" if "\r\n" in content else "\n"
+        for m in reversed(list(self._CAN_DECL_RE.finditer(content))):
+            base, kind = m.group(1), m.group(2)
+            fname = f"{base}_{kind}"
+            params = [p.split(":")[0].strip() for p in m.group(3).split(",")]
+            if len(params) < 2 or not params[0] or not params[1]:
+                continue
+            op = content.find("{", m.end())
+            if op == -1:
+                continue
+            cp = self._find_matching_brace(content, op)
+            if cp == -1:
+                continue
+            body = content[op + 1: cp].replace("\r\n", "\n")
+            if "Reapplying" in body:
+                continue  # 이미 변환됨 (idempotent)
+            body = self._add_await_to_content(body, *await_args)
+            if not re.search(r"\bawait\b", self._js_code_mask(body)):
+                continue  # 동기 핸들러 — 그대로 둠
+
+            ctx = {
+                "fname": fname, "base": base, "obj": params[0], "e": params[1],
+                "column": kind == "CanColumnChange", "flag": self._can_flag_name(base),
+            }
+            if self._CAN_RESERVED_VARS_RE.search(body):
+                logger.warning("[CanAsync] %s — 본문에 newVal/prevVal 등 동일 변수 선언 있음, 수동 확인 필요", fname)
+
+            new_body = self._build_can_async_body(body, ctx)
+            flag_init = "{}" if ctx["column"] else "false"
+            line_start = content.rfind("\n", 0, m.start()) + 1
+            decl_indent = content[line_start:m.start()]
+            if decl_indent.strip():
+                decl_indent, line_start = "", m.start()
+            flag_decl = f"{decl_indent}this.{ctx['flag']} = {flag_init};{nl}"
+            new_body = new_body.replace("\n", nl)
+            content = (content[:line_start] + flag_decl + content[line_start:op + 1]
+                       + new_body + content[cp:])
+        return content
+
+    def _build_can_async_body(self, body: str, ctx: dict) -> str:
+        e, obj, flag = ctx["e"], ctx["obj"], ctx["flag"]
+        if ctx["column"]:
+            ev_vars = (("nRow", "row"), ("sColId", "columnid"), ("oldVal", "oldvalue"), ("newVal", "newvalue"))
+            flag_ref = f"this.{flag}[{e}.columnid]"
+        else:
+            ev_vars = (("newVal", "postvalue"), ("prevVal", "prevalue"))
+            flag_ref = f"this.{flag}"
+            # canchange 시점의 obj.value 는 이전 값 → 새 값(e.postvalue) 사용 (예시 1-4)
+            body = re.sub(rf"\b{re.escape(obj)}\.value\b(?!\s*=(?!=))", "newVal", body)
+        for var, attr in ev_vars:
+            body = re.sub(rf"\b{re.escape(e)}\.{attr}\b", var, body)
+
+        ind = self._first_indent(body, "\t")
+        # 들여쓰기 단위는 본문 스타일을 따름 (탭 / 공백 4칸 등)
+        unit = ctx["unit"] = "\t" if not ind or ind.startswith("\t") else ind
+        width = max(len(v) for v, _ in ev_vars)
+        head = [
+            f"{ind}if ({flag_ref}) {{",
+            f"{ind}{unit}{flag_ref} = false;",
+            f"{ind}{unit}return true;",
+            f"{ind}}}",
+            "",
+            *[f"{ind}var {v.ljust(width)} = {e}.{a};" for v, a in ev_vars],
+            "",
+        ]
+
+        mask = self._js_code_mask(body)
+        branches = self._find_async_branches(mask)
+        if branches is None:
+            # 전체형
+            if ctx["column"]:
+                logger.warning("[CanAsync] %s — 전 컬럼 지연 반영. setColumn 직후 값을 읽는 로직 있으면 "
+                               "async 필요 컬럼만 지연하도록 수동 보완 필요", ctx["fname"])
+            core = "\n".join(self._can_async_segment(body, ind, ctx))
+            logger.info("[CanAsync] %s — 전체형 변환", ctx["fname"])
+        else:
+            core = body
+            for s, t in reversed(branches):
+                seg = core[s:t]
+                seg_ind = self._first_indent(seg, ind + unit)
+                tail = seg[len(seg.rstrip()):]
+                if "\n" not in tail:
+                    tail = "\n" + ind
+                core = core[:s] + "\n" + "\n".join(self._can_async_segment(seg, seg_ind, ctx)) + tail + core[t:]
+            core = "\n".join(self._indent_lines(core, ""))
+            logger.info("[CanAsync] %s — 분기 국소형 변환 (%d개 분기)", ctx["fname"], len(branches))
+
+        return "\n" + "\n".join(head) + "\n" + core + "\n"
+
+    def _find_async_branches(self, mask: str) -> list[tuple[int, int]] | None:
+        """await 가 모두 최상위 if / else if / else 블록 안에만 있고, 각 블록이 끝난 뒤 실행될
+        코드가 없으면(블록이 return false 로 끝나거나 뒤가 같은 if-else 체인뿐) 블록 내부 범위 목록 반환.
+        조건을 만족하지 못하면 None (→ 전체형)."""
+        blocks: list[tuple[int, int]] = []
+        stmt_start, i, n = 0, 0, len(mask)
+        while i < n:
+            c = mask[i]
+            if c == "{":
+                close = self._match_close(mask, i, "{", "}")
+                if close == -1:
+                    return None
+                if re.search(r"\bawait\b", mask[i + 1:close]):
+                    header = mask[stmt_start:i].strip()
+                    if not self._CAN_BRANCH_HEADER_RE.fullmatch(header):
+                        return None
+                    blocks.append((i + 1, close))
+                i = stmt_start = close + 1
+                continue
+            if c == ";":
+                stmt_start = i + 1
+            i += 1
+        if not blocks:
+            return None
+        for am in re.finditer(r"\bawait\b", mask):
+            if not any(s <= am.start() < t for s, t in blocks):
+                return None  # 조건식/최상위 문장에 await → 전체형
+
+        for s, t in blocks:
+            inner = mask[s:t]
+            if len(re.findall(r"\breturn\b", inner)) == 1 and re.search(r"return\s+false\s*;\s*$", inner):
+                continue
+            # 블록 뒤가 같은 if-else 체인뿐이어야 함
+            pos = t + 1
+            while True:
+                em = re.match(r"\s*else\s+if\s*\(", mask[pos:])
+                if em:
+                    pclose = self._match_close(mask, pos + em.end() - 1, "(", ")")
+                    bm = re.match(r"\s*\{", mask[pclose + 1:]) if pclose != -1 else None
+                    if not bm:
+                        return None
+                    pos = self._match_close(mask, pclose + bm.end(), "{", "}") + 1
+                    continue
+                em = re.match(r"\s*else\s*\{", mask[pos:])
+                if em:
+                    pos = self._match_close(mask, pos + em.end() - 1, "{", "}") + 1
+                    continue
+                break
+            if pos <= 0 or mask[pos:].strip():
+                return None
+        return blocks
+
+    def _replace_self_set_value(self, seg: str, ctx: dict) -> tuple[str, bool]:
+        """canchange 안에서 자기 자신 값을 바꾸는 obj.set_value(X) → newVal = X (예시 1-1)"""
+        pat = re.compile(rf"\b(?:{re.escape(ctx['obj'])}|this\.{re.escape(ctx['base'])})\.set_value\(")
+        replaced = False
+        while True:
+            mask = self._js_code_mask(seg)
+            sm = pat.search(mask)
+            if not sm:
+                break
+            close = self._match_close(mask, sm.end() - 1, "(", ")")
+            if close == -1:
+                break
+            seg = seg[:sm.start()] + "newVal = " + seg[sm.end():close] + seg[close + 1:]
+            replaced = True
+        return seg, replaced
+
+    def _can_async_segment(self, seg: str, ind: str, ctx: dict) -> list[str]:
+        column = ctx["column"]
+        prev = "oldVal" if column else "prevVal"
+        if column:
+            flag_ref = f"this.{ctx['flag']}[sColId]"
+            apply_fmt = f"{ctx['obj']}.setColumn(nRow, sColId, {{}});"
+        else:
+            flag_ref = f"this.{ctx['flag']}"
+            apply_fmt = f"{ctx['obj']}.set_value({{}});"
+            seg, replaced = self._replace_self_set_value(seg, ctx)
+
+        def reapply(expr: str, i2: str) -> list[str]:
+            return [f"{i2}{flag_ref} = true;", f"{i2}{apply_fmt.format(expr)}", f"{i2}{flag_ref} = false;"]
+
+        if re.search(rf"\(\s*(?:{re.escape(ctx['obj'])}|this\.{re.escape(ctx['base'])})\s*[,)]", seg):
+            logger.warning("[CanAsync] %s — 함수에 컴포넌트를 그대로 넘김. 내부에서 .value 를 읽으면 "
+                           "이전 값 기준으로 동작하므로 확인 필요", ctx["fname"])
+
+        mask = self._js_code_mask(seg)
+        returns = list(re.finditer(r"\breturn\b([^;}\n]*)", mask))
+        valued = [r for r in returns if r.group(1).strip()]
+        unit = ctx["unit"]
+        i1 = ind + unit
+        out = [f"{ind}(async () => {{"]
+
+        chk = re.search(r"if\s*\(\s*(\w+)\s*==\s*false\s*\)\s*\{?\s*return\s+false\s*;\s*\}?\s*$", mask)
+        last_false = re.search(r"return\s+false\s*;\s*$", mask)
+        if len(returns) == 1 and chk:
+            out += self._indent_lines(seg[:chk.start()], unit)
+            out += reapply(f"({chk.group(1)} != false) ? newVal : {prev}", i1)
+        elif len(returns) == 1 and last_false:
+            out += self._indent_lines(seg[:last_false.start()], unit)
+            out += reapply(prev, i1)
+        elif not returns and not column and replaced:
+            out += self._indent_lines(seg, unit)
+            out += reapply("newVal", i1)
+        elif not valued and not (not column and replaced):
+            # 차단 없는 후처리형 — 새 값 먼저 반영 후 후속 로직 (후속 로직이 컴포넌트 값을 읽을 수 있음)
+            out.append(f"{i1}// as-is 는 변경을 막지 않음 → 새 값을 먼저 재적용한 뒤 후처리")
+            out += reapply("newVal", i1)
+            out.append("")
+            out += self._indent_lines(seg, unit)
+        else:
+            # 일반형 — 원 본문의 리턴값으로 판정 (false 면 이전 값, 그 외 새 값)
+            out.append(f"{i1}var isValid = await (async () => {{")
+            out += self._indent_lines(seg, unit * 2)
+            out.append(f"{i1}}})();")
+            out += reapply(f"(isValid !== false) ? newVal : {prev}", i1)
+        out += [f"{ind}}})();", f"{ind}return false;"]
+        return out
 
     def _add_await_to_content(self, content: str, await_funcs: list,
                                com_prefix_await: bool = False, com_exclusions: set = None,
